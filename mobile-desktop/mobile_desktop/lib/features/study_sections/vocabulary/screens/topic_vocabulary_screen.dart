@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'vocabulary_detail_screen.dart';
+
 class TopicVocabularyScreen extends StatelessWidget {
   final String topicName;
   final List<Map<String, dynamic>> vocabularies;
@@ -79,7 +81,21 @@ class TopicVocabularyScreen extends StatelessWidget {
               itemCount: vocabularies.length,
               itemBuilder: (context, index) {
                 final item = vocabularies[index];
-                return _vocabItem(item);
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => VocabularyDetailScreen(
+                          vocabularies: vocabularies,
+                          initialIndex: index,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _vocabItem(item),
+                );
               },
             ),
           ),

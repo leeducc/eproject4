@@ -660,31 +660,47 @@ class _VocabularyScreenState extends State<VocabularyScreen>
             );
           },
         ),
-        IconButton(
+        PopupMenuButton<int>(
           icon: const Icon(Icons.more_horiz),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              backgroundColor: cardColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              builder: (_) => Column(
-                mainAxisSize: MainAxisSize.min,
+          color: cardColor,
+          offset: const Offset(0, 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem<int>(
+              value: 1,
+              child: Row(
                 children: const [
-                  ListTile(
-                    leading: Icon(Icons.refresh, color: Colors.white),
-                    title: Text('Reset tiến độ',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.info_outline, color: Colors.white),
-                    title: Text('Thông tin bộ từ',
-                        style: TextStyle(color: Colors.white)),
+                  Icon(Icons.star, color: Colors.yellow, size: 18),
+                  SizedBox(width: 10),
+                  Text(
+                    'Chữ Tiếng Anh đã lưu',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ],
               ),
-            );
+            ),
+            PopupMenuItem<int>(
+              value: 2,
+              child: Row(
+                children: const [
+                  Icon(Icons.book, color: Colors.blue, size: 18),
+                  SizedBox(width: 10),
+                  Text(
+                    'Từ mới',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          onSelected: (value) {
+            if (value == 1) {
+              // TODO: reset progress
+            } else if (value == 2) {
+              // TODO: show info
+            }
           },
         ),
       ],

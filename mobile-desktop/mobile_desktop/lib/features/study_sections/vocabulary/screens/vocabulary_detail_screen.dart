@@ -12,14 +12,14 @@ class VocabularyDetailScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VocabularyDetailScreen> createState() =>
-      _VocabularyDetailScreenState();
+  State<VocabularyDetailScreen> createState() => _VocabularyDetailScreenState();
 }
 
 class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   late PageController _controller;
   late int currentIndex;
   final FlutterTts tts = FlutterTts();
+  bool isSlowMode = false;
 
   @override
   void initState() {
@@ -46,9 +46,23 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          // 🐢 Slow mode
           IconButton(
             icon: Icon(
-              widget.vocabularies[currentIndex]['favorite'] == true
+              Icons.slow_motion_video,
+              color: isSlowMode ? Colors.lightGreenAccent : Colors.white54,
+            ),
+            tooltip: isSlowMode ? 'Đọc bình thường' : 'Đọc chậm',
+            onPressed: () {
+              setState(() {
+                isSlowMode = !isSlowMode;
+              });
+            },
+          ),
+          // ⭐ Favorite
+          IconButton(
+            icon: Icon(
+              (widget.vocabularies[currentIndex]['favorite'] ?? false)
                   ? Icons.star
                   : Icons.star_border,
               color: Colors.amber,
@@ -56,10 +70,10 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
             onPressed: () {
               setState(() {
                 widget.vocabularies[currentIndex]['favorite'] =
-                !(widget.vocabularies[currentIndex]['favorite'] ?? false);
+                    !(widget.vocabularies[currentIndex]['favorite'] ?? false);
               });
             },
-          )
+          ),
         ],
       ),
       body: Column(
@@ -89,13 +103,13 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
       child: Row(
         children: List.generate(
           widget.vocabularies.length,
-              (index) => Expanded(
+          (index) => Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),
               height: 4,
               decoration: BoxDecoration(
                 color: index <= currentIndex
-                    ? const Color(0xFF4CAF50)
+                    ? const Color(0xFF4F7CFE)
                     : Colors.white12,
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -122,10 +136,7 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            vocab['ipa'],
-            style: const TextStyle(color: Colors.white54),
-          ),
+          Text(vocab['phonetic'] ?? ''),
           const SizedBox(height: 24),
 
           // ===== AUDIO =====
@@ -142,14 +153,12 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
           Text(
             vocab['meaning'],
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 20),
           ),
           const SizedBox(height: 24),
 
-          _highlightExample(vocab['example'], vocab['word']),
+          if (vocab['example'] != null)
+            _highlightExample(vocab['example'], vocab['word']),
 
           const Spacer(),
 
@@ -159,19 +168,15 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
                 child: _actionButton(
                   'Chưa nhớ',
                   Colors.redAccent,
-                      () => _next(),
+                  () => _next(),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _actionButton(
-                  'Đã nhớ',
-                  const Color(0xFF4CAF50),
-                      () {
-                    vocab['learned'] = true;
-                    _next();
-                  },
-                ),
+                child: _actionButton('Đã nhớ', const Color(0xFF4CAF50), () {
+                  vocab['learned'] = true;
+                  _next();
+                }),
               ),
             ],
           ),
@@ -184,21 +189,28 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   // ===== AUDIO =====
   Widget _audioButton(String locale, String label) {
     return GestureDetector(
-      onTap: () async {
-        await tts.setLanguage(locale);
-        await tts.speak(widget.vocabularies[currentIndex]['word']);
+      onTap: () {
+        _speak(widget.vocabularies[currentIndex]['word'], locale);
       },
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
         ),
-        child: Text(label,
-            style: const TextStyle(color: Colors.white)),
+        child: Text(label, style: const TextStyle(color: Colors.white)),
       ),
     );
+  }
+
+  Future<void> _speak(String text, String locale) async {
+    await tts.stop();
+    await tts.setLanguage(locale);
+
+    await tts.setSpeechRate(isSlowMode ? 0.2 : 0.5);
+
+    await tts.setPitch(1.0);
+    await tts.speak(text);
   }
 
   // ===== HIGHLIGHT EXAMPLE =====
@@ -210,36 +222,38 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
       text: TextSpan(
         children: [
           TextSpan(
-              text: parts[0],
-              style: const TextStyle(color: Colors.white54)),
+            text: parts[0],
+            style: const TextStyle(color: Colors.white54),
+          ),
           TextSpan(
-              text: word,
-              style: const TextStyle(
-                  color: Color(0xFF4CAF50),
-                  fontWeight: FontWeight.bold)),
+            text: word,
+            style: const TextStyle(
+              color: Color(0xFF4CAF50),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           TextSpan(
-              text: parts.length > 1 ? parts[1] : '',
-              style: const TextStyle(color: Colors.white54)),
+            text: parts.length > 1 ? parts[1] : '',
+            style: const TextStyle(color: Colors.white54),
+          ),
         ],
       ),
     );
   }
 
   // ===== ACTION =====
-  Widget _actionButton(
-      String text, Color color, VoidCallback onTap) {
+  Widget _actionButton(String text, Color color, VoidCallback onTap) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       onPressed: onTap,
-      child: Text(text,
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold)),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
