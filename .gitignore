@@ -1,3 +1,4 @@
 # credential files 
 application.properties
 .env
+.idea
