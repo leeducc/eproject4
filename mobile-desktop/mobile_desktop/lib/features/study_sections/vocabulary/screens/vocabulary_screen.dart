@@ -22,293 +22,332 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     'Colors': [
       {
         'word': 'red',
+        'vi': 'màu đỏ',
         'phonetic': '/red/',
         'pos': 'noun',
         'meaning': 'the color of blood',
-        'learned': false,
+        'meaning_vi': 'màu của máu',
       },
       {
         'word': 'blue',
+        'vi': 'màu xanh dương',
         'phonetic': '/bluː/',
         'pos': 'noun',
         'meaning': 'the color of the sky',
-        'learned': false,
+        'meaning_vi': 'màu của bầu trời',
       },
     ],
 
     'Animals': [
       {
         'word': 'dog',
+        'vi': 'con chó',
         'phonetic': '/dɒɡ/',
         'pos': 'noun',
         'meaning': 'a common domestic animal',
-        'learned': false,
+        'meaning_vi': 'một loài động vật nuôi phổ biến',
       },
       {
         'word': 'cat',
+        'vi': 'con mèo',
         'phonetic': '/kæt/',
         'pos': 'noun',
         'meaning': 'a small domestic animal',
-        'learned': false,
+        'meaning_vi': 'một loài động vật nuôi nhỏ',
       },
     ],
 
     'Objects': [
       {
         'word': 'table',
+        'vi': 'cái bàn',
         'phonetic': '/ˈteɪbl/',
         'pos': 'noun',
         'meaning': 'a piece of furniture',
-        'learned': false,
+        'meaning_vi': 'một món đồ nội thất',
       },
       {
         'word': 'chair',
+        'vi': 'cái ghế',
         'phonetic': '/tʃeə/',
         'pos': 'noun',
         'meaning': 'something you sit on',
-        'learned': false,
+        'meaning_vi': 'vật dùng để ngồi',
       },
     ],
+
     'Greetings': [
       {
         'word': 'hello',
+        'vi': 'xin chào',
         'phonetic': '/həˈləʊ/',
         'pos': 'exclamation',
         'meaning': 'used to greet someone',
-        'learned': false,
+        'meaning_vi': 'dùng để chào hỏi ai đó',
       },
       {
         'word': 'goodbye',
+        'vi': 'tạm biệt',
         'phonetic': '/ˌɡʊdˈbaɪ/',
         'pos': 'exclamation',
         'meaning': 'used when leaving',
-        'learned': false,
+        'meaning_vi': 'dùng khi rời đi',
       },
     ],
 
     'Time': [
       {
         'word': 'today',
+        'vi': 'hôm nay',
         'phonetic': '/təˈdeɪ/',
         'pos': 'noun',
         'meaning': 'the present day',
-        'learned': false,
+        'meaning_vi': 'ngày hiện tại',
       },
       {
         'word': 'tomorrow',
+        'vi': 'ngày mai',
         'phonetic': '/təˈmɒrəʊ/',
         'pos': 'noun',
         'meaning': 'the day after today',
-        'learned': false,
+        'meaning_vi': 'ngày sau hôm nay',
       },
     ],
 
     'Places': [
       {
         'word': 'school',
+        'vi': 'trường học',
         'phonetic': '/skuːl/',
         'pos': 'noun',
         'meaning': 'a place to study',
-        'learned': false,
+        'meaning_vi': 'nơi để học tập',
       },
       {
         'word': 'home',
+        'vi': 'nhà',
         'phonetic': '/həʊm/',
         'pos': 'noun',
         'meaning': 'the place where you live',
-        'learned': false,
+        'meaning_vi': 'nơi bạn sinh sống',
       },
     ],
+
     'Family': [
       {
         'word': 'father',
+        'vi': 'cha / bố',
         'phonetic': '/ˈfɑːðə/',
         'pos': 'noun',
         'meaning': 'male parent',
-        'learned': false,
+        'meaning_vi': 'cha (bố)',
       },
       {
         'word': 'mother',
+        'vi': 'mẹ',
         'phonetic': '/ˈmʌðə/',
         'pos': 'noun',
         'meaning': 'female parent',
-        'learned': false,
+        'meaning_vi': 'mẹ',
       },
     ],
 
     'School': [
       {
         'word': 'student',
+        'vi': 'học sinh / sinh viên',
         'phonetic': '/ˈstjuːdənt/',
         'pos': 'noun',
         'meaning': 'a person who studies',
-        'learned': false,
+        'meaning_vi': 'người học tập',
       },
       {
         'word': 'teacher',
+        'vi': 'giáo viên',
         'phonetic': '/ˈtiːtʃə/',
         'pos': 'noun',
         'meaning': 'a person who teaches',
-        'learned': false,
+        'meaning_vi': 'người giảng dạy',
       },
     ],
 
     'Sports': [
       {
         'word': 'football',
+        'vi': 'bóng đá',
         'phonetic': '/ˈfʊtbɔːl/',
         'pos': 'noun',
         'meaning': 'a popular team sport',
-        'learned': false,
+        'meaning_vi': 'một môn thể thao đồng đội phổ biến',
       },
       {
         'word': 'swimming',
+        'vi': 'bơi lội',
         'phonetic': '/ˈswɪmɪŋ/',
         'pos': 'noun',
         'meaning': 'moving in water',
-        'learned': false,
+        'meaning_vi': 'di chuyển trong nước',
       },
     ],
+
     'Food': [
       {
         'word': 'breakfast',
+        'vi': 'bữa sáng',
         'phonetic': '/ˈbrekfəst/',
         'pos': 'noun',
         'meaning': 'the first meal of the day',
-        'learned': false,
+        'meaning_vi': 'bữa ăn đầu tiên trong ngày',
       },
       {
         'word': 'delicious',
+        'vi': 'ngon',
         'phonetic': '/dɪˈlɪʃəs/',
         'pos': 'adjective',
         'meaning': 'tastes very good',
-        'learned': false,
+        'meaning_vi': 'có hương vị rất ngon',
       },
     ],
 
     'Shopping': [
       {
         'word': 'price',
+        'vi': 'giá cả',
         'phonetic': '/praɪs/',
         'pos': 'noun',
         'meaning': 'the cost of something',
-        'learned': false,
+        'meaning_vi': 'chi phí của một thứ gì đó',
       },
       {
         'word': 'discount',
+        'vi': 'giảm giá',
         'phonetic': '/ˈdɪskaʊnt/',
         'pos': 'noun',
         'meaning': 'a reduction in price',
-        'learned': false,
+        'meaning_vi': 'sự giảm giá',
       },
     ],
 
     'Transport': [
       {
         'word': 'bus',
+        'vi': 'xe buýt',
         'phonetic': '/bʌs/',
         'pos': 'noun',
         'meaning': 'a public vehicle',
-        'learned': false,
+        'meaning_vi': 'phương tiện giao thông công cộng',
       },
       {
         'word': 'train',
+        'vi': 'tàu hỏa',
         'phonetic': '/treɪn/',
         'pos': 'noun',
         'meaning': 'a railway vehicle',
-        'learned': false,
+        'meaning_vi': 'phương tiện giao thông đường sắt',
       },
     ],
 
     'Weather': [
       {
         'word': 'rain',
+        'vi': 'mưa',
         'phonetic': '/reɪn/',
         'pos': 'noun',
         'meaning': 'water falling from the sky',
-        'learned': false,
+        'meaning_vi': 'nước rơi từ bầu trời',
       },
       {
         'word': 'sunny',
+        'vi': 'nắng',
         'phonetic': '/ˈsʌni/',
         'pos': 'adjective',
         'meaning': 'full of sunshine',
-        'learned': false,
+        'meaning_vi': 'đầy ánh nắng',
       },
     ],
+
     // ===== HSK 5 =====
     'Travel': [
       {
         'word': 'airport',
+        'vi': 'sân bay',
         'phonetic': '/ˈeəpɔːt/',
         'pos': 'noun',
         'meaning': 'a place where airplanes land and take off',
-        'learned': false,
+        'meaning_vi': 'nơi máy bay cất cánh và hạ cánh',
       },
       {
         'word': 'passport',
+        'vi': 'hộ chiếu',
         'phonetic': '/ˈpɑːspɔːt/',
         'pos': 'noun',
         'meaning': 'an official document for international travel',
-        'learned': false,
+        'meaning_vi': 'giấy tờ chính thức dùng cho việc đi lại quốc tế',
       },
       {
         'word': 'luggage',
+        'vi': 'hành lý',
         'phonetic': '/ˈlʌɡɪdʒ/',
         'pos': 'noun',
         'meaning': 'bags and suitcases for traveling',
-        'learned': false,
+        'meaning_vi': 'túi xách và vali dùng khi đi du lịch',
       },
     ],
 
     'Work': [
       {
         'word': 'employee',
+        'vi': 'nhân viên',
         'phonetic': '/ˌemplɔɪˈiː/',
         'pos': 'noun',
         'meaning': 'a person who works for a company',
-        'learned': false,
+        'meaning_vi': 'người làm việc cho một công ty',
       },
       {
         'word': 'deadline',
+        'vi': 'hạn chót',
         'phonetic': '/ˈdedlaɪn/',
         'pos': 'noun',
         'meaning': 'the latest time something must be done',
-        'learned': false,
+        'meaning_vi': 'thời hạn cuối cùng phải hoàn thành',
       },
     ],
 
     'Media': [
       {
         'word': 'broadcast',
+        'vi': 'phát sóng',
         'phonetic': '/ˈbrɔːdkɑːst/',
         'pos': 'verb',
         'meaning': 'to send out programs by radio or TV',
-        'learned': false,
+        'meaning_vi': 'phát chương trình qua radio hoặc truyền hình',
       },
       {
         'word': 'journalist',
+        'vi': 'nhà báo',
         'phonetic': '/ˈdʒɜːnəlɪst/',
         'pos': 'noun',
         'meaning': 'a person who reports news',
-        'learned': false,
+        'meaning_vi': 'người đưa tin, làm báo',
       },
     ],
 
     'Lifestyle': [
       {
         'word': 'routine',
+        'vi': 'thói quen hàng ngày',
         'phonetic': '/ruːˈtiːn/',
         'pos': 'noun',
         'meaning': 'daily habits or activities',
-        'learned': false,
+        'meaning_vi': 'những thói quen hoặc hoạt động hằng ngày',
       },
       {
         'word': 'balance',
+        'vi': 'sự cân bằng',
         'phonetic': '/ˈbæləns/',
         'pos': 'noun',
         'meaning': 'a state of equal or proper proportions',
-        'learned': false,
+        'meaning_vi': 'trạng thái cân đối hoặc hài hòa',
       },
     ],
 
@@ -316,92 +355,103 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     'Technology': [
       {
         'word': 'software',
+        'vi': 'phần mềm',
         'phonetic': '/ˈsɒftweə/',
         'pos': 'noun',
         'meaning': 'computer programs',
-        'learned': false,
+        'meaning_vi': 'các chương trình máy tính',
       },
       {
         'word': 'database',
+        'vi': 'cơ sở dữ liệu',
         'phonetic': '/ˈdeɪtəbeɪs/',
         'pos': 'noun',
         'meaning': 'an organized collection of data',
-        'learned': false,
+        'meaning_vi': 'tập hợp dữ liệu được tổ chức',
       },
       {
         'word': 'algorithm',
+        'vi': 'thuật toán',
         'phonetic': '/ˈælɡərɪðəm/',
         'pos': 'noun',
         'meaning': 'a set of rules to solve a problem',
-        'learned': false,
+        'meaning_vi': 'tập hợp các quy tắc để giải quyết vấn đề',
       },
     ],
 
     'Business': [
       {
         'word': 'investment',
+        'vi': 'sự đầu tư',
         'phonetic': '/ɪnˈvestmənt/',
         'pos': 'noun',
         'meaning': 'the act of putting money into something',
-        'learned': false,
+        'meaning_vi': 'hành động bỏ tiền vào một lĩnh vực nào đó',
       },
       {
         'word': 'profit',
+        'vi': 'lợi nhuận',
         'phonetic': '/ˈprɒfɪt/',
         'pos': 'noun',
         'meaning': 'money earned after costs are paid',
-        'learned': false,
+        'meaning_vi': 'tiền kiếm được sau khi trừ chi phí',
       },
     ],
 
     'Education': [
       {
         'word': 'assignment',
+        'vi': 'bài tập',
         'phonetic': '/əˈsaɪnmənt/',
         'pos': 'noun',
         'meaning': 'a task given to students',
-        'learned': false,
+        'meaning_vi': 'nhiệm vụ được giao cho học sinh',
       },
       {
         'word': 'curriculum',
+        'vi': 'chương trình học',
         'phonetic': '/kəˈrɪkjələm/',
         'pos': 'noun',
         'meaning': 'subjects taught in a course',
-        'learned': false,
+        'meaning_vi': 'các môn học được giảng dạy trong khóa học',
       },
     ],
 
     'Health': [
       {
         'word': 'nutrition',
+        'vi': 'dinh dưỡng',
         'phonetic': '/njuːˈtrɪʃn/',
         'pos': 'noun',
         'meaning': 'the process of eating healthy food',
-        'learned': false,
+        'meaning_vi': 'quá trình ăn uống lành mạnh',
       },
       {
         'word': 'exercise',
+        'vi': 'tập thể dục',
         'phonetic': '/ˈeksəsaɪz/',
         'pos': 'noun',
         'meaning': 'physical activity to stay healthy',
-        'learned': false,
+        'meaning_vi': 'hoạt động thể chất để giữ sức khỏe',
       },
     ],
 
     'Environment': [
       {
         'word': 'pollution',
+        'vi': 'ô nhiễm',
         'phonetic': '/pəˈluːʃn/',
         'pos': 'noun',
         'meaning': 'damage to air, water, or land',
-        'learned': false,
+        'meaning_vi': 'sự gây hại cho không khí, nước hoặc đất',
       },
       {
         'word': 'recycle',
+        'vi': 'tái chế',
         'phonetic': '/ˌriːˈsaɪkl/',
         'pos': 'verb',
         'meaning': 'to reuse materials',
-        'learned': false,
+        'meaning_vi': 'tái sử dụng vật liệu',
       },
     ],
 
@@ -409,109 +459,121 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     'Politics': [
       {
         'word': 'democracy',
+        'vi': 'nền dân chủ',
         'phonetic': '/dɪˈmɒkrəsi/',
         'pos': 'noun',
         'meaning': 'government by the people',
-        'learned': false,
+        'meaning_vi': 'chính quyền do nhân dân làm chủ',
       },
       {
         'word': 'election',
+        'vi': 'cuộc bầu cử',
         'phonetic': '/ɪˈlekʃn/',
         'pos': 'noun',
         'meaning': 'a process of choosing leaders',
-        'learned': false,
+        'meaning_vi': 'quá trình lựa chọn lãnh đạo',
       },
     ],
 
     'Economy': [
       {
         'word': 'inflation',
+        'vi': 'lạm phát',
         'phonetic': '/ɪnˈfleɪʃn/',
         'pos': 'noun',
         'meaning': 'general increase in prices',
-        'learned': false,
+        'meaning_vi': 'sự gia tăng chung của giá cả',
       },
       {
         'word': 'recession',
+        'vi': 'suy thoái kinh tế',
         'phonetic': '/rɪˈseʃn/',
         'pos': 'noun',
         'meaning': 'a period of economic decline',
-        'learned': false,
+        'meaning_vi': 'giai đoạn suy giảm kinh tế',
       },
     ],
 
     'Law': [
       {
         'word': 'legislation',
+        'vi': 'luật pháp',
         'phonetic': '/ˌledʒɪsˈleɪʃn/',
         'pos': 'noun',
         'meaning': 'laws passed by a government',
-        'learned': false,
+        'meaning_vi': 'các đạo luật được chính phủ ban hành',
       },
       {
         'word': 'justice',
+        'vi': 'công lý',
         'phonetic': '/ˈdʒʌstɪs/',
         'pos': 'noun',
         'meaning': 'fair treatment by law',
-        'learned': false,
+        'meaning_vi': 'sự đối xử công bằng theo pháp luật',
       },
     ],
 
     'Philosophy': [
       {
         'word': 'ethics',
+        'vi': 'đạo đức',
         'phonetic': '/ˈeθɪks/',
         'pos': 'noun',
         'meaning': 'moral principles',
-        'learned': false,
+        'meaning_vi': 'các nguyên tắc đạo đức',
       },
       {
         'word': 'existence',
+        'vi': 'sự tồn tại',
         'phonetic': '/ɪɡˈzɪstəns/',
         'pos': 'noun',
         'meaning': 'the state of being',
-        'learned': false,
+        'meaning_vi': 'trạng thái tồn tại',
       },
     ],
 
     'Research': [
       {
         'word': 'hypothesis',
+        'vi': 'giả thuyết',
         'phonetic': '/haɪˈpɒθəsɪs/',
         'pos': 'noun',
         'meaning': 'a proposed explanation',
-        'learned': false,
+        'meaning_vi': 'một lời giải thích được đưa ra',
       },
       {
         'word': 'analysis',
+        'vi': 'phân tích',
         'phonetic': '/əˈnæləsɪs/',
         'pos': 'noun',
         'meaning': 'detailed examination of data',
-        'learned': false,
+        'meaning_vi': 'sự xem xét chi tiết dữ liệu',
       },
     ],
 
     'Culture': [
       {
         'word': 'tradition',
+        'vi': 'truyền thống',
         'phonetic': '/trəˈdɪʃn/',
         'pos': 'noun',
         'meaning': 'customs passed down generations',
-        'learned': false,
+        'meaning_vi': 'phong tục được truyền qua nhiều thế hệ',
       },
       {
         'word': 'heritage',
+        'vi': 'di sản',
         'phonetic': '/ˈherɪtɪdʒ/',
         'pos': 'noun',
         'meaning': 'cultural inheritance',
-        'learned': false,
+        'meaning_vi': 'di sản văn hóa',
       },
     ],
   };
 
   final hskData = [
     {
-      'level': 'HSK7-9',
+      'level': 'IELTS7-9',
       'total': 300,
       'lessons': 20,
       'topics': [
@@ -524,7 +586,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK6',
+      'level': 'IELTS6',
       'total': 250,
       'lessons': 18,
       'topics': [
@@ -536,7 +598,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK5',
+      'level': 'IELTS5',
       'total': 200,
       'lessons': 16,
       'topics': [
@@ -547,7 +609,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK4',
+      'level': 'IELTS4',
       'total': 180,
       'lessons': 15,
       'topics': [
@@ -558,7 +620,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK3',
+      'level': 'IELTS3',
       'total': 150,
       'lessons': 14,
       'topics': [
@@ -568,7 +630,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK2',
+      'level': 'IELTS2',
       'total': 150,
       'lessons': 14,
       'topics': [
@@ -578,7 +640,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       ]
     },
     {
-      'level': 'HSK1',
+      'level': 'IELTS1',
       'total': 150,
       'lessons': 14,
       'topics': [
@@ -638,7 +700,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       elevation: 0,
       centerTitle: true,
       title: const Text(
-        'Từ vựng HSK 2.0',
+        'Từ vựng IELTS',
         style: TextStyle(color: Colors.white, fontSize: 17),
       ),
       leading: IconButton(

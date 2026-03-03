@@ -111,7 +111,16 @@ class TopicVocabularyScreen extends StatelessWidget {
                     background: primaryColor,
                     textColor: Colors.white,
                     onTap: () {
-                      // TODO: điều hướng sang màn học từ đầu tiên
+                      if (vocabularies.isEmpty) return;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => VocabularyDetailScreen(
+                            vocabularies: vocabularies,
+                            initialIndex: 0,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),

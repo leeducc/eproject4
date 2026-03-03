@@ -19,7 +19,18 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   late PageController _controller;
   late int currentIndex;
   final FlutterTts tts = FlutterTts();
+  bool showMeaning = false;
   bool isSlowMode = false;
+  bool get isLastWord =>
+      currentIndex == widget.vocabularies.length - 1;
+  Icon _speakerIcon() {
+    return Icon(
+      isSlowMode ? Icons.slow_motion_video : Icons.volume_up_rounded,
+      color: isSlowMode
+          ? Colors.lightGreenAccent
+          : const Color(0xFF4F7CFE),
+    );
+  }
 
   @override
   void initState() {
@@ -83,7 +94,10 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
             child: PageView.builder(
               controller: _controller,
               onPageChanged: (index) {
-                setState(() => currentIndex = index);
+                setState(() {
+                  currentIndex = index;
+                  showMeaning = false;
+                });
               },
               itemCount: widget.vocabularies.length,
               itemBuilder: (context, index) {
@@ -123,138 +137,185 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   // ===== WORD CARD =====
   Widget _buildWordCard(Map<String, dynamic> vocab) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Spacer(),
+
+          /// ===== WORD (EN) =====
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  vocab['word'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: _speakerIcon(),
+                onPressed: () => _speak(vocab['word'], 'en-US'),
+              ),
+            ],
+          ),
+
+          /// ===== WORD (VI) – CHỈ HIỆN KHI BẤM =====
+          if (showMeaning)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                vocab['vi'] ?? '',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 8),
+
+          /// ===== PHONETIC =====
           Text(
-            vocab['word'],
+            vocab['phonetic'] ?? '',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 36,
+              fontSize: 34,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(vocab['phonetic'] ?? ''),
-          const SizedBox(height: 24),
 
-          // ===== AUDIO =====
+          const SizedBox(height: 12),
+
+          /// ===== POS =====
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4F7CFE).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              vocab['pos'] ?? '',
+              style: const TextStyle(
+                color: Color(0xFF4F7CFE),
+                fontSize: 12,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 12),
+
+          /// ===== MEANING (EN) – LUÔN HIỆN =====
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _audioButton('en-GB', 'UK'),
-              const SizedBox(width: 16),
-              _audioButton('en-US', 'US'),
+              Expanded(
+                child: Text(
+                  vocab['meaning'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: _speakerIcon(),
+                onPressed: () => _speak(vocab['meaning'], 'en-US'),
+              ),
             ],
           ),
 
-          const SizedBox(height: 32),
-          Text(
-            vocab['meaning'],
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
-          ),
-          const SizedBox(height: 24),
-
-          if (vocab['example'] != null)
-            _highlightExample(vocab['example'], vocab['word']),
+          /// ===== MEANING (VI) – CHỈ HIỆN KHI BẤM =====
+          if (showMeaning)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                vocab['meaning_vi'] ?? '',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+            ),
 
           const Spacer(),
 
-          Row(
-            children: [
-              Expanded(
-                child: _actionButton(
-                  'Chưa nhớ',
-                  Colors.redAccent,
-                  () => _next(),
+          /// ===== FOOTER =====
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                if (!showMeaning) {
+                  // Lần 1: hiện nghĩa
+                  showMeaning = true;
+                } else {
+                  // Lần 2
+                  if (isLastWord) {
+                    // 👉 TODO: đi sang màn luyện tập
+                    _goToPractice();
+                  } else {
+                    _next();
+                    showMeaning = false;
+                  }
+                }
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: showMeaning
+                    ? const Color(0xFF4F7CFE)
+                    : Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Text(
+                  _footerText(),
+                  style: TextStyle(
+                    color: showMeaning ? Colors.white : Colors.white70,
+                    fontSize: 15,
+                    fontWeight:
+                    showMeaning ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _actionButton('Đã nhớ', const Color(0xFF4CAF50), () {
-                  vocab['learned'] = true;
-                  _next();
-                }),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
         ],
       ),
     );
   }
+  String _footerText() {
+    if (!showMeaning) {
+      return 'Nhấp vào để xem nghĩa tiếng Việt';
+    }
 
-  // ===== AUDIO =====
-  Widget _audioButton(String locale, String label) {
-    return GestureDetector(
-      onTap: () {
-        _speak(widget.vocabularies[currentIndex]['word'], locale);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Text(label, style: const TextStyle(color: Colors.white)),
-      ),
-    );
+    if (isLastWord) {
+      return 'Luyện tập từ vựng';
+    }
+
+    return 'Từ tiếp theo';
   }
 
   Future<void> _speak(String text, String locale) async {
     await tts.stop();
     await tts.setLanguage(locale);
 
-    await tts.setSpeechRate(isSlowMode ? 0.2 : 0.5);
+    await tts.setSpeechRate(isSlowMode ? 0.1 : 0.5);
 
     await tts.setPitch(1.0);
     await tts.speak(text);
   }
-
-  // ===== HIGHLIGHT EXAMPLE =====
-  Widget _highlightExample(String sentence, String word) {
-    final parts = sentence.split(RegExp(word, caseSensitive: false));
-
-    return RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: parts[0],
-            style: const TextStyle(color: Colors.white54),
-          ),
-          TextSpan(
-            text: word,
-            style: const TextStyle(
-              color: Color(0xFF4CAF50),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          TextSpan(
-            text: parts.length > 1 ? parts[1] : '',
-            style: const TextStyle(color: Colors.white54),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ===== ACTION =====
-  Widget _actionButton(String text, Color color, VoidCallback onTap) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      onPressed: onTap,
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    );
+  void _goToPractice() {
+    Navigator.pop(context);
   }
 
   void _next() {
