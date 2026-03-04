@@ -17,7 +17,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/writing/**").permitAll()
-                        .anyRequest().permitAll() // Relaxed permissions for test
+                        .anyRequest().permitAll() 
                 );
 
         return http.build();
