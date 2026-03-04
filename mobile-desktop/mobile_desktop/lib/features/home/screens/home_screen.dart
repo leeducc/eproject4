@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../study_sections/listening/screens/listening_screen.dart';
 import '../../study_sections/reading/screens/reading_screen.dart';
-import '../../study_sections/writing/screens/writing_screen.dart';
+import '../../study_sections/writing/screens/topic_list_screen.dart';
 import '../../study_sections/speaking/screens/speaking_screen.dart';
 import '../../study_sections/simulate_exam/screens/simulate_exam_screen.dart';
 import '../../study_sections/real_exam/screens/real_exam_screen.dart';
@@ -106,7 +106,7 @@ class HomeScreen extends StatelessWidget {
       {'title': 'Nghe', 'icon': Icons.headphones, 'color': Colors.orange, 'screen': const ListeningScreen()},
       {'title': 'Nói', 'icon': Icons.mic_none, 'color': Colors.purple, 'screen': const SpeakingScreen()},
       {'title': 'Đọc hiểu', 'icon': Icons.menu_book, 'color': Colors.yellow.shade700, 'screen': const ReadingScreen()},
-      {'title': 'Viết', 'icon': Icons.edit_document, 'color': Colors.green, 'screen': const WritingScreen()},
+      {'title': 'Viết', 'icon': Icons.edit_document, 'color': Colors.green, 'screen': const TopicListScreen()},
       {'title': 'Đề mô phỏng', 'icon': Icons.insert_drive_file, 'color': Colors.lightBlue, 'screen': const SimulateExamScreen()},
       {'title': 'Đề thi thật', 'icon': Icons.assignment, 'color': Colors.indigo, 'screen': const RealExamScreen()},
       {'title': 'Từ vựng', 'icon': Icons.abc, 'color': Colors.blueAccent, 'screen': const VocabularyScreen()},
