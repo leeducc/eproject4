@@ -72,7 +72,7 @@ class _WritingScreenState extends State<WritingScreen> {
           backgroundColor: const Color(0xFF1E2330),
           title: const Text('Thông báo', style: TextStyle(color: Colors.white)),
           content: const Text(
-            'Bài luận của bạn đã được gửi. Giáo viên sẽ chấm bài và kết quả sẽ được gửi thông báo tới email của bạn sớm nhất (Tính năng Email sẽ được phát triển sau).',
+            'Bài luận của bạn đã được gửi. Giáo viên sẽ chấm bài và kết quả sẽ được gửi thông báo tới email của bạn sớm nhất.',
             style: TextStyle(color: Colors.white70),
           ),
           actions: [

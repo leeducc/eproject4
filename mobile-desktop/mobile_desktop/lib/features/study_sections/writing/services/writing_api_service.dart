@@ -4,8 +4,8 @@ import '../models/topic_model.dart';
 import '../models/essay_submission_response.dart';
 
 class WritingApiService {
-
-  static const String baseUrl = 'http://localhost:8080/api/writing';
+  
+  static const String baseUrl = 'http://10.0.2.2:8080/api/writing';
 
   Future<List<Topic>> fetchTopics() async {
     final response = await http.get(Uri.parse('$baseUrl/topics'));
