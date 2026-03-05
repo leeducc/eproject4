@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'review_screen.dart';
 import 'topic_vocabulary_screen.dart';
+import 'vocabulary_detail_screen.dart';
 
 class VocabularyScreen extends StatefulWidget {
   const VocabularyScreen({Key? key}) : super(key: key);
@@ -676,15 +676,24 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     return Scaffold(
       backgroundColor: bgColor,
       appBar: _buildAppBar(context),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildTopCard(),
-            const SizedBox(height: 16),
-            Expanded(child: _buildTopicGrid()),
-          ],
-        ),
+      body: TabBarView(
+        controller: _tabController,
+        children: List.generate(hskData.length, (index) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _buildTopCardByIndex(index),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 16),
+                ),
+                _buildTopicGridSliver(index),
+              ],
+            ),
+          );
+        }),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
@@ -710,15 +719,10 @@ class _VocabularyScreenState extends State<VocabularyScreen>
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () async {
-            await showSearch(
+          onPressed: () {
+            showSearch(
               context: context,
-              delegate: LessonSearchDelegate(
-                List.generate(
-                  hskData[_tabController.index]['lessons'] as int,
-                      (i) => i + 1,
-                ),
-              ),
+              delegate: VocabularySearchDelegate(topicVocabularyData),
             );
           },
         ),
@@ -780,8 +784,8 @@ class _VocabularyScreenState extends State<VocabularyScreen>
   }
 
   // ===== Top Card =====
-  Widget _buildTopCard() {
-    final current = hskData[_tabController.index];
+  Widget _buildTopCardByIndex(int index) {
+    final current = hskData[index];
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -826,75 +830,76 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     );
   }
 
-  Widget _buildTopicGrid() {
-    final topics =
-    hskData[_tabController.index]['topics'] as List<Map>;
+  SliverGrid _buildTopicGridSliver(int index) {
+    final topics = hskData[index]['topics'] as List<Map>;
 
-    return GridView.builder(
-      itemCount: topics.length,
+    return SliverGrid(
+      delegate: SliverChildBuilderDelegate(
+            (context, i) {
+          final topic = topics[i];
+          final topicTitle = topic['title'];
+
+          return InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              final vocabByTopic =
+                  topicVocabularyData[topicTitle] ?? [];
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TopicVocabularyScreen(
+                    topicName: topicTitle,
+                    vocabularies: vocabByTopic,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderBlue, width: 1.2),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: primaryBlue.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      topic['icon'],
+                      color: primaryBlue,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    topicTitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        childCount: topics.length,
+      ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
         childAspectRatio: 1.3,
       ),
-      itemBuilder: (_, i) {
-        final topic = topics[i];
-        return InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            final topicTitle = topic['title'];
-
-            // MOCK vocab theo topic (sau này đổi sang API / DB)
-            final vocabByTopic = topicVocabularyData[topicTitle] ?? [];
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TopicVocabularyScreen(
-                  topicName: topicTitle,
-                  vocabularies: vocabByTopic,
-                ),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderBlue, width: 1.2),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: primaryBlue.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    topic['icon'],
-                    color: primaryBlue,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  topic['title'],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -942,10 +947,10 @@ class _VocabularyScreenState extends State<VocabularyScreen>
 }
 
 // ===== SEARCH DELEGATE =====
-class LessonSearchDelegate extends SearchDelegate<int?> {
-  final List<int> lessons;
+class VocabularySearchDelegate extends SearchDelegate {
+  final Map<String, List<Map<String, dynamic>>> topicVocabularyData;
 
-  LessonSearchDelegate(this.lessons);
+  VocabularySearchDelegate(this.topicVocabularyData);
 
   @override
   String get searchFieldLabel => 'Tìm từ, dịch nghĩa, ví dụ';
@@ -953,10 +958,11 @@ class LessonSearchDelegate extends SearchDelegate<int?> {
   @override
   List<Widget>? buildActions(BuildContext context) {
     return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () => query = '',
-      ),
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () => query = '',
+        )
     ];
   }
 
@@ -970,28 +976,78 @@ class LessonSearchDelegate extends SearchDelegate<int?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    final result =
-    lessons.where((e) => e.toString().contains(query)).toList();
-    return _buildList(result, context);
+    return _buildResultList(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final result =
-    lessons.where((e) => e.toString().contains(query)).toList();
-    return _buildList(result, context);
+    if (query.trim().isEmpty) {
+      return const SizedBox();
+    }
+    return _buildResultList(context);
   }
 
-  Widget _buildList(List<int> items, BuildContext context) {
+  Widget _buildResultList(BuildContext context) {
+    final results = <Map<String, dynamic>>[];
+
+    topicVocabularyData.forEach((topic, list) {
+      for (var v in list) {
+        if (v['word']
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase())) {
+          results.add({
+            ...v,
+            '__topic': topic,
+            '__topicList': list,
+          });
+        }
+      }
+    });
+
+    if (results.isEmpty) {
+      return const Center(
+        child: Text('Không tìm thấy từ',
+            style: TextStyle(color: Colors.white54)),
+      );
+    }
+
     return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (_, i) => ListTile(
-        title: Text(
-          'Bài ${items[i]}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        onTap: () => close(context, items[i]),
-      ),
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final item = results[index];
+
+        return ListTile(
+          title: Text(
+            item['word'],
+            style: const TextStyle(color: Colors.white),
+          ),
+          subtitle: Text(
+            '${item['phonetic']} • ${item['meaning']}',
+            style: const TextStyle(color: Colors.white54),
+          ),
+          onTap: () {
+            final vocabList =
+            item['__topicList'] as List<Map<String, dynamic>>;
+
+            final startIndex = vocabList.indexWhere(
+                  (e) => e['word'] == item['word'],
+            );
+
+            close(context, null);
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VocabularyDetailScreen(
+                  vocabularies: vocabList,
+                  initialIndex: startIndex,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

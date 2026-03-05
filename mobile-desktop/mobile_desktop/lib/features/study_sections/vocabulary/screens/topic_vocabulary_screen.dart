@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'practice_screen.dart';
 import 'vocabulary_detail_screen.dart';
 
 class TopicVocabularyScreen extends StatelessWidget {
@@ -131,7 +132,14 @@ class TopicVocabularyScreen extends StatelessWidget {
                     background: primaryColor,
                     textColor: Colors.white,
                     onTap: () {
-                      // TODO: điều hướng sang màn test
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PracticeScreen(
+                            vocabList: vocabularies,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),

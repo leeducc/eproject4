@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'practice_screen.dart';
+
 class VocabularyDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> vocabularies;
   final int initialIndex;
@@ -53,8 +55,10 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         actions: [
           // 🐢 Slow mode
@@ -315,7 +319,14 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
     await tts.speak(text);
   }
   void _goToPractice() {
-    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PracticeScreen(
+          vocabList: widget.vocabularies,
+        ),
+      ),
+    );
   }
 
   void _next() {
