@@ -16,16 +16,37 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   final FlutterTts tts = FlutterTts();
   final Random random = Random();
-  List<String> sentenceTemplates = [
-    "I want a ____.",
-    "She bought a ____.",
-    "He likes ____.",
-    "This is a ____.",
-    "They need a ____.",
-    "Can you give me a ____?",
-    "I see a ____.",
-    "We use a ____ every day.",
-  ];
+  Map<String, List<String>> sentenceTemplates = {
+    "noun": [
+      "I see a ____.",
+      "She bought a ____.",
+      "This is a ____.",
+      "They need a ____.",
+      "I have a ____."
+    ],
+
+    "verb": [
+      "I like to ____.",
+      "She will ____ tomorrow.",
+      "They often ____ together.",
+      "We ____ every day.",
+    ],
+
+    "adjective": [
+      "The food is ____.",
+      "This place is very ____.",
+      "She feels ____ today.",
+      "It looks ____.",
+    ],
+
+    "phrase": [
+      "People say '____' when greeting.",
+    ],
+
+    "interjection": [
+      "We say '____' to greet someone.",
+    ]
+  };
   String currentSentence = "";
   int? selectedLeft;
   int? selectedRight;
@@ -80,8 +101,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
     }
 
     /// random câu hỏi cho fill blank
-    sentenceTemplates.shuffle();
-    currentSentence = sentenceTemplates.first;
+    String pos = currentWord!['pos'] ?? 'noun';
+
+    List<String> templates =
+        sentenceTemplates[pos] ?? sentenceTemplates['noun']!;
+
+    templates.shuffle();
+    currentSentence = templates.first;
 
     /// match game
     matchList = [...widget.vocabList]..shuffle();
@@ -210,27 +236,31 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Widget matchCard(
-    String text,
-    bool selected,
-    bool hidden,
-    VoidCallback onTap,
-  ) {
-    if (hidden) {
-      return const SizedBox();
-    }
-
+      String text,
+      bool selected,
+      bool hidden,
+      VoidCallback onTap,
+      ) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: hidden ? null : onTap,
       child: Container(
-        height: 100,
+        height: 70,
         alignment: Alignment.center,
+        margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? Colors.blue : const Color(0xFF1E2A38),
+          color: hidden
+              ? Colors.transparent
+              : (selected ? Colors.blue : const Color(0xFF1E2A38)),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Text(
+        child: hidden
+            ? const SizedBox()
+            : Text(
           text,
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
       ),
     );
