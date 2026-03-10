@@ -1,0 +1,21 @@
+{
+    "name": "@english-learning/ui",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "dependencies": {
+        "@radix-ui/react-slot": "^1.0.2",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.0",
+        "lucide-react": "^0.577.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^7.13.1",
+        "tailwind-merge": "^2.2.1",
+        "tailwindcss": "^3.4.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.2.0",
+        "typescript": "^5.2.2"
+    }
+}

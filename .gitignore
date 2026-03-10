@@ -1,4 +1,123 @@
-# credential files 
+# ===========================
+# Credentials & Secrets
+# ===========================
 application.properties
+application-*.properties
 .env
-.idea
+.env.*
+!.env.example
+
+# ===========================
+# IDE & Editor
+# ===========================
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ===========================
+# Node.js / npm / Turborepo
+# ===========================
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm/
+.yarn/
+.pnp
+.pnp.js
+
+# Turborepo
+.turbo/
+**/.turbo/
+
+# Build outputs (React / Vite / Next.js)
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/.next/
+**/.nuxt/
+**/.svelte-kit/
+
+# Cache
+.cache/
+**/.cache/
+.parcel-cache/
+
+# ===========================
+# Flutter / Dart
+# ===========================
+.dart_tool/
+**/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/pubspec.lock
+
+# Flutter build outputs
+mobile-desktop/**/build/
+**/android/app/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/.idea/
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Runner/GeneratedPluginRegistrant.*
+*.g.dart
+*.freezed.dart
+
+# ===========================
+# Java / Maven / Spring Boot
+# ===========================
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Maven wrapper cache
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ===========================
+# AI Agent
+# ===========================
+.agent/rules/
+
+# ===========================
+# Miscellaneous
+# ===========================
+*.log
+*.pid
+*.seed
+*.pid.lock
+coverage/
+**/coverage/
+*.lcov
+.nyc_output/

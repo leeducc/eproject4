@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: englishhub-nginx
+    ports:
+      - "80:80"
+    volumes:
+      # Mount Nginx configuration file
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount Windows backend uploads folder into Linux Nginx container serving media
+      - ./backend/uploads:/var/www/uploads:ro 
+    restart: unless-stopped
