@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/services/icoin_service.dart';
 import 'settings_screen.dart';
+import 'upgrade_pro_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             children: [
               _buildHeader(context),
-              _buildPlusBanner(),
+              _buildPlusBanner(context),
               _buildStatsSection(),
               const SizedBox(height: 10),
               _buildDivider(),
@@ -57,12 +59,18 @@ class ProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.amber, width: 1),
                     ),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.monetization_on, color: Colors.amber, size: 14),
-                        SizedBox(width: 4),
-                        Text('150 iCoins', style: TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
+                    child: FutureBuilder<int?>(
+                      future: ICoinService.getBalance(),
+                      builder: (context, snapshot) {
+                        final balance = snapshot.data ?? 0;
+                        return Row(
+                          children: [
+                            const Icon(Icons.monetization_on, color: Colors.amber, size: 14),
+                            const SizedBox(width: 4),
+                            Text('$balance iCoins', style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -91,11 +99,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlusBanner() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
+  Widget _buildPlusBanner(BuildContext context) {
+    print('Building Plus Banner');
+    return GestureDetector(
+      onTap: () {
+        print('Tapped Plus Banner, navigating to UpgradeProScreen...');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const UpgradeProScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
           begin: Alignment.centerLeft,
@@ -123,8 +140,9 @@ class ProfileScreen extends StatelessWidget {
           const Icon(Icons.chevron_right, color: Colors.white54),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatsSection() {
     return Padding(

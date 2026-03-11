@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Enum for the four IELTS band groups. Used as a filter key in repositories.
+enum IeltsBand { band0_4, band5_6, band7_8, band9 }
+
 /// Represents one of the 4 IELTS band levels supported in the app.
 class IeltsLevel {
-  final String label;       // e.g. "Band 0-4"
+  final IeltsBand band;     // type-safe filter key
+  final String label;       // e.g. "Band 0–4"
   final String range;       // e.g. "0-4"
   final String description; // short description shown on the picker
   final Color primaryColor;
@@ -10,6 +14,7 @@ class IeltsLevel {
   final int barHeight;      // relative height for the bar chart (1-4)
 
   const IeltsLevel({
+    required this.band,
     required this.label,
     required this.range,
     required this.description,
@@ -21,6 +26,7 @@ class IeltsLevel {
 
 const List<IeltsLevel> kIeltsLevels = [
   IeltsLevel(
+    band: IeltsBand.band0_4,
     label: 'Band 0–4',
     range: '0-4',
     description:
@@ -30,6 +36,7 @@ const List<IeltsLevel> kIeltsLevels = [
     barHeight: 1,
   ),
   IeltsLevel(
+    band: IeltsBand.band5_6,
     label: 'Band 5–6',
     range: '5-6',
     description:
@@ -39,6 +46,7 @@ const List<IeltsLevel> kIeltsLevels = [
     barHeight: 2,
   ),
   IeltsLevel(
+    band: IeltsBand.band7_8,
     label: 'Band 7–8',
     range: '7-8',
     description:
@@ -48,6 +56,7 @@ const List<IeltsLevel> kIeltsLevels = [
     barHeight: 3,
   ),
   IeltsLevel(
+    band: IeltsBand.band9,
     label: 'Band 9',
     range: '9',
     description:
@@ -59,12 +68,13 @@ const List<IeltsLevel> kIeltsLevels = [
 ];
 
 class IeltsLevelProvider extends ChangeNotifier {
-  IeltsLevel _selectedLevel = kIeltsLevels[1]; // default Band 5-6
+  // Default is Band 0-4 (index 0)
+  IeltsLevel _selectedLevel = kIeltsLevels[0];
 
   IeltsLevel get selectedLevel => _selectedLevel;
 
   void setLevel(IeltsLevel level) {
-    debugPrint('[IeltsLevelProvider] Level changed: ${level.label}');
+    debugPrint('[IeltsLevelProvider] Level changed → ${level.label} (band: ${level.band})');
     _selectedLevel = level;
     notifyListeners();
   }

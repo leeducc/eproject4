@@ -5,7 +5,10 @@ import 'package:mobile_desktop/features/study_sections/listening/models/true_fal
 import 'package:mobile_desktop/features/study_sections/listening/screens/dialogue_questions_screen.dart';
 import 'package:mobile_desktop/features/study_sections/listening/screens/dialogue_true_false_screen.dart';
 import 'true_false_screen.dart';
-
+import 'package:provider/provider.dart';
+import '../../../../core/providers/ielts_level_provider.dart';
+import '../../../home/screens/choose_level_screen.dart';
+import '../services/listening_provider.dart';
 class ListeningScreen extends StatelessWidget {
   const ListeningScreen({super.key});
 
@@ -71,8 +74,16 @@ class ListeningScreen extends StatelessWidget {
       ),
     ];
 
+    final listeningProvider = context.watch<ListeningProvider>();
+    final level = context.watch<IeltsLevelProvider>().selectedLevel;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Listening")),
+      appBar: AppBar(
+        title: Text("Listening · ${level.label}"),
+        actions: [
+          _LevelBadge(level: level),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
@@ -166,6 +177,37 @@ class ListeningScreen extends StatelessWidget {
               Text("Progress ${(progress * 100).toInt()}%"),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelBadge extends StatelessWidget {
+  final IeltsLevel level;
+  const _LevelBadge({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        debugPrint('[_LevelBadge] Navigating to ChooseLevelScreen');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChooseLevelScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: level.primaryColor.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: level.primaryColor, width: 1),
+        ),
+        child: Text(
+          level.range,
+          style: TextStyle(color: level.primaryColor, fontWeight: FontWeight.bold),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthApi {
 
@@ -37,6 +38,14 @@ class AuthApi {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data.containsKey('token')) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', data['token']);
+          if (data.containsKey('isPro')) {
+            await prefs.setBool('is_pro', data['isPro'] == true);
+          }
+          print('Saved token from Google login');
+        }
         return data; // contains token, email, role, fullName
       } else {
         throw Exception('Backend authentication failed: ${response.statusCode} - ${response.body}');
@@ -54,7 +63,20 @@ class AuthApi {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data.containsKey('token')) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', data['token']);
+          if (data.containsKey('isPro')) {
+            await prefs.setBool('is_pro', data['isPro'] == true);
+          }
+          print('Saved token from email login');
+        }
+        return true;
+      }
+      print('Login false: ${response.statusCode} - ${response.body}');
+      return false;
     } catch (e) {
       print('Login error: $e');
       return false;

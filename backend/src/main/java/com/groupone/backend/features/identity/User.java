@@ -47,6 +47,13 @@ public class User {
     @Builder.Default
     private Integer iCoinBalance = 0;
 
+    @Column(name = "is_pro", nullable = false)
+    @Builder.Default
+    private Boolean isPro = false;
+
+    @Column(name = "pro_expiry_date")
+    private LocalDateTime proExpiryDate;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile profile;
 }

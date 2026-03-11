@@ -15,4 +15,5 @@ public class AuthResponse {
     private String email;
     private UserRole role;
     private String fullName;
+    private Boolean isPro;
 }

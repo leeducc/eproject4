@@ -94,6 +94,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .fullName(fullName)
+                .isPro(user.getIsPro() != null ? user.getIsPro() : false)
                 .build();
     }
 
@@ -138,6 +139,7 @@ public class AuthService {
                         .email(user.getEmail())
                         .role(user.getRole())
                         .fullName(fullName)
+                        .isPro(user.getIsPro() != null ? user.getIsPro() : false)
                         .build();
 
             } else {

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/topic_model.dart';
 import '../models/essay_submission_response.dart';
 import '../services/writing_api_service.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/providers/ielts_level_provider.dart';
+import '../../../home/screens/choose_level_screen.dart';
+import '../services/writing_provider.dart';
 
 class WritingScreen extends StatefulWidget {
   final Topic topic;
@@ -94,19 +98,25 @@ class _WritingScreenState extends State<WritingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final level = context.watch<IeltsLevelProvider>().selectedLevel;
+    final writingProvider = context.watch<WritingProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF161A23),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Luyện Viết IELTS',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          'Luyện Viết IELTS · ${level.label}',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          _LevelBadge(level: level),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -345,6 +355,37 @@ class _WritingScreenState extends State<WritingScreen> {
               
             const SizedBox(height: 40), // Padding at bottom of scrollable area
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelBadge extends StatelessWidget {
+  final IeltsLevel level;
+  const _LevelBadge({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        debugPrint('[_LevelBadge] Navigating to ChooseLevelScreen');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChooseLevelScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: level.primaryColor.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: level.primaryColor, width: 1),
+        ),
+        child: Text(
+          level.range,
+          style: TextStyle(color: level.primaryColor, fontWeight: FontWeight.bold),
         ),
       ),
     );

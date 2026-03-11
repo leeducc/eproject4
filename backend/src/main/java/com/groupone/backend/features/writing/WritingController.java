@@ -1,0 +1,28 @@
+package com.groupone.backend.features.writing;
+
+import com.groupone.backend.features.writing.dto.EssaySubmissionRequest;
+import com.groupone.backend.features.writing.dto.EssaySubmissionResponse;
+import com.groupone.backend.features.writing.dto.TopicResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/writing")
+@RequiredArgsConstructor
+public class WritingController {
+
+    private final WritingService writingService;
+
+    @GetMapping("/topics")
+    public ResponseEntity<List<TopicResponse>> getTopics() {
+        return ResponseEntity.ok(writingService.getAllTopics());
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<EssaySubmissionResponse> submitEssay(@RequestBody EssaySubmissionRequest request) {
+        return ResponseEntity.ok(writingService.submitEssay(request));
+    }
+}

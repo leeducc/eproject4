@@ -5,6 +5,7 @@ class Topic {
   final String? hint;
   final String? imageUrl;
   final String? audioUrl;
+  final bool isProOnly;
 
   Topic({
     required this.id,
@@ -13,6 +14,7 @@ class Topic {
     this.hint,
     this.imageUrl,
     this.audioUrl,
+    this.isProOnly = false,
   });
 
   factory Topic.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Topic {
       hint: json['hint'],
       imageUrl: json['imageUrl'],
       audioUrl: json['audioUrl'],
+      isProOnly: json['isProOnly'] ?? false,
     );
   }
 
@@ -34,6 +37,7 @@ class Topic {
       'hint': hint,
       'imageUrl': imageUrl,
       'audioUrl': audioUrl,
+      'isProOnly': isProOnly,
     };
   }
 }

@@ -22,7 +22,7 @@ class _ChooseLevelScreenState extends State<ChooseLevelScreen>
     final provider = context.read<IeltsLevelProvider>();
     _selectedIndex =
         kIeltsLevels.indexWhere((l) => l.range == provider.selectedLevel.range);
-    if (_selectedIndex < 0) _selectedIndex = 1;
+    if (_selectedIndex < 0) _selectedIndex = 0;
 
     _barController = AnimationController(
       vsync: this,
