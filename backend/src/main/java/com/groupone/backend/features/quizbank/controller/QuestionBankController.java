@@ -30,16 +30,19 @@ public class QuestionBankController {
         return ResponseEntity.ok(questionBankService.getQuestionById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<QuestionResponse> createQuestion(@Valid @RequestBody QuestionRequest request) {
-        return ResponseEntity.ok(questionBankService.createQuestion(request));
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<QuestionResponse> createQuestion(
+            @RequestPart("question") @Valid QuestionRequest request,
+            @RequestPart(value = "media", required = false) List<org.springframework.web.multipart.MultipartFile> media) {
+        return ResponseEntity.ok(questionBankService.createQuestion(request, media));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<QuestionResponse> updateQuestion(
             @PathVariable Long id, 
-            @Valid @RequestBody QuestionRequest request) {
-        return ResponseEntity.ok(questionBankService.updateQuestion(id, request));
+            @RequestPart("question") @Valid QuestionRequest request,
+            @RequestPart(value = "media", required = false) List<org.springframework.web.multipart.MultipartFile> media) {
+        return ResponseEntity.ok(questionBankService.updateQuestion(id, request, media));
     }
 
     @DeleteMapping("/{id}")

@@ -124,3 +124,8 @@ coverage/
 
 # Vite cache
 **/.vite/
+
+# ===========================
+# Media & Uploads
+# ===========================
+backend/uploads/

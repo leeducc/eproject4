@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
-import { DashboardLayout, NavItem } from '@english-learning/ui';
+import { DashboardLayout, NavItem, ConfirmDialog, toast } from '@english-learning/ui';
 import { Home, Database, Users, Settings, Briefcase, Plus, Trash2, Edit2, BookOpen } from 'lucide-react';
 import { ExamCompositionUI } from '../../features/quiz-bank/components/ExamCompositionUI';
 
 export const ExamList: React.FC = () => {
+  const location = useLocation();
   const { exams, currentUser, deleteExam, fetchExams } = useQuizBankStore();
   const [isCreating, setIsCreating] = useState(false);
+  const [examToDelete, setExamToDelete] = useState<number | null>(null);
 
   const isTeacher = currentUser.role === 'TEACHER';
 
+  const handleConfirmDelete = async () => {
+    if (examToDelete) {
+      try {
+        await deleteExam(examToDelete);
+        toast.success("Exam deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete exam");
+      } finally {
+        setExamToDelete(null);
+      }
+    }
+  };
+
   useEffect(() => {
+    console.log(`[ExamList] Route changed (${location.pathname}), resetting view state.`);
+    setIsCreating(false);
     fetchExams();
-  }, [fetchExams]);
+  }, [fetchExams, location.key]);
 
   // Define sidebar locally just to render DashboardLayout generically per standard practices
   const sidebarItems: NavItem[] = [
@@ -142,7 +160,7 @@ export const ExamList: React.FC = () => {
                                             {/* RBAC Rules again: hide Deletes for TEACHER role */}
                                             {!isTeacher && (
                                                 <button 
-                                                    onClick={() => deleteExam(exam.id)}
+                                                    onClick={() => setExamToDelete(exam.id)}
                                                     className="p-1.5 text-gray-400 hover:text-red-600 rounded bg-white border mt-1 shadow-sm transition-colors"
                                                 >
                                                     <Trash2 size={16} />
@@ -158,6 +176,16 @@ export const ExamList: React.FC = () => {
             </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={examToDelete !== null}
+        onClose={() => setExamToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Exam"
+        message="Are you sure you want to delete this exam? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </DashboardLayout>
   );
 };

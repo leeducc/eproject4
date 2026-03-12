@@ -7,6 +7,7 @@ import com.groupone.backend.features.quizbank.enums.SkillType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.util.Map;
+import java.util.List;
 
 @Data
 public class QuestionRequest {
@@ -30,4 +31,10 @@ public class QuestionRequest {
     @NotNull
     @JsonProperty("isPremiumContent")
     private Boolean isPremiumContent;
+
+    private List<String> mediaUrls;
+    
+    private List<String> mediaTypes;
+
+    private List<String> retainedMediaUrls;
 }

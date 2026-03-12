@@ -29,9 +29,9 @@ public class EmailService {
             String htmlContent = "<h2>Registration Verification Code</h2>"
                                + "<p>Welcome to the IELTS App!</p>"
                                + "<p>Your 6-digit verification code is: <strong>" + otp + "</strong></p>"
-                               + "<p>This code will expire in 2 minutes.</p>";
+                               + "<p>This code will expire in 5 minutes.</p>";
                                
-            helper.setText(htmlContent, true); // true sets it to HTML form
+            helper.setText(htmlContent, true); 
             
             mailSender.send(message);
         } catch (MessagingException e) {

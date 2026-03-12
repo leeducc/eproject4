@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { PrivateRoute } from "@english-learning/ui";
+import { PrivateRoute, Toaster } from "@english-learning/ui";
 import AdminLogin from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -10,10 +10,13 @@ import ICoinManagement from "./pages/ICoinManagement";
 import { QuizBankTestPage } from "./pages/QuizBankTestPage";
 import { CategoryPage } from "./pages/questions/CategoryPage";
 import { ExamList } from "./pages/questions/ExamList";
+import { QuestionDetailView } from "./pages/questions/QuestionDetailView";
+import { QuestionEditPage } from "./pages/questions/QuestionEditPage";
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
+            <Toaster position="top-right" richColors closeButton />
             <BrowserRouter>
                 <div className="min-h-screen bg-gray-50">
                     <Routes>
@@ -30,6 +33,10 @@ function App() {
                             <Route path="/admin/questions/reading" element={<CategoryPage skill="READING" title="Reading" />} />
                             <Route path="/admin/questions/writing" element={<CategoryPage skill="WRITING" title="Writing" />} />
                             <Route path="/admin/questions/exam" element={<ExamList />} />
+                            
+                            {/* Detailed Question Views */}
+                            <Route path="/admin/questions/:id" element={<QuestionDetailView />} />
+                            <Route path="/admin/questions/:id/edit" element={<QuestionEditPage />} />
                         </Route>
 
                         {/* Public Test Route */}

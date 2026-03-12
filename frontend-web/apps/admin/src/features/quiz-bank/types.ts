@@ -1,6 +1,6 @@
 export type Role = 'ADMIN' | 'TEACHER';
 export type SkillType = 'READING' | 'LISTENING' | 'VOCABULARY' | 'WRITING';
-export type QuestionType = 'MULTIPLE_CHOICE' | 'MATCHING' | 'FILL_BLANK';
+export type QuestionType = 'MULTIPLE_CHOICE' | 'MATCHING' | 'FILL_BLANK' | 'ESSAY';
 export type DifficultyBand = 'BAND_0_4' | 'BAND_5_6' | 'BAND_7_8' | 'BAND_9';
 
 export interface Passage {
@@ -14,15 +14,15 @@ export interface Passage {
 // -- Question Data Payloads --
 
 export interface MultipleChoiceData {
-  options: { id: string; label: string }[];
+  options: { id: string; label: string; image?: string }[];
   correct_ids: string[];
   multiple_select: boolean;
   answer_with_image?: boolean;
 }
 
 export interface MatchingData {
-  left_items: { id: number | string; text: string }[];
-  right_items: { id: number | string; text: string }[];
+  left_items: { id: string; text: string; image?: string }[];
+  right_items: { id: string; text: string; image?: string }[];
   solution: Record<string, string>; // Maps left_id to right_id
 }
 
@@ -39,6 +39,9 @@ export interface Question {
   difficultyBand: DifficultyBand;
   instruction?: string;
   explanation?: string;
+  mediaUrls?: string[];
+  mediaTypes?: string[];
+  retainedMediaUrls?: string[];
   data: any | MultipleChoiceData | MatchingData | FillBlankData;
   isPremiumContent: boolean;
 }

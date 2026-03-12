@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
 import { SkillType, Question } from '../../features/quiz-bank/types';
-import { DashboardLayout, NavItem } from '@english-learning/ui';
-import { Home, Database, Users, Settings, Briefcase, Plus, Trash2, Edit2, FileText } from 'lucide-react';
+import { DashboardLayout, NavItem, ConfirmDialog, toast } from '@english-learning/ui';
+import { Home, Database, Users, Settings, Briefcase, Plus, Trash2, Edit2, FileText, Eye } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { MultipleChoiceBuilder } from '../../features/quiz-bank/components/MultipleChoiceBuilder';
 import { FillInTheBlankBuilder } from '../../features/quiz-bank/components/FillInTheBlankBuilder';
 import { MatchingBuilder } from '../../features/quiz-bank/components/MatchingBuilder';
@@ -45,17 +47,36 @@ const sidebarItems: NavItem[] = [
 ];
 
 export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ skill, title }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { questions, currentUser, deleteQuestion, fetchQuestions } = useQuizBankStore();
   const [isCreating, setIsCreating] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<number | null>(null);
 
   useEffect(() => {
+    console.log(`[CategoryPage] Route changed (${location.pathname}), resetting view state.`);
+    setIsCreating(false);
+    setEditingQuestion(null);
     fetchQuestions(skill);
-  }, [skill, fetchQuestions]);
+  }, [skill, fetchQuestions, location.key]);
   const [builderType, setBuilderType] = useState<'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'MATCHING' | 'WRITING'>('MULTIPLE_CHOICE');
 
   const filteredQuestions = questions.filter(q => q.skill === skill || (skill === 'WRITING' && q.skill === 'WRITING'));
   const isTeacher = currentUser.role === 'TEACHER';
+
+  const handleConfirmDelete = async () => {
+    if (questionToDelete) {
+      try {
+        await deleteQuestion(questionToDelete);
+        toast.success("Question deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete question");
+      } finally {
+        setQuestionToDelete(null);
+      }
+    }
+  };
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
@@ -137,7 +158,11 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                         ) : (
                             filteredQuestions.map((q) => (
                                 <tr key={q.id} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="p-4 text-sm font-medium text-gray-900 border-b border-gray-100">#{q.id.toString().slice(-4)}</td>
+                                    <td className="p-4 text-sm font-medium text-gray-900 border-b border-gray-100">
+                                        <Link to={`/admin/questions/${q.id}`} className="hover:text-blue-600 transition-colors">
+                                            #{q.id.toString().slice(-4)}
+                                        </Link>
+                                    </td>
                                     <td className="p-4 text-sm text-gray-600 border-b border-gray-100">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${q.isPremiumContent ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}`}>
                                             {q.type.replace('_', ' ')}
@@ -145,7 +170,9 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                                         </span>
                                     </td>
                                     <td className="p-4 text-sm text-gray-800 border-b border-gray-100 max-w-xs truncate" title={q.instruction}>
-                                        {q.instruction || (q.data as any).template || "Open Task"}
+                                        <Link to={`/admin/questions/${q.id}`} className="hover:text-blue-600 transition-colors font-medium">
+                                            {q.instruction || (q.data as any).template || "Open Task"}
+                                        </Link>
                                     </td>
                                     <td className="p-4 text-sm text-gray-600 border-b border-gray-100">
                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border border-gray-200 bg-gray-50">
@@ -155,15 +182,23 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                                     <td className="p-4 text-right border-b border-gray-100">
                                         <div className="flex items-center justify-end gap-2">
                                             <button 
-                                                onClick={() => setEditingQuestion(q)}
+                                                onClick={() => navigate(`/admin/questions/${q.id}`)}
                                                 className="p-1.5 text-gray-400 hover:text-blue-600 rounded bg-white border shadow-sm transition-colors"
+                                                title="View Details"
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate(`/admin/questions/${q.id}/edit`)}
+                                                className="p-1.5 text-gray-400 hover:text-blue-600 rounded bg-white border shadow-sm transition-colors"
+                                                title="Edit Question"
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             {/* RBAC: Hide Delete if Teacher */}
                                             {!isTeacher && (
                                                 <button 
-                                                    onClick={() => deleteQuestion(q.id)}
+                                                    onClick={() => setQuestionToDelete(q.id)}
                                                     className="p-1.5 text-gray-400 hover:text-red-600 rounded bg-white border shadow-sm transition-colors"
                                                 >
                                                     <Trash2 size={16} />
@@ -180,6 +215,16 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
         )}
 
       </div>
+
+      <ConfirmDialog
+        isOpen={questionToDelete !== null}
+        onClose={() => setQuestionToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Question"
+        message="Are you sure you want to delete this question? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </DashboardLayout>
   );
 };

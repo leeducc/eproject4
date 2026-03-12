@@ -14,8 +14,9 @@ interface QuizBankState {
   
   // Async Data Fetching
   fetchQuestions: (skill?: SkillType) => Promise<void>;
-  createQuestion: (question: Omit<Question, 'id'>) => Promise<void>;
-  updateQuestion: (id: number, question: Partial<Question>) => Promise<void>;
+  fetchQuestionById: (id: number) => Promise<Question | null>;
+  createQuestion: (question: Omit<Question, 'id'>, mediaFiles?: File[]) => Promise<void>;
+  updateQuestion: (id: number, question: Partial<Question>, mediaFiles?: File[]) => Promise<void>;
   deleteQuestion: (id: number) => Promise<void>;
 
   fetchExams: () => Promise<void>;
@@ -63,17 +64,53 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
     }
   },
 
-  createQuestion: async (questionConfig) => {
+  fetchQuestionById: async (id: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_BASE_URL}/questions/${id}`, { headers: getHeaders() });
+      if (!response.ok) throw new Error('Failed to fetch question');
+      const data = await response.json();
+      console.log(`[QuizBankStore] Fetched question ${id}`, data);
+      
+      // Update the local list if it exists
+      set((state) => ({
+        isLoading: false,
+        questions: state.questions.some(q => q.id === id) 
+          ? state.questions.map(q => q.id === id ? data : q)
+          : [...state.questions, data]
+      }));
+      
+      return data;
+    } catch (err: any) {
+      console.error('[QuizBankStore] fetchQuestionById Error:', err);
+      set({ error: err.message || 'Failed to fetch question', isLoading: false });
+      return null;
+    }
+  },
+
+  createQuestion: async (questionConfig, mediaFiles?: File[]) => {
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('admin_token');
       console.log('[QuizBankStore] createQuestion - token present:', !!token);
       console.log('[QuizBankStore] createQuestion - payload:', questionConfig);
 
+      const headers = getHeaders();
+      delete (headers as any)['Content-Type'];
+
+      const formData = new FormData();
+      formData.append(
+        'question',
+        new Blob([JSON.stringify(questionConfig)], { type: 'application/json' })
+      );
+      if (mediaFiles && mediaFiles.length > 0) {
+        mediaFiles.forEach(file => formData.append('media', file));
+      }
+
       const response = await fetch(`${API_BASE_URL}/questions`, {
         method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(questionConfig),
+        headers,
+        body: formData,
       });
 
       if (!response.ok) {
@@ -91,13 +128,25 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
     }
   },
 
-  updateQuestion: async (id, updatedFields) => {
+  updateQuestion: async (id, updatedFields, mediaFiles?: File[]) => {
     set({ isLoading: true, error: null });
     try {
+      const headers = getHeaders();
+      delete (headers as any)['Content-Type'];
+
+      const formData = new FormData();
+      formData.append(
+        'question',
+        new Blob([JSON.stringify(updatedFields)], { type: 'application/json' })
+      );
+      if (mediaFiles && mediaFiles.length > 0) {
+        mediaFiles.forEach(file => formData.append('media', file));
+      }
+
       const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
         method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify(updatedFields),
+        headers,
+        body: formData,
       });
       if (!response.ok) throw new Error('Failed to update question');
       const updatedQuestion = await response.json();

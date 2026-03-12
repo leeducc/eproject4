@@ -10,6 +10,10 @@ echo Starting React Frontend...
 start "React Frontend" cmd /c "cd frontend-web && npm run dev"
 
 :: ollama run gemma3:4b
-echo strat ollama Ai model api
+echo start ollama Ai model api
 Start "Ollama" cmd /c "ollama run gemma3:4b"
+
+echo start nginx
+start "Nginx" cmd /c "docker-compose up -d --build"
+
 echo All components started!

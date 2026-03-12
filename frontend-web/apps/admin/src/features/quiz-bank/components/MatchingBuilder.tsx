@@ -2,19 +2,9 @@ import React, { useState } from 'react';
 import { useQuizBankStore } from '../store';
 import { MatchingData, DifficultyBand, SkillType, Question } from '../types';
 import { 
-  Image as ImageIcon, 
-  Video, 
-  Mic, 
-  GripVertical, 
-  Trash2, 
-  Plus
+  Plus, Trash2, X, Image as ImageIcon, GripVertical
 } from 'lucide-react';
-
-interface MatchingPair {
-  id: string;
-  leftText: string;
-  rightText: string;
-}
+import { toast, ConfirmDialog } from '@english-learning/ui';
 
 export interface MatchingBuilderProps {
   skill?: SkillType;
@@ -30,66 +20,127 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || 'Match the following items.');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
   const [isPremium, setIsPremium] = useState<boolean>(initialQuestion?.isPremiumContent || false);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  
+  const initialMediaItems = (initialQuestion?.mediaUrls || []).map((url, i) => ({
+    url,
+    type: initialQuestion?.mediaTypes?.[i] || ''
+  }));
+  const [retainedMedia, setRetainedMedia] = useState<{url: string; type: string}[]>(initialMediaItems);
+  
+  const [fileToDelete, setFileToDelete] = useState<{ type: 'new' | 'retained' | 'item', side?: 'left' | 'right', index: number } | null>(null);
   
   const existingData = initialQuestion?.data as MatchingData | undefined;
+  const [pairs, setPairs] = useState<{left: string, right: string}[]>(() => {
+    if (!existingData) return [{ left: '', right: '' }];
+    return existingData.left_items.map((left) => ({
+      left: left.text,
+      right: existingData.right_items.find(r => r.id === existingData.solution[left.id])?.text || ''
+    }));
+  });
+
+  // Local state for item-specific images
+  const [itemImages, setItemImages] = useState<Record<string, File | string>>(() => {
+    const images: Record<string, File | string> = {};
+    if (existingData) {
+      existingData.left_items.forEach((item, idx) => { if (item.image) images[`left-${idx}`] = item.image; });
+      existingData.right_items.forEach((item, idx) => { if (item.image) images[`right-${idx}`] = item.image; });
+    }
+    return images;
+  });
   
-  // Reconstruct pairs from existing data if editing
-  const initialPairs = existingData ? existingData.left_items.map((left) => ({
-      id: left.id.toString(),
-      leftText: left.text,
-      rightText: existingData.right_items.find(r => r.id.toString() === existingData.solution[left.id.toString()])?.text || ''
-  })) : [
-    { id: '1', leftText: 'Icon Button', rightText: 'Initiate a direct action' },
-    { id: '2', leftText: 'Data Grid', rightText: 'Present tabular data for display and manipulation' }
-  ];
-
-  const [pairs, setPairs] = useState<MatchingPair[]>(initialPairs);
-  
-
-
   const isTeacher = currentUser.role === 'TEACHER';
 
   const handleAddPair = () => {
-    console.log('[MatchingBuilder] Adding new pair');
-    const newId = Date.now().toString();
-    setPairs([...pairs, { id: newId, leftText: '', rightText: '' }]);
+    setPairs([...pairs, { left: '', right: '' }]);
   };
 
-  const handleRemovePair = (id: string) => {
-    if (isTeacher) return; // Role check
-    console.log(`[MatchingBuilder] Removing pair ${id}`);
-    setPairs(pairs.filter(p => p.id !== id));
+  const handleRemovePair = (index: number) => {
+    if (isTeacher) return;
+    const newPairs = pairs.filter((_, i) => i !== index);
+    setPairs(newPairs);
+    
+    setItemImages(prev => {
+      const next = { ...prev };
+      delete next[`left-${index}`];
+      delete next[`right-${index}`];
+      
+      const newImages: Record<string, File | string> = {};
+      Object.entries(next).forEach(([key, value]) => {
+        const [side, oldIdxStr] = key.split('-');
+        const oldIdx = parseInt(oldIdxStr);
+        if (oldIdx > index) {
+          newImages[`${side}-${oldIdx - 1}`] = value;
+        } else {
+          newImages[key] = value;
+        }
+      });
+      return newImages;
+    });
   };
 
-  const handleOptionChange = (id: string, side: 'left' | 'right', newText: string) => {
-    setPairs(pairs.map(p => {
-      if (p.id === id) {
-        return side === 'left' ? { ...p, leftText: newText } : { ...p, rightText: newText };
-      }
-      return p;
-    }));
+  const handleUpdatePair = (index: number, side: 'left' | 'right', val: string) => {
+    const newPairs = [...pairs];
+    newPairs[index][side] = val;
+    setPairs(newPairs);
+  };
+
+  const handleItemImageChange = (index: number, side: 'left' | 'right', file: File) => {
+    setItemImages(prev => ({ ...prev, [`${side}-${index}`]: file }));
+  };
+
+  const handleRemoveItemImage = (index: number, side: 'left' | 'right') => {
+    setItemImages(prev => {
+      const next = { ...prev };
+      delete next[`${side}-${index}`];
+      return next;
+    });
   };
 
   const handleSave = () => {
     if (!instruction.trim()) {
-      alert("Please provide an instruction.");
+      toast.error("Please provide an instruction.");
       return;
     }
     if (pairs.length < 2) {
-      alert("Please provide at least two matching pairs.");
+      toast.error("Please provide at least two matching pairs.");
       return;
     }
-    if (pairs.some(p => !p.leftText.trim() || !p.rightText.trim())) {
-      alert("Please fill in both sides for all matching pairs.");
+    if (pairs.some((p, i) => !p.left.trim() && !itemImages[`left-${i}`])) {
+      toast.error("Please fill in text or attach an image for all left items.");
+      return;
+    }
+    if (pairs.some((p, i) => !p.right.trim() && !itemImages[`right-${i}`])) {
+      toast.error("Please fill in text or attach an image for all right items.");
       return;
     }
 
-    // Transform pairs state to MatchingData payload structure
-    const left_items = pairs.map((p) => ({ id: p.id, text: p.leftText }));
-    const right_items = pairs.map((p) => ({ id: p.id, text: p.rightText }));
-    
-    // Default solution is 1:1 mapping of their IDs since they are inputted in rows
-    const solution = pairs.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.id }), {} as Record<string, string>);
+    const left_items = pairs.map((p, i) => {
+      const img = itemImages[`left-${i}`];
+      return {
+          id: `L${i}`,
+          text: p.left,
+          image: img instanceof File ? `@media:${img.name}` : (typeof img === 'string' ? img : undefined)
+      };
+    });
+    const right_items = pairs.map((p, i) => {
+      const img = itemImages[`right-${i}`];
+      return {
+          id: `R${i}`,
+          text: p.right,
+          image: img instanceof File ? `@media:${img.name}` : (typeof img === 'string' ? img : undefined)
+      };
+    });
+
+    const solution: Record<string, string> = {};
+    left_items.forEach((item, i) => {
+      solution[item.id] = right_items[i].id;
+    });
+
+    const allFiles = [...mediaFiles];
+    Object.values(itemImages).forEach(val => {
+      if (val instanceof File) allFiles.push(val);
+    });
 
     const data: MatchingData = {
       left_items,
@@ -100,21 +151,41 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
     const payload = {
       skill,
       type: 'MATCHING' as const,
-      difficultyBand: difficultyBand,
+      difficultyBand,
       instruction,
       explanation,
       data,
-      isPremiumContent: isPremium
+      isPremiumContent: isPremium,
+      retainedMediaUrls: retainedMedia.map(m => m.url)
     };
     
     if (initialQuestion) {
-      console.log('[MatchingBuilder] Updating matching question', { instruction, data });
-      updateQuestion(initialQuestion.id, payload);
+      updateQuestion(initialQuestion.id, payload, allFiles);
     } else {
-      console.log('[MatchingBuilder] Saving matching question', { instruction, data });
-      createQuestion(payload);
+      createQuestion(payload, allFiles);
     }
     if (onSave) onSave();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const newFiles = Array.from(e.target.files);
+    setMediaFiles(prev => [...prev, ...newFiles]);
+    e.target.value = ''; 
+  };
+
+  const handleConfirmDeleteFile = () => {
+    if (!fileToDelete) return;
+    
+    if (fileToDelete.type === 'new') {
+      setMediaFiles(prev => prev.filter((_, i) => i !== fileToDelete.index));
+    } else if (fileToDelete.type === 'retained') {
+      setRetainedMedia(prev => prev.filter((_, i) => i !== fileToDelete.index));
+    } else if (fileToDelete.type === 'item' && fileToDelete.side) {
+      handleRemoveItemImage(fileToDelete.index, fileToDelete.side);
+    }
+    setFileToDelete(null);
+    toast.success("File removed");
   };
 
   return (
@@ -152,120 +223,163 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
              Question
           </div>
           <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-gray-50/50 flex flex-col justify-between group">
-            <div className="flex justify-between p-2">
+            <div className="p-2">
                <textarea
                  className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none outline-none font-medium text-gray-800 min-h-[50px]"
                  placeholder="Type your instruction..."
                  value={instruction}
                  onChange={(e) => setInstruction(e.target.value)}
                />
-               <div className="flex items-start gap-1 p-2 text-gray-500 shrink-0">
-                 <button className="p-1.5 hover:bg-gray-200 border bg-white rounded shadow-sm"><ImageIcon size={16} /></button>
-                 <button className="p-1.5 hover:bg-gray-200 border bg-white rounded shadow-sm"><Video size={16} /></button>
-                 <button className="p-1.5 hover:bg-gray-200 border bg-white rounded shadow-sm"><Mic size={16} /></button>
-               </div>
+            </div>
+            <div className="flex flex-col gap-2 p-3 bg-white border-t text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700">Attach Media (Question Level):</span>
+                <input 
+                  type="file" 
+                  accept="image/*,video/*,audio/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="outline-none"
+                />
+              </div>
+              
+              {/* Media Previews */}
+              {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
+                <div className="flex flex-wrap gap-4 mt-2">
+                  {retainedMedia.map((media, idx) => (
+                    <div key={`retained-${idx}`} className="relative border rounded p-1">
+                      <button onClick={() => setFileToDelete({ type: 'retained', index: idx })} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12}/></button>
+                      {media.type.startsWith('image/') ? <img src={`http://localhost:8080${media.url}`} className="h-16 object-contain" /> : <div className="p-2 bg-gray-100 rounded text-xs">Media File</div>}
+                    </div>
+                  ))}
+                  {mediaFiles.map((file, idx) => (
+                    <div key={`new-${idx}`} className="relative border border-blue-200 bg-blue-50 rounded p-1">
+                      <button onClick={() => setFileToDelete({ type: 'new', index: idx })} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12}/></button>
+                      {file.type.startsWith('image/') ? <img src={URL.createObjectURL(file)} className="h-16 object-contain" /> : <div className="p-2 bg-blue-100 rounded text-xs">{file.name}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Pairs List List */}
-        <div className="space-y-3 pt-2">
-          
-          <div className="flex items-center gap-4 mb-2 pl-8">
-            <div className="flex-1 font-semibold text-sm text-gray-800">
-               Column A: UI Element <span className="text-red-500">*</span> <span className="text-gray-500 font-normal">(Text or Image)</span>
-            </div>
-            <div className="flex-1 font-semibold text-sm text-gray-800">
-               Column B: Core Function <span className="text-gray-500 font-normal">(Text or Image)</span>
-            </div>
+        {/* Pairs List */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 mb-2 pl-8 text-xs font-bold text-gray-400 uppercase tracking-wider">
+            <div className="flex-1">Column A (Item)</div>
+            <div className="flex-1">Column B (Match)</div>
             {!isTeacher && <div className="w-8"></div>}
           </div>
               
-          {pairs.map((pair) => (
-            <div key={pair.id} className="flex items-center gap-3 group">
-              <div className="flex items-center gap-2 cursor-grab text-gray-400 hover:text-gray-600">
+          {pairs.map((pair, index) => (
+            <div key={index} className="flex items-center gap-3 group">
+              <div className="cursor-grab text-gray-300 group-hover:text-gray-500">
                 <GripVertical size={16} />
               </div>
-              
-              <div className="flex items-center justify-center w-8 h-8 rounded shrink-0 bg-pink-100 border border-pink-400 text-pink-700 font-bold">
-                 {/* No index since removed */}
+              <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                 {index + 1}
               </div>
               
-              <div className="flex-1 flex items-center border rounded-md px-3 py-2 bg-gray-50 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
-                 <input 
-                   type="text"
-                   className="flex-1 outline-none text-gray-700 bg-transparent"
-                   value={pair.leftText}
-                   onChange={(e) => handleOptionChange(pair.id, 'left', e.target.value)}
-                   placeholder="Type left item..."
-                 />
-                 <button className="text-gray-400 hover:text-gray-600 ml-2">
-                    <ImageIcon size={16} />
-                 </button>
+              {/* Left Item */}
+              <div className="flex-1 border rounded-lg p-2 bg-gray-50 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+                <div className="flex items-center gap-2">
+                  <input 
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium outline-none"
+                    value={pair.left}
+                    onChange={(e) => handleUpdatePair(index, 'left', e.target.value)}
+                    placeholder="Text..."
+                  />
+                  <div className="shrink-0 flex items-center">
+                    {itemImages[`left-${index}`] ? (
+                      <div className="relative border rounded p-0.5 bg-white shadow-sm border-blue-200">
+                        <button onClick={() => handleRemoveItemImage(index, 'left')} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 z-10"><X size={8}/></button>
+                        {typeof itemImages[`left-${index}`] === 'string' ? (
+                          <img src={`http://localhost:8080${itemImages[`left-${index}`]}`} className="h-8 w-8 object-cover rounded" />
+                        ) : (
+                          <img src={URL.createObjectURL(itemImages[`left-${index}`] as File)} className="h-8 w-8 object-cover rounded" />
+                        )}
+                      </div>
+                    ) : (
+                      <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
+                        <ImageIcon size={18} />
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'left', e.target.files[0])} />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="text-gray-400 font-bold px-1">—</div>
+              <div className="text-gray-300">→</div>
 
-              <div className="flex-1 flex items-center border rounded-md px-3 py-2 bg-gray-50 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
-                 <input 
-                   type="text"
-                   className="flex-1 outline-none text-gray-700 bg-transparent"
-                   value={pair.rightText}
-                   onChange={(e) => handleOptionChange(pair.id, 'right', e.target.value)}
-                   placeholder="Type right matching item..."
-                 />
-                 <button className="text-gray-400 hover:text-gray-600 ml-2">
-                    <ImageIcon size={16} />
-                 </button>
+              {/* Right Item */}
+              <div className="flex-1 border rounded-lg p-2 bg-blue-50/30 border-blue-100 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+                <div className="flex items-center gap-2">
+                  <input 
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-blue-900 outline-none"
+                    value={pair.right}
+                    onChange={(e) => handleUpdatePair(index, 'right', e.target.value)}
+                    placeholder="Match..."
+                  />
+                  <div className="shrink-0 flex items-center">
+                    {itemImages[`right-${index}`] ? (
+                      <div className="relative border rounded p-0.5 bg-white shadow-sm border-blue-200">
+                        <button onClick={() => handleRemoveItemImage(index, 'right')} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 z-10"><X size={8}/></button>
+                        {typeof itemImages[`right-${index}`] === 'string' ? (
+                          <img src={`http://localhost:8080${itemImages[`right-${index}`]}`} className="h-8 w-8 object-cover rounded" />
+                        ) : (
+                          <img src={URL.createObjectURL(itemImages[`right-${index}`] as File)} className="h-8 w-8 object-cover rounded" />
+                        )}
+                      </div>
+                    ) : (
+                      <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
+                        <ImageIcon size={18} />
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'right', e.target.files[0])} />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {!isTeacher && (
-                <button 
-                  className="p-1.5 text-gray-400 hover:text-red-500 border bg-white rounded shadow-sm opacity-50 hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemovePair(pair.id)}
-                  title="Delete pair"
-                >
-                  <Trash2 size={16} />
-                </button>
+              {!isTeacher && pairs.length > 1 && (
+                <button onClick={() => handleRemovePair(index)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"><Trash2 size={16}/></button>
               )}
             </div>
           ))}
           
-          <div className="pl-[3.5rem] mt-4">
-             <button 
-               onClick={handleAddPair}
-               className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border rounded-md px-3 py-1.5 text-sm font-medium bg-white shadow-sm hover:bg-gray-50 transition-colors"
-             >
-               <ImageIcon size={16} /> <Plus size={16} className="-ml-1" /> Add Pair
-             </button>
-          </div>
+          <button 
+            onClick={handleAddPair}
+            className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 mt-4 pl-8"
+          >
+            <Plus size={16} /> Add Matching Pair
+          </button>
         </div>
 
-        {/* Explanation Input */}
+        {/* Explanation */}
         <div className="space-y-2 pt-4 border-t border-dashed">
           <label className="text-sm font-semibold text-gray-800">Explanation (Optional)</label>
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
-            <textarea
-              className="w-full p-4 border-none focus:ring-0 resize-none min-h-[80px] outline-none"
-              placeholder="Provide an explanation for the matching pairs..."
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-            />
-          </div>
+          <textarea
+            className="w-full p-3 border rounded-md focus:ring-1 focus:ring-blue-500 outline-none min-h-[80px]"
+            value={explanation}
+            onChange={(e) => setExplanation(e.target.value)}
+            placeholder="Why are these matches correct?"
+          />
         </div>
       </div>
 
-      {/* Footer Settings */}
-      <div className="bg-white p-4 border-t flex items-center justify-end">
-        <div>
-           <button 
-             onClick={handleSave}
-             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-           >
-             Save Question
-           </button>
-        </div>
+      <div className="bg-gray-50 p-4 border-t flex justify-end">
+        <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-bold text-sm shadow-sm transition-all">Save Changes</button>
       </div>
+
+      <ConfirmDialog
+        isOpen={fileToDelete !== null}
+        onClose={() => setFileToDelete(null)}
+        onConfirm={handleConfirmDeleteFile}
+        title="Remove File"
+        message="Are you sure you want to remove this file?"
+        confirmText="Remove"
+        variant="danger"
+      />
     </div>
   );
 };

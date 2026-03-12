@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuizBankStore } from '../store';
 import { SkillType } from '../types';
 import { Search } from 'lucide-react';
+import { toast } from '@english-learning/ui';
 
 interface ExamCompositionUIProps {
   onSave: () => void;
@@ -22,7 +23,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave }) 
   const filteredPool = useMemo(() => {
     return questions.filter(q => {
       const matchesSkill = selectedSkillFilter === 'ALL' || q.skill === selectedSkillFilter;
-      const matchesSearch = q.instruction.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = (q.instruction || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
                             q.type.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSkill && matchesSearch;
     });
@@ -38,7 +39,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave }) 
 
   const handleCreate = () => {
     if (!title.trim() || selectedQuestions.length === 0) {
-      alert("Please enter a title and select at least one question.");
+      toast.error("Please enter a title and select at least one question.");
       return;
     }
 

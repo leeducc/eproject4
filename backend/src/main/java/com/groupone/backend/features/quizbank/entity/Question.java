@@ -41,4 +41,9 @@ public class Question {
 
     @Column(columnDefinition = "TEXT")
     private String explanation;
+    @Column(name = "media_url", length = 255)
+    private String mediaUrl;
+
+    @Column(name = "media_type", length = 50)
+    private String mediaType;
 }

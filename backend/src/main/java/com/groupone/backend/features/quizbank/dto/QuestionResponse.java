@@ -7,6 +7,7 @@ import com.groupone.backend.features.quizbank.enums.SkillType;
 import lombok.Builder;
 import lombok.Data;
 import java.util.Map;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,4 +27,8 @@ public class QuestionResponse {
     private String instruction;
     
     private String explanation;
+
+    private List<String> mediaUrls;
+    
+    private List<String> mediaTypes;
 }
