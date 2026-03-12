@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/v1/questions/seed").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         .anyRequest().authenticated());

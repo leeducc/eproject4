@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useQuizBankStore } from '../store';
 import { FillBlankData, DifficultyBand, SkillType, Question } from '../types';
-import { Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Eye } from 'lucide-react';
 import { toast, ConfirmDialog } from '@english-learning/ui';
+import { getMediaUrl } from '../utils';
 
 export interface FillInTheBlankBuilderProps {
   skill?: SkillType;
@@ -11,13 +12,14 @@ export interface FillInTheBlankBuilderProps {
 }
 
 export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
-  const { currentUser, createQuestion, updateQuestion } = useQuizBankStore();
+  const { currentUser, createQuestion, updateQuestion, uploadMedia } = useQuizBankStore();
   const isTeacher = currentUser.role === 'TEACHER';
   const [difficultyBand, setDifficultyBand] = useState<DifficultyBand>(initialQuestion?.difficultyBand || 'BAND_5_6');
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || 'Fill in the blanks with the correct words.');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
   const [isPremium, setIsPremium] = useState<boolean>(initialQuestion?.isPremiumContent || false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const initialMediaItems = (initialQuestion?.mediaUrls || []).map((url, i) => ({
     url,
@@ -226,7 +228,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
     setAnswerPool(answerPool.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!instruction.trim()) {
       toast.error("Please provide an instruction.");
       return;
@@ -266,23 +268,23 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
 
     if (initialQuestion) {
       console.log('[FillInTheBlankBuilder] Updating question', { data });
-      updateQuestion(initialQuestion.id, payload, mediaFiles);
+      await updateQuestion(initialQuestion.id, payload);
     } else {
       console.log('[FillInTheBlankBuilder] Saving question', { data });
-      createQuestion(payload, mediaFiles);
+      await createQuestion(payload);
     }
     if (onSave) onSave();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const newFiles = Array.from(e.target.files);
+    
+    // Constraints check
     const countImages = retainedMedia.filter(m => m.type.startsWith('image/')).length +
-      mediaFiles.filter(f => f.type.startsWith('image/')).length +
       newFiles.filter(f => f.type.startsWith('image/')).length;
 
     const countAV = retainedMedia.filter(m => !m.type.startsWith('image/')).length +
-      mediaFiles.filter(f => !f.type.startsWith('image/')).length +
       newFiles.filter(f => !f.type.startsWith('image/')).length;
 
     if (countImages > 0 && countAV > 0) {
@@ -300,7 +302,16 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       e.target.value = '';
       return;
     }
-    setMediaFiles(prev => [...prev, ...newFiles]);
+
+    try {
+      for (const file of newFiles) {
+        const url = await uploadMedia(file, 'questions');
+        setRetainedMedia(prev => [...prev, { url, type: file.type }]);
+      }
+      toast.success("Files uploaded successfully");
+    } catch (err) {
+      toast.error("Failed to upload some files");
+    }
     e.target.value = '';
   };
 
@@ -392,13 +403,19 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
                           <X size={14} />
                         </button>
                         {media.type?.startsWith('image/') ? (
-                          <img src={`http://localhost${media.url}`} alt="Preview" className="max-h-32 object-contain" />
+                          <button 
+                            type="button"
+                            onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
+                            className="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                          >
+                            <Eye size={12} /> View file
+                          </button>
                         ) : media.type?.startsWith('video/') ? (
-                          <video src={`http://localhost${media.url}`} controls className="max-h-32 w-64 max-w-full" />
+                          <video src={getMediaUrl(media.url)} controls className="max-h-32 w-64 max-w-full" />
                         ) : media.type?.startsWith('audio/') ? (
-                          <audio src={`http://localhost${media.url}`} controls className="w-64 max-w-full" />
+                          <audio src={getMediaUrl(media.url)} controls className="w-64 max-w-full" />
                         ) : (
-                          <a href={`http://localhost${media.url}`} target="_blank" rel="noreferrer" className="text-blue-500 underline">View File</a>
+                          <a href={getMediaUrl(media.url)} target="_blank" rel="noreferrer" className="text-blue-500 underline text-xs">View File</a>
                         )}
                       </div>
                     ))}
@@ -621,6 +638,28 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
         confirmText="Remove"
         variant="danger"
       />
+
+      {/* Full Size Image Preview Modal */}
+      {previewImageUrl && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setPreviewImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={previewImageUrl} 
+              alt="Full Size Preview" 
+              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

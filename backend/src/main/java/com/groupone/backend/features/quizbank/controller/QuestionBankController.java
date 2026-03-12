@@ -1,8 +1,12 @@
 package com.groupone.backend.features.quizbank.controller;
 
+import com.groupone.backend.features.quizbank.dto.PaginatedResponse;
 import com.groupone.backend.features.quizbank.dto.QuestionRequest;
 import com.groupone.backend.features.quizbank.dto.QuestionResponse;
+import com.groupone.backend.features.quizbank.enums.DifficultyBand;
+import com.groupone.backend.features.quizbank.enums.QuestionType;
 import com.groupone.backend.features.quizbank.enums.SkillType;
+import com.groupone.backend.features.quizbank.service.DataSeederService;
 import com.groupone.backend.features.quizbank.service.QuestionBankService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +23,30 @@ public class QuestionBankController {
     @Autowired
     private QuestionBankService questionBankService;
 
+    @Autowired
+    private DataSeederService dataSeederService;
+
+    @GetMapping("/seed")
+    public ResponseEntity<String> seedQuestions(@RequestParam(defaultValue = "100") int count) {
+        dataSeederService.seedQuestions(count);
+        return ResponseEntity.ok("Successfully seeded " + count + " questions.");
+    }
+
     @GetMapping
     public ResponseEntity<List<QuestionResponse>> getAllQuestions(
             @RequestParam(required = false) SkillType skill) {
         return ResponseEntity.ok(questionBankService.getAllQuestions(skill));
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<PaginatedResponse<QuestionResponse>> getQuestionsPaginated(
+            @RequestParam(required = false) SkillType skill,
+            @RequestParam(required = false) QuestionType type,
+            @RequestParam(required = false) DifficultyBand difficulty,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long lastSeenId,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(questionBankService.getQuestionsPaginated(skill, type, difficulty, search, lastSeenId, limit));
     }
 
     @GetMapping("/{id}")

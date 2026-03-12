@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
-import { DashboardLayout, NavItem, ConfirmDialog, toast } from '@english-learning/ui';
-import { Home, Database, Users, Settings, Briefcase, Plus, Trash2, Edit2, BookOpen } from 'lucide-react';
+import { ConfirmDialog, toast } from '@english-learning/ui';
+import { Plus, Trash2, Edit2, BookOpen } from 'lucide-react';
 import { ExamCompositionUI } from '../../features/quiz-bank/components/ExamCompositionUI';
+import { AdminLayout } from '../../components/AdminLayout';
 
-export const ExamList: React.FC = () => {
+export const ExamList: React.FC<{
+  Layout?: React.ComponentType<{ children: React.ReactNode }>
+}> = ({ Layout = AdminLayout }) => {
   const location = useLocation();
   const { exams, currentUser, deleteExam, fetchExams } = useQuizBankStore();
   const [isCreating, setIsCreating] = useState(false);
@@ -32,44 +35,8 @@ export const ExamList: React.FC = () => {
     fetchExams();
   }, [fetchExams, location.key]);
 
-  // Define sidebar locally just to render DashboardLayout generically per standard practices
-  const sidebarItems: NavItem[] = [
-      { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-      {
-          title: "Questions Bank",
-          icon: <Database size={20} />,
-          children: [
-              { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-              { title: "Listening", href: "/admin/questions/listening" },
-              { title: "Reading", href: "/admin/questions/reading" },
-              { title: "Writing", href: "/admin/questions/writing" },
-              { title: "Exam", href: "/admin/questions/exam" },
-          ],
-      },
-      {
-          title: "Teacher Management",
-          icon: <Briefcase size={20} />,
-          children: [
-              { title: "Teacher List", href: "/admin/teachers/list" },
-              { title: "Performance & Logs", href: "/admin/teachers/logs" },
-          ],
-      },
-      {
-          title: "Customer Management",
-          icon: <Users size={20} />,
-          children: [
-              { title: "Customer List", href: "/admin/customers/list" },
-              { title: "Messages", href: "/admin/customers/messages" },
-              { title: "Reports", href: "/admin/customers/reports" },
-              { title: "Requests", href: "/admin/customers/requests" },
-              { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-          ],
-      },
-      { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-  ];
-
   return (
-    <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+    <Layout>
       <div className="flex flex-col gap-6 max-w-7xl mx-auto py-6">
         
         <div className="flex items-center justify-between">
@@ -186,6 +153,6 @@ export const ExamList: React.FC = () => {
         confirmText="Delete"
         variant="danger"
       />
-    </DashboardLayout>
+    </Layout>
   );
 };

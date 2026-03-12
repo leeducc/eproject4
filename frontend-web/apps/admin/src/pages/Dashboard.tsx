@@ -1,45 +1,10 @@
-import { DashboardLayout, StatCard, NavItem } from "@english-learning/ui";
-import { Home, Database, Users, Settings, BookOpen, Edit3, CheckSquare, Briefcase } from "lucide-react";
+import { StatCard } from "@english-learning/ui";
+import { Users, BookOpen, Edit3, CheckSquare, Settings } from "lucide-react";
+import { AdminLayout } from "../components/AdminLayout";
 
 export default function AdminDashboard() {
-    const sidebarItems: NavItem[] = [
-        { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-        {
-            title: "Questions Bank",
-            icon: <Database size={20} />,
-            isNew: true,
-            children: [
-                { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-                { title: "Listening", href: "/admin/questions/listening" },
-                { title: "Reading", href: "/admin/questions/reading" },
-                { title: "Writing", href: "/admin/questions/writing" },
-                { title: "Exam", href: "/admin/questions/exam" },
-            ],
-        },
-        {
-            title: "Teacher Management",
-            icon: <Briefcase size={20} />,
-            children: [
-                { title: "Teacher List", href: "/admin/teachers/list" },
-                { title: "Performance & Logs", href: "/admin/teachers/logs" },
-            ],
-        },
-        {
-            title: "Customer Management",
-            icon: <Users size={20} />,
-            children: [
-                { title: "Customer List", href: "/admin/customers/list" },
-                { title: "Messages", href: "/admin/customers/messages" },
-                { title: "Reports", href: "/admin/customers/reports" },
-                { title: "Requests", href: "/admin/customers/requests" },
-                { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-            ],
-        },
-        { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-    ];
-
     return (
-        <DashboardLayout sidebarItems={sidebarItems} userName="Admin User" userRole="System Admin">
+        <AdminLayout>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard
                     title="Total Students"
@@ -136,6 +101,6 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </AdminLayout>
     );
 }

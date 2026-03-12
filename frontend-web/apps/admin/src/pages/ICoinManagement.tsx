@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { DashboardLayout } from "@english-learning/ui";
-import { Database, Home, Briefcase, Users, Settings, RefreshCw, AlertCircle } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
+import { AdminLayout } from "../components/AdminLayout";
 
-const API_BASE = "http://localhost:8080/api";
-
+const API_BASE = "http://localhost/api";
+// ... existing Transaction interface and TYPE_STYLES ...
 interface Transaction {
     id: number;
     userId: number;
@@ -15,42 +15,6 @@ interface Transaction {
     balanceAfter: number | null;
     createdAt: string;
 }
-
-const SIDEBAR_ITEMS = [
-    { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-    {
-        title: "Questions Bank",
-        icon: <Database size={20} />,
-        isNew: true,
-        children: [
-            { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-            { title: "Listening", href: "/admin/questions/listening" },
-            { title: "Reading", href: "/admin/questions/reading" },
-            { title: "Writing", href: "/admin/questions/writing" },
-            { title: "Exam", href: "/admin/questions/exam" },
-        ],
-    },
-    {
-        title: "Teacher Management",
-        icon: <Briefcase size={20} />,
-        children: [
-            { title: "Teacher List", href: "/admin/teachers/list" },
-            { title: "Performance & Logs", href: "/admin/teachers/logs" },
-        ],
-    },
-    {
-        title: "Customer Management",
-        icon: <Users size={20} />,
-        children: [
-            { title: "Customer List", href: "/admin/customers/list" },
-            { title: "Messages", href: "/admin/customers/messages" },
-            { title: "Reports", href: "/admin/customers/reports" },
-            { title: "Requests", href: "/admin/customers/requests" },
-            { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-        ],
-    },
-    { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-];
 
 const TYPE_STYLES: Record<string, string> = {
     ADD: "bg-green-100 text-green-700",
@@ -145,7 +109,7 @@ export default function ICoinManagement() {
         new Date(iso).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" });
 
     return (
-        <DashboardLayout sidebarItems={SIDEBAR_ITEMS} userName="Admin User" userRole="System Admin">
+        <AdminLayout>
             <div className="space-y-6">
                 {/* ── Adjust Balance Form ─────────────────────────────────────── */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
@@ -247,6 +211,6 @@ export default function ICoinManagement() {
                     )}
                 </div>
             </div>
-        </DashboardLayout>
+        </AdminLayout>
     );
 }

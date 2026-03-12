@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { PrivateRoute } from "@english-learning/ui";
+import { PrivateRoute, Toaster } from "@english-learning/ui";
 import TeacherLogin from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -10,10 +10,12 @@ import TeacherDashboard from "./pages/Dashboard";
 import { QuizBankTestPage } from "../../admin/src/pages/QuizBankTestPage";
 import { CategoryPage } from "../../admin/src/pages/questions/CategoryPage";
 import { ExamList } from "../../admin/src/pages/questions/ExamList";
+import { TeacherLayout } from "./components/TeacherLayout";
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
+            <Toaster position="top-right" richColors closeButton />
             <BrowserRouter>
                 <div className="min-h-screen bg-gray-50">
                     <Routes>
@@ -24,11 +26,11 @@ function App() {
                             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
                             
                             {/* Question Bank Routes */}
-                            <Route path="/teacher/questions/vocabulary" element={<CategoryPage skill="VOCABULARY" title="Vocabulary" />} />
-                            <Route path="/teacher/questions/listening" element={<CategoryPage skill="LISTENING" title="Listening" />} />
-                            <Route path="/teacher/questions/reading" element={<CategoryPage skill="READING" title="Reading" />} />
-                            <Route path="/teacher/questions/writing" element={<CategoryPage skill="WRITING" title="Writing" />} />
-                            <Route path="/teacher/questions/exam" element={<ExamList />} />
+                            <Route path="/teacher/questions/vocabulary" element={<CategoryPage skill="VOCABULARY" title="Vocabulary" Layout={TeacherLayout} />} />
+                            <Route path="/teacher/questions/listening" element={<CategoryPage skill="LISTENING" title="Listening" Layout={TeacherLayout} />} />
+                            <Route path="/teacher/questions/reading" element={<CategoryPage skill="READING" title="Reading" Layout={TeacherLayout} />} />
+                            <Route path="/teacher/questions/writing" element={<CategoryPage skill="WRITING" title="Writing" Layout={TeacherLayout} />} />
+                            <Route path="/teacher/questions/exam" element={<ExamList Layout={TeacherLayout} />} />
                         </Route>
 
                         {/* Public Test Route */}

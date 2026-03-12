@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useQuizBankStore } from '../store';
 import { MatchingData, DifficultyBand, SkillType, Question } from '../types';
 import { 
-  Plus, Trash2, X, Image as ImageIcon, GripVertical
+  Plus, Trash2, X, Image as ImageIcon, GripVertical, Eye
 } from 'lucide-react';
 import { toast, ConfirmDialog } from '@english-learning/ui';
+import { getMediaUrl } from '../utils';
 
 export interface MatchingBuilderProps {
   skill?: SkillType;
@@ -13,40 +14,41 @@ export interface MatchingBuilderProps {
 }
 
 export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
-  const { currentUser, createQuestion, updateQuestion } = useQuizBankStore();
+  const { currentUser, createQuestion, updateQuestion, uploadMedia } = useQuizBankStore();
   
   // Local state for the form
   const [difficultyBand, setDifficultyBand] = useState<DifficultyBand>(initialQuestion?.difficultyBand || 'BAND_5_6');
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || 'Match the following items.');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
   const [isPremium, setIsPremium] = useState<boolean>(initialQuestion?.isPremiumContent || false);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
+  const existingData = initialQuestion?.data as MatchingData | undefined;
+
+  // Local state for item-specific images
+  const initialItemImagesObj: Record<string, File | string> = {};
+  if (existingData) {
+    existingData.left_items.forEach((item, idx) => { if (item.image) initialItemImagesObj[`left-${idx}`] = item.image; });
+    existingData.right_items.forEach((item, idx) => { if (item.image) initialItemImagesObj[`right-${idx}`] = item.image; });
+  }
+
+  const [itemImages, setItemImages] = useState<Record<string, File | string>>(initialItemImagesObj);
+
   const initialMediaItems = (initialQuestion?.mediaUrls || []).map((url, i) => ({
     url,
     type: initialQuestion?.mediaTypes?.[i] || ''
-  }));
+  })).filter(item => !Object.values(initialItemImagesObj).some(img => typeof img === 'string' && img === item.url));
+
   const [retainedMedia, setRetainedMedia] = useState<{url: string; type: string}[]>(initialMediaItems);
   
-  const [fileToDelete, setFileToDelete] = useState<{ type: 'new' | 'retained' | 'item', side?: 'left' | 'right', index: number } | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<{ type: 'retained' | 'item', side?: 'left' | 'right', index: number } | null>(null);
   
-  const existingData = initialQuestion?.data as MatchingData | undefined;
   const [pairs, setPairs] = useState<{left: string, right: string}[]>(() => {
     if (!existingData) return [{ left: '', right: '' }];
     return existingData.left_items.map((left) => ({
       left: left.text,
       right: existingData.right_items.find(r => r.id === existingData.solution[left.id])?.text || ''
     }));
-  });
-
-  // Local state for item-specific images
-  const [itemImages, setItemImages] = useState<Record<string, File | string>>(() => {
-    const images: Record<string, File | string> = {};
-    if (existingData) {
-      existingData.left_items.forEach((item, idx) => { if (item.image) images[`left-${idx}`] = item.image; });
-      existingData.right_items.forEach((item, idx) => { if (item.image) images[`right-${idx}`] = item.image; });
-    }
-    return images;
   });
   
   const isTeacher = currentUser.role === 'TEACHER';
@@ -85,8 +87,13 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
     setPairs(newPairs);
   };
 
-  const handleItemImageChange = (index: number, side: 'left' | 'right', file: File) => {
-    setItemImages(prev => ({ ...prev, [`${side}-${index}`]: file }));
+  const handleItemImageChange = async (index: number, side: 'left' | 'right', file: File) => {
+    try {
+      const url = await uploadMedia(file, 'answers');
+      setItemImages(prev => ({ ...prev, [`${side}-${index}`]: url }));
+    } catch (err) {
+      toast.error("Failed to upload image");
+    }
   };
 
   const handleRemoveItemImage = (index: number, side: 'left' | 'right') => {
@@ -97,7 +104,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!instruction.trim()) {
       toast.error("Please provide an instruction.");
       return;
@@ -116,19 +123,20 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
     }
 
     const left_items = pairs.map((p, i) => {
-      const img = itemImages[`left-${i}`];
+      const imageUrl = typeof itemImages[`left-${i}`] === 'string' ? itemImages[`left-${i}`] as string : undefined;
       return {
-          id: `L${i}`,
-          text: p.left,
-          image: img instanceof File ? `@media:${img.name}` : (typeof img === 'string' ? img : undefined)
+        id: `L${i}`,
+        text: p.left,
+        image: imageUrl
       };
     });
+    
     const right_items = pairs.map((p, i) => {
-      const img = itemImages[`right-${i}`];
+      const imageUrl = typeof itemImages[`right-${i}`] === 'string' ? itemImages[`right-${i}`] as string : undefined;
       return {
-          id: `R${i}`,
-          text: p.right,
-          image: img instanceof File ? `@media:${img.name}` : (typeof img === 'string' ? img : undefined)
+        id: `R${i}`,
+        text: p.right,
+        image: imageUrl
       };
     });
 
@@ -137,17 +145,16 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       solution[item.id] = right_items[i].id;
     });
 
-    const allFiles = [...mediaFiles];
-    Object.values(itemImages).forEach(val => {
-      if (val instanceof File) allFiles.push(val);
-    });
-
     const data: MatchingData = {
       left_items,
       right_items,
       solution
     };
     
+    const itemMediaUrls = [...left_items, ...right_items]
+      .map(item => item.image)
+      .filter((url): url is string => !!url);
+
     const payload = {
       skill,
       type: 'MATCHING' as const,
@@ -156,30 +163,37 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       explanation,
       data,
       isPremiumContent: isPremium,
-      retainedMediaUrls: retainedMedia.map(m => m.url)
+      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...itemMediaUrls]
     };
     
     if (initialQuestion) {
-      updateQuestion(initialQuestion.id, payload, allFiles);
+      await updateQuestion(initialQuestion.id, payload);
     } else {
-      createQuestion(payload, allFiles);
+      await createQuestion(payload);
     }
     if (onSave) onSave();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const newFiles = Array.from(e.target.files);
-    setMediaFiles(prev => [...prev, ...newFiles]);
+    
+    try {
+      for (const file of newFiles) {
+        const url = await uploadMedia(file, 'questions');
+        setRetainedMedia(prev => [...prev, { url, type: file.type }]);
+      }
+      toast.success("Files uploaded successfully");
+    } catch (err) {
+      toast.error("Failed to upload files");
+    }
     e.target.value = ''; 
   };
 
   const handleConfirmDeleteFile = () => {
     if (!fileToDelete) return;
     
-    if (fileToDelete.type === 'new') {
-      setMediaFiles(prev => prev.filter((_, i) => i !== fileToDelete.index));
-    } else if (fileToDelete.type === 'retained') {
+    if (fileToDelete.type === 'retained') {
       setRetainedMedia(prev => prev.filter((_, i) => i !== fileToDelete.index));
     } else if (fileToDelete.type === 'item' && fileToDelete.side) {
       handleRemoveItemImage(fileToDelete.index, fileToDelete.side);
@@ -244,20 +258,32 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
               </div>
               
               {/* Media Previews */}
-              {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
+              {retainedMedia.length > 0 && (
                 <div className="flex flex-wrap gap-4 mt-2">
-                  {retainedMedia.map((media, idx) => (
-                    <div key={`retained-${idx}`} className="relative border rounded p-1">
-                      <button onClick={() => setFileToDelete({ type: 'retained', index: idx })} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12}/></button>
-                      {media.type.startsWith('image/') ? <img src={`http://localhost:8080${media.url}`} className="h-16 object-contain" /> : <div className="p-2 bg-gray-100 rounded text-xs">Media File</div>}
-                    </div>
-                  ))}
-                  {mediaFiles.map((file, idx) => (
-                    <div key={`new-${idx}`} className="relative border border-blue-200 bg-blue-50 rounded p-1">
-                      <button onClick={() => setFileToDelete({ type: 'new', index: idx })} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12}/></button>
-                      {file.type.startsWith('image/') ? <img src={URL.createObjectURL(file)} className="h-16 object-contain" /> : <div className="p-2 bg-blue-100 rounded text-xs">{file.name}</div>}
-                    </div>
-                  ))}
+                  {retainedMedia
+                    .map((media, idx) => (
+                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                        {media.type?.startsWith('image/') ? (
+                          <button 
+                            type="button"
+                            onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
+                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                          >
+                            <Eye size={12} /> View file
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter italic">
+                             Media File
+                          </span>
+                        )}
+                        <button 
+                          onClick={() => setFileToDelete({ type: 'retained', index: idx })}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
@@ -292,13 +318,28 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                   />
                   <div className="shrink-0 flex items-center">
                     {itemImages[`left-${index}`] ? (
-                      <div className="relative border rounded p-0.5 bg-white shadow-sm border-blue-200">
-                        <button onClick={() => handleRemoveItemImage(index, 'left')} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 z-10"><X size={8}/></button>
-                        {typeof itemImages[`left-${index}`] === 'string' ? (
-                          <img src={`http://localhost:8080${itemImages[`left-${index}`]}`} className="h-8 w-8 object-cover rounded" />
-                        ) : (
-                          <img src={URL.createObjectURL(itemImages[`left-${index}`] as File)} className="h-8 w-8 object-cover rounded" />
-                        )}
+                      <div className="flex items-center gap-1">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const img = itemImages[`left-${index}`];
+                            if (typeof img === 'string') {
+                              setPreviewImageUrl(getMediaUrl(img));
+                            } else {
+                              setPreviewImageUrl(URL.createObjectURL(img));
+                            }
+                          }}
+                          className="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                        >
+                          <Eye size={12} /> View
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setFileToDelete({ type: 'item', side: 'left', index })}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     ) : (
                       <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
@@ -323,13 +364,28 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                   />
                   <div className="shrink-0 flex items-center">
                     {itemImages[`right-${index}`] ? (
-                      <div className="relative border rounded p-0.5 bg-white shadow-sm border-blue-200">
-                        <button onClick={() => handleRemoveItemImage(index, 'right')} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 z-10"><X size={8}/></button>
-                        {typeof itemImages[`right-${index}`] === 'string' ? (
-                          <img src={`http://localhost:8080${itemImages[`right-${index}`]}`} className="h-8 w-8 object-cover rounded" />
-                        ) : (
-                          <img src={URL.createObjectURL(itemImages[`right-${index}`] as File)} className="h-8 w-8 object-cover rounded" />
-                        )}
+                      <div className="flex items-center gap-1">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const img = itemImages[`right-${index}`];
+                            if (typeof img === 'string') {
+                              setPreviewImageUrl(getMediaUrl(img));
+                            } else {
+                              setPreviewImageUrl(URL.createObjectURL(img));
+                            }
+                          }}
+                          className="bg-white text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors shadow-sm"
+                        >
+                          <Eye size={12} /> View
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setFileToDelete({ type: 'item', side: 'right', index })}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     ) : (
                       <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
@@ -380,6 +436,28 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
         confirmText="Remove"
         variant="danger"
       />
+
+      {/* Full Size Image Preview Modal */}
+      {previewImageUrl && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setPreviewImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={previewImageUrl} 
+              alt="Full Size Preview" 
+              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

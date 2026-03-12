@@ -15,12 +15,14 @@ public class MediaController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadMedia(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadMedia(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "context", required = false) String context) {
         try {
             // TODO: In a real app, extract uploaderId from JWT Security Context
             Long uploaderId = 1L;
 
-            MediaFile uploadedFile = mediaService.uploadFile(file, uploaderId);
+            MediaFile uploadedFile = mediaService.uploadFile(file, uploaderId, context);
 
             // Return the Nginx URL so the client can immediately use it
             return ResponseEntity.ok(uploadedFile);
