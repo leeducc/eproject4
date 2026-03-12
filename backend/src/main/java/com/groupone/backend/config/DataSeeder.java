@@ -108,5 +108,7 @@ public class DataSeeder implements CommandLineRunner {
             writingTopicRepository.save(topic2);
             System.out.println("Sample writing topics created.");
         }
+
+
     }
 }

@@ -1,5 +1,5 @@
 import { DashboardLayout, StatCard, NavItem } from "@english-learning/ui";
-import { Home, Database, Users, Settings, BookOpen, Headphones, Edit3, CheckSquare, MessageSquare, Briefcase, FileText, Download } from "lucide-react";
+import { Home, Database, Users, Settings, BookOpen, Edit3, CheckSquare, Briefcase } from "lucide-react";
 
 export default function AdminDashboard() {
     const sidebarItems: NavItem[] = [

@@ -1,75 +1,135 @@
 # IELTS Learning Platform
 
-This project is a comprehensive application for IELTS preparation, serving three types of users:
-1. **Customers**: Use the Flutter mobile app to learn, practice, and take exams.
-2. **Teachers**: Use the React web app to upload learning content and grade student submissions.
-3. **Admins**: Manage the platform, users, and view reports.
+A comprehensive IELTS preparation platform with three primary interfaces:
+- **Mobile & Desktop (Flutter)**: For students (Customers) to study and take exams.
+- **Admin Portal (React)**: For platform management and reporting.
+- **Teacher Portal (React)**: For content creation and grading.
 
-## Backend Architecture Design: IELTS App (Vertical Slice)
+---
 
-This project utilizes a **Vertical Slice Architecture** for the Spring Boot backend. Code is grouped by feature/use-case rather than technical concern (e.g., all controllers in one folder).
-
-### Folder Structure
+## 📂 Project Structure
 
 ```text
-src/main/java/com/yourcompany/ieltsapp/
-├── IeltsAppApplication.java
-├── config/                 # Global configurations (Security, Swagger, WebMvc, Database)
-├── shared/                 # Shared components used across multiple slices
-│   ├── exception/          # Global error handling & custom exceptions
-│   ├── utility/            # Shared helpers (e.g., File upload utils, JWT, Time formatting)
-│   ├── domain/             # Shared base entities (e.g., BaseEntity with createdAt, updatedAt)
-│   └── enums/              # Shared Enums (e.g., BandScore, UserRole, QuestionType)
-│
-└── features/               # 🌟 THE VERTICAL SLICES 🌟
-    │
-    ├── identity/           # Authentication & User Management
-    │   ├── login/
-    │   ├── register/
-    │   └── usermanagement/ # Admin managing customers and teachers
-    │
-    ├── listening/          # Listening Section (Level-Based Questions)
-    │   ├── manage_content/ # Teacher/Admin: Upload audio, define questions by Level (0-4, 5-6, etc.)
-    │   ├── take_practice/  # Customer: Fetch questions matching their level, submit answers
-    │   └── auto_grade/     # System: Automatically score objective listening tests
-    │
-    ├── reading/            # Reading Section (Level-Based Questions)
-    │   ├── manage_content/ # Teacher/Admin: Upload passages, define questions by Level
-    │   ├── take_practice/  # Customer: Fetch passages matching their level, submit answers
-    │   └── auto_grade/     # System: Automatically score objective reading tests
-    │
-    ├── speaking/           # Speaking Section (Prompt & Review)
-    │   ├── manage_prompts/ # Teacher: Create speaking topics/prompts
-    │   ├── submit_audio/   # Customer: Receive prompt, record & upload audio answer
-    │   └── grade_speaking/ # Teacher/AI: Listen to audio, submit band score and feedback
-    │
-    ├── writing/            # Writing Section (Prompt & Review)
-    │   ├── manage_prompts/ # Teacher: Create writing topics/prompts (Task 1 & Task 2)
-    │   ├── submit_essay/   # Customer: Receive prompt, type & submit essay
-    │   └── grade_writing/  # Teacher/AI: Review essay, submit band score and detailed feedback
-    │
-    ├── vocabulary/         # Vocabulary Learning (Level-Gated, Uniform Content)
-    │   ├── manage_vocab/   # Teacher/Admin: Upload word lists, definitions, examples, assign to levels
-    │   └── learn_session/  # Customer: Learn vocab available at their current level (spaced repetition)
-    │
-    ├── full_exams/         # Real & Simulated Exams (Timed, 4-Skills)
-    │   ├── manage_exams/   # Admin/Teacher: Assemble full exam configurations (Reading + Listening + Writing + Speaking)
-    │   ├── take_exam/      # Customer: Start timed exam session, submit across 4 skills
-    │   └── view_results/   # Customer/Teacher: View aggregated band scores across the 4 skills
-    │
-    ├── wrong_answers/      # Mistake Tracking & Review
-    │   ├── log_mistake/    # Internal Event: Triggered when auto_grade or teacher marks an answer wrong
-    │   └── review_bank/    # Customer: Fetch personalized list of past wrong answers to restudy
-    │
-    └── statistics/         # Admin Reports & Analytics
-        ├── user_progress/  # Admin/Teacher: View customer improvement over time
-        └── site_usage/     # Admin: View overall platform metrics
+eproject4/
+├── backend/                # Spring Boot Backend (Vertical Slice Architecture)
+├── frontend-web/           # Turborepo containing React Applications
+│   ├── apps/
+│   │   ├── admin/          # Admin Dashboard
+│   │   └── teacher/        # Teacher Management Interface
+│   └── packages/           # Shared UI components and logic
+├── mobile-desktop/         # Flutter Mobile and Desktop Application
+├── database/               # Database SQL dumps and export scripts
+├── nginx/                  # Nginx configuration for deployment
+└── run_all.bat             # Batch script to start core services
 ```
 
-### Key Design Highlights
+---
 
-1.  **Role-Based Access Control (RBAC):** Slices naturally align with user roles, making security implementation straightforward (e.g., Teacher slices vs. Customer slices).
-2.  **Unified Management within Slices:** For Reading and Listening, the `manage_content` slice handles attaching a "Target Band Level" (0-4, 5-6, 7-8, 9) to specific questions or passages.
-3.  **Shared Workflow for Speaking & Writing:** Speaking and Writing share the same meta-workflow (`manage_prompts` -> `submit_task` -> `grade_task`), ensuring a consistent workflow for both text (essays) and audio (speaking) submissions.
-4.  **Vocabulary Simplification:** The `manage_vocab` slice tags vocab lists by level, but the `learn_session` slice provides the identical set of questions for that vocab list to all users who have unlocked that level.
-5.  **Full Exams Orchestration:** The `full_exams` feature is distinct from individual practice sections and acts as an orchestrator managing global timers and sequentially routing the user through the 4 skills.
+## 🛠️ Prerequisites
+
+Ensure you have the following installed:
+- **Java 17+** (for Backend)
+- **MySQL 8.0+**
+- **Node.js 20+** & **npm** (for Web Frontend)
+- **Flutter SDK** (for Mobile/Desktop)
+- **Ollama** (for AI features, optional but recommended)
+
+---
+
+## ⚙️ Environment Configuration
+
+You will need to set up the following configuration files before running the project.
+
+### 1. Backend (`backend/src/main/resources/application.properties`)
+Configure your database and external services:
+- `spring.datasource.url`: JDBC URL for your MySQL instance.
+- `spring.datasource.username` & `password`: Your MySQL credentials.
+- `spring.mail.*`: SMTP settings for email notifications.
+- `recaptcha.secret.key`: Google reCAPTCHA v2 secret key.
+- `jwt.secret`: Secret key for JWT token generation.
+- `google.client.id`: Google OAuth2 Client ID for authentication.
+
+### 2. Flutter App (`mobile-desktop/.env`)
+Create a `.env` file in the `mobile-desktop` directory with the following keys:
+```env
+API_BASE_URL=http://localhost:8080/api
+GOOGLE_SERVER_CLIENT_ID=your_google_server_client_id
+GOOGLE_CLIENT_ID=your_google_client_id
+```
+*(Note: Use `10.0.2.2` instead of `localhost` if running on an Android Emulator)*
+
+---
+
+## 🚀 How to Run
+
+### Quick Start (Windows)
+You can start the Backend, Web Frontends, and Ollama AI model using the provided batch script:
+```bash
+./run_all.bat
+```
+
+### Manual Start
+
+#### 1. Database Setup
+1. Create a database named `eproject4` in MySQL.
+2. Import the SQL dump located at `database/eproject4_dump.sql`.
+
+#### 2. Start Backend
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+#### 3. Start Web Portals (Admin & Teacher)
+```bash
+cd frontend-web
+npm install
+npm run dev
+```
+The apps will typically be available at `http://localhost:3000` (Admin) and `http://localhost:3001` (Teacher), depending on port availability.
+
+#### 4. Start Mobile/Desktop App
+```bash
+cd mobile-desktop
+flutter pub get
+flutter run
+```
+
+#### 5. Start AI Service (Ollama)
+The platform uses fine-tuned models for grading and feedback.
+```bash
+ollama run gemma3:4b
+```
+
+---
+
+## 🏗️ Backend Architecture
+The backend follows a **Vertical Slice Architecture**. Code is organized by feature rather than layer, making it easier to maintain and scale individual functionalities (e.g., Reading, Writing, Listening slices).
+
+- **`features/`**: Contains the core logic for each functional slice (Controller, Service, Entity, Repository).
+- **`shared/`**: Contains common utilities, exceptions, and global configurations.
+- **`config/`**: Global system settings (Security, Database, etc.).
+
+---
+
+## 🎨 Frontend (Web) Architecture
+The web frontend is managed as a **Turborepo Monorepo**, ensuring consistency and shared logic across different portals.
+
+- **`apps/`**: Contains standalone React applications.
+    - `admin/`: Portal for platform administrators.
+    - `teacher/`: Portal for content creators and graders.
+- **`packages/`**: Shared libraries used by the applications.
+    - `api/`: Centralized API service layer.
+    - `ui/`: Design system and common UI components.
+    - `types/`: Shared TypeScript interfaces and enums.
+- **Feature-Based Design**: Each app organizes its logic into `features/` (logic & state) and `pages/` (routing & layout).
+
+---
+
+## 📱 Mobile & Desktop Architecture
+The Flutter application utilizes a **Modular Layered Architecture** to handle high complexity across mobile and desktop platforms.
+
+- **`lib/features/`**: Functional modules (Auth, Home, Study Sections, Profile). Each feature is self-contained.
+- **`lib/data/`**: Data layer managing API services and local storage.
+- **`lib/core/`**: Shared infrastructure including constants, global providers, and reusable widgets.
+- **State Management**: Uses a reactive pattern (Providers) to ensure consistent data flow across the UI.

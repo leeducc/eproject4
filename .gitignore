@@ -121,3 +121,6 @@ coverage/
 **/coverage/
 *.lcov
 .nyc_output/
+
+# Vite cache
+**/.vite/
