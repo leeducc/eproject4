@@ -1748,17 +1748,20 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     return SliverGrid(
       delegate: SliverChildBuilderDelegate((context, i) {
         final topic = topics[i];
-        final topicTitle = topic['title'];
+        final topicTitle = topic['title'] as String;
 
         return InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
             final vocabByTopic = topicVocabularyData[topicTitle] ?? [];
 
+            final levelTitle = hskData[index]['level'] as String;
+
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => TopicVocabularyScreen(
+                  level: levelTitle,
                   topicName: topicTitle,
                   vocabularies: vocabByTopic,
                 ),
@@ -1827,14 +1830,17 @@ class _VocabularyScreenState extends State<VocabularyScreen>
 
           // 👉 chủ đề đầu tiên của level
           final firstTopic = topics.first;
-          final topicTitle = firstTopic['title'];
+          final topicTitle = firstTopic['title'] as String;
 
           final vocabularies = topicVocabularyData[topicTitle] ?? [];
+
+          final levelTitle = currentLevel['level'] as String;
 
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => TopicVocabularyScreen(
+                level: levelTitle,
                 topicName: topicTitle,
                 vocabularies: vocabularies,
               ),
@@ -1937,6 +1943,8 @@ class VocabularySearchDelegate extends SearchDelegate {
                 builder: (_) => VocabularyDetailScreen(
                   vocabularies: vocabList,
                   initialIndex: startIndex,
+                  level: 'Search',
+                  topic: item['__topic'],
                 ),
               ),
             );

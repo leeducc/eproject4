@@ -6,11 +6,15 @@ import 'practice_screen.dart';
 class VocabularyDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> vocabularies;
   final int initialIndex;
+  final String level;
+  final String topic;
 
   const VocabularyDetailScreen({
     Key? key,
     required this.vocabularies,
     required this.initialIndex,
+    required this.level,
+    required this.topic,
   }) : super(key: key);
 
   @override
@@ -318,7 +322,11 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticeScreen(vocabList: widget.vocabularies),
+        builder: (_) => PracticeScreen(
+          vocabList: widget.vocabularies,
+          level: widget.level,
+          topic: widget.topic,
+        ),
       ),
     );
   }
