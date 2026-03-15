@@ -1,69 +1,114 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
 import { SkillType, Question } from '../../features/quiz-bank/types';
-import { DashboardLayout, NavItem, ConfirmDialog, toast } from '@english-learning/ui';
-import { Home, Database, Users, Settings, Briefcase, Plus, Trash2, Edit2, FileText, Eye } from 'lucide-react';
+import { ConfirmDialog, toast } from '@english-learning/ui';
+import { Plus, Trash2, Edit2, FileText, Eye, ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MultipleChoiceBuilder } from '../../features/quiz-bank/components/MultipleChoiceBuilder';
 import { FillInTheBlankBuilder } from '../../features/quiz-bank/components/FillInTheBlankBuilder';
 import { MatchingBuilder } from '../../features/quiz-bank/components/MatchingBuilder';
 import { WritingBuilder } from '../../features/quiz-bank/components/WritingBuilder';
+import { AdminLayout } from '../../components/AdminLayout';
 
-// Reusing same sidebar for consistency across admin pages
-const sidebarItems: NavItem[] = [
-    { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-    {
-        title: "Questions Bank",
-        icon: <Database size={20} />,
-        children: [
-            { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-            { title: "Listening", href: "/admin/questions/listening" },
-            { title: "Reading", href: "/admin/questions/reading" },
-            { title: "Writing", href: "/admin/questions/writing" },
-            { title: "Exam", href: "/admin/questions/exam" },
-        ],
-    },
-    {
-        title: "Teacher Management",
-        icon: <Briefcase size={20} />,
-        children: [
-            { title: "Teacher List", href: "/admin/teachers/list" },
-            { title: "Performance & Logs", href: "/admin/teachers/logs" },
-        ],
-    },
-    {
-        title: "Customer Management",
-        icon: <Users size={20} />,
-        children: [
-            { title: "Customer List", href: "/admin/customers/list" },
-            { title: "Messages", href: "/admin/customers/messages" },
-            { title: "Reports", href: "/admin/customers/reports" },
-            { title: "Requests", href: "/admin/customers/requests" },
-            { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-        ],
-    },
-    { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-];
-
-export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ skill, title }) => {
-  const location = useLocation();
+export const CategoryPage: React.FC<{ 
+  skill: SkillType, 
+  title: string,
+  Layout?: React.ComponentType<{ children: React.ReactNode }>
+}> = ({ skill, title, Layout = AdminLayout }) => {
   const navigate = useNavigate();
-  const { questions, currentUser, deleteQuestion, fetchQuestions } = useQuizBankStore();
+  const { questions, currentUser, deleteQuestion, fetchQuestionsPaginated, isLoading } = useQuizBankStore();
   const [isCreating, setIsCreating] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [questionToDelete, setQuestionToDelete] = useState<number | null>(null);
 
-  useEffect(() => {
-    console.log(`[CategoryPage] Route changed (${location.pathname}), resetting view state.`);
-    setIsCreating(false);
-    setEditingQuestion(null);
-    fetchQuestions(skill);
-  }, [skill, fetchQuestions, location.key]);
-  const [builderType, setBuilderType] = useState<'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'MATCHING' | 'WRITING'>('MULTIPLE_CHOICE');
+  // Filter & Pagination State
+  const [filterType, setFilterType] = useState<string>('');
+  const [filterDifficulty, setFilterDifficulty] = useState<string>('');
+  const [pageSize, setPageSize] = useState<number | 'All'>(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [currentCursor, setCurrentCursor] = useState<number | null>(null);
+  const [cursorStack, setCursorStack] = useState<(number | null)[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<number | null>(null);
 
-  const filteredQuestions = questions.filter(q => q.skill === skill || (skill === 'WRITING' && q.skill === 'WRITING'));
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // React to filter changes
+  useEffect(() => {
+    const triggerFilterUpdate = async () => {
+      setCurrentCursor(null);
+      setCursorStack([]);
+      loadQuestions(null, false);
+    };
+    triggerFilterUpdate();
+  }, [filterType, filterDifficulty, pageSize, skill, debouncedSearch]);
+
+  const loadQuestions = async (cursor: number | null, append: boolean) => {
+    try {
+      const limit = pageSize === 'All' ? 50 : pageSize;
+      const res: any = await fetchQuestionsPaginated({
+        skill,
+        type: filterType || undefined,
+        difficulty: filterDifficulty || undefined,
+        search: debouncedSearch || undefined,
+        limit,
+        lastSeenId: cursor,
+        append
+      });
+      setHasMore(res.hasMore);
+      setNextCursor(res.nextCursor);
+    } catch (err) {
+      toast.error("Failed to load questions");
+    }
+  };
+
+  const handleNext = async () => {
+    if (nextCursor) {
+      setCursorStack([...cursorStack, currentCursor]);
+      setCurrentCursor(nextCursor);
+      await loadQuestions(nextCursor, false);
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (cursorStack.length > 0) {
+      const prevCursor = cursorStack[cursorStack.length - 1];
+      const newStack = cursorStack.slice(0, -1);
+      setCursorStack(newStack);
+      setCurrentCursor(prevCursor);
+      await loadQuestions(prevCursor, false);
+    }
+  };
+
+  // Infinite Scroll Observer
+  const observerTarget = React.useRef(null);
+  useEffect(() => {
+    if (pageSize !== 'All' || !hasMore || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          loadQuestions(nextCursor, true);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [pageSize, hasMore, nextCursor, isLoading]);
   const isTeacher = currentUser.role === 'TEACHER';
+  const [builderType, setBuilderType] = useState<'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'MATCHING' | 'WRITING'>('MULTIPLE_CHOICE');
 
   const handleConfirmDelete = async () => {
     if (questionToDelete) {
@@ -79,7 +124,7 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+    <Layout>
       <div className="flex flex-col gap-6 max-w-6xl mx-auto py-6">
         
         <div className="flex items-center justify-between">
@@ -88,17 +133,101 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                 <p className="text-sm text-gray-500 mt-1">Manage and create {title.toLowerCase()} questions.</p>
             </div>
             {!isCreating && !editingQuestion && (
-                <button 
-                  onClick={() => {
-                      setEditingQuestion(null);
-                      setIsCreating(true);
-                  }}
-                  className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
-                >
-                  <Plus size={16} /> Create Question
-                </button>
+                <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => {
+                          setEditingQuestion(null);
+                          setIsCreating(true);
+                      }}
+                      className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+                    >
+                      <Plus size={16} /> Create Question
+                    </button>
+                </div>
             )}
         </div>
+
+        {!isCreating && !editingQuestion && (
+          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-gray-400" />
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Filters</span>
+            </div>
+            
+            <div className="flex items-center gap-4 flex-1">
+              {/* Search Bar */}
+              <div className="relative flex-1 max-w-sm">
+                <input 
+                  type="text" 
+                  placeholder="Search questions..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                />
+                <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Question Type</label>
+                <select 
+                  value={filterType} 
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                >
+                  <option value="">All Types</option>
+                  <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+                  <option value="FILL_BLANK">Fill Blank</option>
+                  <option value="MATCHING">Matching</option>
+                  <option value="ESSAY">Essay</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Difficulty</label>
+                <select 
+                  value={filterDifficulty} 
+                  onChange={(e) => setFilterDifficulty(e.target.value)}
+                  className="bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                >
+                  <option value="">All Levels</option>
+                  <option value="BAND_0_4">Level 0-4</option>
+                  <option value="BAND_5_6">Level 5-6</option>
+                  <option value="BAND_7_8">Level 7-8</option>
+                  <option value="BAND_9">Level 9</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Page Size</label>
+                <select 
+                  value={pageSize.toString()} 
+                  onChange={(e) => { 
+                    const val = e.target.value === 'All' ? 'All' : parseInt(e.target.value);
+                    setPageSize(val as any); 
+                  }}
+                  className="bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                >
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+                  <option value="50">50 per page</option>
+                  <option value="All">Infinite Scroll</option>
+                </select>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setFilterType('');
+                  setFilterDifficulty('');
+                  setPageSize(10);
+                  setSearchTerm('');
+                }}
+                className="mt-4 text-xs font-medium text-gray-400 hover:text-blue-600 flex items-center gap-1 transition-colors"
+              >
+                <RefreshCcw size={12} /> Reset
+              </button>
+            </div>
+          </div>
+        )}
 
         {isCreating || editingQuestion ? (
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -147,16 +276,16 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {filteredQuestions.length === 0 ? (
+                        {questions.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="p-8 text-center text-gray-500">
                                     <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                                     <p>No {title.toLowerCase()} questions found.</p>
-                                    <p className="text-sm mt-1">Click the "Create Question" button to add one.</p>
+                                    <p className="text-sm mt-1">Try adjusting your filters or click "Create Question".</p>
                                 </td>
                             </tr>
                         ) : (
-                            filteredQuestions.map((q) => (
+                            questions.map((q) => (
                                 <tr key={q.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="p-4 text-sm font-medium text-gray-900 border-b border-gray-100">
                                         <Link to={`/admin/questions/${q.id}`} className="hover:text-blue-600 transition-colors">
@@ -195,7 +324,6 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                                             >
                                                 <Edit2 size={16} />
                                             </button>
-                                            {/* RBAC: Hide Delete if Teacher */}
                                             {!isTeacher && (
                                                 <button 
                                                     onClick={() => setQuestionToDelete(q.id)}
@@ -211,6 +339,45 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
                         )}
                     </tbody>
                 </table>
+                
+                {/* Standard Pagination Controls */}
+                {pageSize !== 'All' && !isCreating && !editingQuestion && (
+                    <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between font-medium text-xs text-gray-500">
+                        <div>
+                            Showing <span className="text-gray-900">{questions.length}</span> results
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={handlePrevious}
+                                disabled={cursorStack.length === 0 || isLoading}
+                                className="px-3 py-1.5 rounded bg-white border shadow-sm flex items-center gap-1 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                <ChevronLeft size={14} /> Previous
+                            </button>
+                            <button 
+                                onClick={handleNext}
+                                disabled={!hasMore || isLoading}
+                                className="px-3 py-1.5 rounded bg-white border shadow-sm flex items-center gap-1 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                Next <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Infinite Scroll Trigger */}
+                {pageSize === 'All' && hasMore && (
+                    <div ref={observerTarget} className="p-8 flex justify-center border-t border-gray-100">
+                        {isLoading ? (
+                            <div className="flex items-center gap-2 text-blue-600 font-bold animate-pulse text-sm">
+                                <RefreshCcw size={16} className="animate-spin" />
+                                Loading more questions...
+                            </div>
+                        ) : (
+                            <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></div>
+                        )}
+                    </div>
+                )}
             </div>
         )}
 
@@ -225,6 +392,6 @@ export const CategoryPage: React.FC<{ skill: SkillType, title: string }> = ({ sk
         confirmText="Delete"
         variant="danger"
       />
-    </DashboardLayout>
+    </Layout>
   );
 };

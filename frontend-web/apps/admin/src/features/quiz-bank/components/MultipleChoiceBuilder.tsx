@@ -6,9 +6,11 @@ import {
   GripVertical, 
   Trash2, 
   Plus,
-  X
+  X,
+  Eye
 } from 'lucide-react';
 import { toast, ConfirmDialog } from '@english-learning/ui';
+import { getMediaUrl } from '../utils';
 
 export interface MultipleChoiceBuilderProps {
   skill?: SkillType;
@@ -17,25 +19,28 @@ export interface MultipleChoiceBuilderProps {
 }
 
 export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
-  const { currentUser, createQuestion, updateQuestion } = useQuizBankStore();
+  const { currentUser, createQuestion, updateQuestion, uploadMedia } = useQuizBankStore();
   
   // Local state for the builder form
   const [difficultyBand, setDifficultyBand] = useState<DifficultyBand>(initialQuestion?.difficultyBand || 'BAND_0_4');
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || '');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
   const [isPremium, setIsPremium] = useState<boolean>(initialQuestion?.isPremiumContent || false);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
   // existing media state
+  const existingData = initialQuestion?.data as MultipleChoiceData | undefined;
+  const optionImageUrls = existingData?.options?.map(opt => opt.image).filter(Boolean) || [];
+  
   const initialMediaItems = (initialQuestion?.mediaUrls || []).map((url, i) => ({
     url,
     type: initialQuestion?.mediaTypes?.[i] || ''
-  }));
+  })).filter(item => !optionImageUrls.includes(item.url));
+
   const [retainedMedia, setRetainedMedia] = useState<{url: string; type: string}[]>(initialMediaItems);
   
-  const [fileToDelete, setFileToDelete] = useState<{ type: 'new' | 'retained', index: number } | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<{ type: 'retained' | 'item', index: number } | null>(null);
   
-  const existingData = initialQuestion?.data as MultipleChoiceData | undefined;
   
   const [options, setOptions] = useState<{ id: string; label: string }[]>(existingData?.options || [
     { id: '1', label: 'Option 1' },
@@ -74,8 +79,13 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
     setOptions(options.map(opt => opt.id === id ? { ...opt, label: newLabel } : opt));
   };
 
-  const handleOptionImageChange = (id: string, file: File) => {
-    setOptionImages(prev => ({ ...prev, [id]: file }));
+  const handleOptionImageChange = async (id: string, file: File) => {
+    try {
+      const url = await uploadMedia(file, 'answers');
+      setOptionImages(prev => ({ ...prev, [id]: url }));
+    } catch (err) {
+      toast.error("Failed to upload image");
+    }
   };
 
   const handleRemoveOptionImage = (id: string) => {
@@ -99,7 +109,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!instruction.trim()) {
       toast.error("Please provide an instruction/question.");
       return;
@@ -117,19 +127,13 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       return;
     }
 
-    // Prepare final options with placeholders for new images
+    // Prepare final options
     const finalOptions = options.map(opt => {
-      const img = optionImages[opt.id];
-      if (img instanceof File) {
-        return { ...opt, image: `@media:${img.name}` };
-      }
-      return { ...opt, image: typeof img === 'string' ? img : undefined };
-    });
-
-    // Collect all new files (question level + option level)
-    const allFiles = [...mediaFiles];
-    Object.values(optionImages).forEach(val => {
-      if (val instanceof File) allFiles.push(val);
+      const imageUrl = typeof optionImages[opt.id] === 'string' ? optionImages[opt.id] as string : undefined;
+      return {
+        ...opt,
+        image: imageUrl
+      };
     });
 
     const data: MultipleChoiceData = {
@@ -138,7 +142,10 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       multiple_select: isMultipleAnswer,
       answer_with_image: isAnswerWithImage
     };
-    const retainedMediaUrls = retainedMedia.map(m => m.url);
+
+    const optionMediaUrls = finalOptions
+      .map(opt => opt.image)
+      .filter((url): url is string => !!url);
 
     const payload = {
       skill,
@@ -148,32 +155,28 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       explanation,
       data,
       isPremiumContent: isPremium,
-      retainedMediaUrls
+      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...optionMediaUrls]
     };
 
     if (initialQuestion) {
       console.log('[MultipleChoiceBuilder] Updating question', { instruction, data });
-      updateQuestion(initialQuestion.id, payload, allFiles);
+      await updateQuestion(initialQuestion.id, payload);
     } else {
       console.log('[MultipleChoiceBuilder] Saving question', { instruction, data });
-      createQuestion(payload, allFiles);
+      await createQuestion(payload);
     }
     if (onSave) onSave();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    
-    // Calculate total proposed items constraint 
-    // Types allowed: audio, video, image
     const newFiles = Array.from(e.target.files);
     
+    // Constraints check
     const countImages = retainedMedia.filter(m => m.type.startsWith('image/')).length + 
-                        mediaFiles.filter(f => f.type.startsWith('image/')).length +
                         newFiles.filter(f => f.type.startsWith('image/')).length;
                         
     const countAV = retainedMedia.filter(m => !m.type.startsWith('image/')).length + 
-                    mediaFiles.filter(f => !f.type.startsWith('image/')).length +
                     newFiles.filter(f => !f.type.startsWith('image/')).length;
 
     if (countImages > 0 && countAV > 0) {
@@ -181,42 +184,45 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       e.target.value = '';
       return;
     }
-
     if (countAV > 1) {
       toast.error("Only 1 audio or video file is allowed.");
       e.target.value = '';
       return;
     }
-
     if (countImages > 3) {
       toast.error("Maximum 3 images allowed.");
       e.target.value = '';
       return;
     }
 
-    setMediaFiles(prev => [...prev, ...newFiles]);
-    e.target.value = ''; // Reset input to allow selecting same file again if deleted
+    try {
+      for (const file of newFiles) {
+        const url = await uploadMedia(file, 'questions');
+        setRetainedMedia(prev => [...prev, { url, type: file.type }]);
+      }
+      toast.success("Files uploaded successfully");
+    } catch (err) {
+      toast.error("Failed to upload some files");
+    }
+    e.target.value = '';
   };
 
   const handleConfirmDeleteFile = () => {
     if (!fileToDelete) return;
     
-    if (fileToDelete.type === 'new') {
-      setMediaFiles(prev => prev.filter((_, i) => i !== fileToDelete.index));
-    } else {
+    if (fileToDelete.type === 'retained') {
       setRetainedMedia(prev => prev.filter((_, i) => i !== fileToDelete.index));
+    } else if (fileToDelete.type === 'item') {
+      handleRemoveOptionImage(options[fileToDelete.index].id);
     }
     setFileToDelete(null);
     toast.success("File removed");
   };
 
-  const removeNewFile = (index: number) => {
-    setFileToDelete({ type: 'new', index });
-  };
-
   const removeRetainedMedia = (index: number) => {
     setFileToDelete({ type: 'retained', index });
   };
+
 
   return (
     <div className="bg-white border rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans">
@@ -257,7 +263,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
             />
             <div className="flex flex-col gap-2 p-3 px-4 border-t bg-gray-50 text-gray-500">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-700">Attach Media (Max 3 Images OR 1 Video/Audio):</span>
+                <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">Attach Media for Question (Max 3 Images OR 1 Video/Audio):</span>
                 <input 
                   type="file" 
                   accept="image/*,video/*,audio/*"
@@ -267,57 +273,38 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                 />
               </div>
 
-              {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
-                <div className="mt-2 text-sm text-gray-500">
-                  <div className="font-semibold mb-2">Media Previews:</div>
-                  <div className="flex flex-wrap gap-4">
-                    {/* Retained Media previews */}
+                    {/* Retained Media previews (includes newly uploaded) */}
                     {retainedMedia.map((media, idx) => (
-                      <div key={`retained-${idx}`} className="relative border rounded p-1 inline-block">
+                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                        {media.type?.startsWith('image/') ? (
+                          <button 
+                            onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
+                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                          >
+                            <Eye size={12} /> View file
+                          </button>
+                        ) : media.type?.startsWith('video/') ? (
+                          <span className="text-[10px] font-bold text-blue-600 flex items-center gap-1 uppercase tracking-tighter cursor-default">
+                             Video
+                          </span>
+                        ) : media.type?.startsWith('audio/') ? (
+                          <span className="text-[10px] font-bold text-blue-600 flex items-center gap-1 uppercase tracking-tighter cursor-default">
+                             Audio
+                          </span>
+                        ) : (
+                          <a href={getMediaUrl(media.url)} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter">
+                            View File
+                          </a>
+                        )}
                         <button 
                           onClick={() => removeRetainedMedia(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                          className="text-red-500 hover:bg-red-50 rounded p-0.5 transition-colors"
+                          title="Remove attachment"
                         >
                           <X size={14} />
                         </button>
-                        {media.type?.startsWith('image/') ? (
-                          <img src={`http://localhost${media.url}`} alt="Preview" className="max-h-32 object-contain" />
-                        ) : media.type?.startsWith('video/') ? (
-                          <video src={`http://localhost${media.url}`} controls className="max-h-32 w-64 max-w-full" />
-                        ) : media.type?.startsWith('audio/') ? (
-                          <audio src={`http://localhost${media.url}`} controls className="w-64 max-w-full" />
-                        ) : (
-                          <a href={`http://localhost${media.url}`} target="_blank" rel="noreferrer" className="text-blue-500 underline">View File</a>
-                        )}
                       </div>
                     ))}
-
-                    {/* New Files Previews */}
-                    {mediaFiles.map((file, idx) => {
-                       const objectUrl = URL.createObjectURL(file);
-                       return (
-                         <div key={`new-${idx}`} className="relative border border-blue-200 bg-blue-50 rounded p-1 inline-block">
-                           <button 
-                             onClick={() => removeNewFile(idx)}
-                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
-                           >
-                             <X size={14} />
-                           </button>
-                           {file.type.startsWith('image/') ? (
-                             <img src={objectUrl} alt="Preview" className="max-h-32 object-contain" onLoad={() => URL.revokeObjectURL(objectUrl)} />
-                           ) : file.type.startsWith('video/') ? (
-                             <video src={objectUrl} controls className="max-h-32 w-64 max-w-full" />
-                           ) : file.type.startsWith('audio/') ? (
-                             <audio src={objectUrl} controls className="w-64 max-w-full" />
-                           ) : (
-                             <div className="p-4">{file.name}</div>
-                           )}
-                         </div>
-                       );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -378,21 +365,30 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                    onChange={(e) => handleOptionChange(opt.id, e.target.value)}
                    placeholder="Type an exact answer..."
                  />
-                  {isAnswerWithImage && (
+                   {isAnswerWithImage && (
                     <div className="flex items-center gap-2 ml-2">
                        {optionImages[opt.id] ? (
-                         <div className="relative border rounded p-0.5 bg-gray-50 border-blue-200">
-                           <button 
-                             onClick={() => handleRemoveOptionImage(opt.id)}
-                             className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 shadow-sm z-10"
-                           >
-                             <X size={10} />
-                           </button>
-                           {typeof optionImages[opt.id] === 'string' ? (
-                             <img src={`http://localhost:8080${optionImages[opt.id]}`} className="h-8 w-8 object-cover rounded" alt="Option" />
-                           ) : (
-                             <img src={URL.createObjectURL(optionImages[opt.id] as File)} className="h-8 w-8 object-cover rounded" alt="Preview" />
-                           )}
+                         <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                            <button
+                              onClick={() => {
+                                const img = optionImages[opt.id];
+                                if (typeof img === 'string') {
+                                  setPreviewImageUrl(getMediaUrl(img));
+                                } else {
+                                  setPreviewImageUrl(URL.createObjectURL(img));
+                                }
+                              }}
+                              className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                            >
+                              <Eye size={12} /> View file
+                            </button>
+                            <button 
+                              onClick={() => handleRemoveOptionImage(opt.id)}
+                              className="text-red-500 hover:bg-red-50 rounded p-0.5 transition-colors"
+                              title="Remove image"
+                            >
+                              <X size={14} />
+                            </button>
                          </div>
                        ) : (
                          <label className="text-gray-400 hover:text-blue-600 cursor-pointer">
@@ -401,7 +397,10 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                              type="file" 
                              accept="image/*" 
                              className="hidden" 
-                             onChange={(e) => e.target.files?.[0] && handleOptionImageChange(opt.id, e.target.files[0])}
+                             onChange={(e) => {
+                               console.log(`[MultipleChoiceBuilder] Image selected for option ${opt.id}`);
+                               e.target.files?.[0] && handleOptionImageChange(opt.id, e.target.files[0]);
+                             }}
                            />
                          </label>
                        )}
@@ -460,7 +459,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
         </div>
       </div>
 
-      <ConfirmDialog
+       <ConfirmDialog
         isOpen={fileToDelete !== null}
         onClose={() => setFileToDelete(null)}
         onConfirm={handleConfirmDeleteFile}
@@ -469,6 +468,33 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
         confirmText="Remove"
         variant="danger"
       />
+
+      {/* Full Size Image Preview Modal */}
+      {previewImageUrl && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setPreviewImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={previewImageUrl} 
+              alt="Full Size Preview" 
+              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+              onLoad={() => {
+                if (previewImageUrl.startsWith('blob:')) {
+                  // Keep it for now, logic to revoke would go here if we didn't need it multiple times
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

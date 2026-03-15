@@ -2,52 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
 import { Question } from '../../features/quiz-bank/types';
-import { DashboardLayout, NavItem, toast } from '@english-learning/ui';
-import { ArrowLeft, Home, Database, Briefcase, Users, Settings } from 'lucide-react';
+import { toast } from '@english-learning/ui';
+import { ArrowLeft } from 'lucide-react';
 import { MultipleChoiceBuilder } from '../../features/quiz-bank/components/MultipleChoiceBuilder';
 import { FillInTheBlankBuilder } from '../../features/quiz-bank/components/FillInTheBlankBuilder';
 import { MatchingBuilder } from '../../features/quiz-bank/components/MatchingBuilder';
 import { WritingBuilder } from '../../features/quiz-bank/components/WritingBuilder';
-
-const sidebarItems: NavItem[] = [
-    { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-    {
-        title: "Questions Bank",
-        icon: <Database size={20} />,
-        children: [
-            { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-            { title: "Listening", href: "/admin/questions/listening" },
-            { title: "Reading", href: "/admin/questions/reading" },
-            { title: "Writing", href: "/admin/questions/writing" },
-            { title: "Exam", href: "/admin/questions/exam" },
-        ],
-    },
-    {
-        title: "Teacher Management",
-        icon: <Briefcase size={20} />,
-        children: [
-            { title: "Teacher List", href: "/admin/teachers/list" },
-            { title: "Performance & Logs", href: "/admin/teachers/logs" },
-        ],
-    },
-    {
-        title: "Customer Management",
-        icon: <Users size={20} />,
-        children: [
-            { title: "Customer List", href: "/admin/customers/list" },
-            { title: "Messages", href: "/admin/customers/messages" },
-            { title: "Reports", href: "/admin/customers/reports" },
-            { title: "Requests", href: "/admin/customers/requests" },
-            { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-        ],
-    },
-    { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-];
+import { AdminLayout } from '../../components/AdminLayout';
 
 export const QuestionEditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { fetchQuestionById, currentUser, isLoading } = useQuizBankStore();
+    const { fetchQuestionById, isLoading } = useQuizBankStore();
     const [question, setQuestion] = useState<Question | null>(null);
 
     useEffect(() => {
@@ -65,11 +31,11 @@ export const QuestionEditPage: React.FC = () => {
 
     if (isLoading && !question) {
         return (
-            <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+            <AdminLayout>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            </DashboardLayout>
+            </AdminLayout>
         );
     }
 
@@ -81,7 +47,7 @@ export const QuestionEditPage: React.FC = () => {
     };
 
     return (
-        <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+        <AdminLayout>
             <div className="max-w-6xl mx-auto py-8 px-4">
                 <div className="mb-8">
                     <button 
@@ -129,6 +95,6 @@ export const QuestionEditPage: React.FC = () => {
                     )}
                 </div>
             </div>
-        </DashboardLayout>
+        </AdminLayout>
     );
 };

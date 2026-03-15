@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MultipleChoiceData, MatchingData, FillBlankData, Question } from '../types';
-import { CheckCircle2, XCircle, RefreshCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, RefreshCcw, Eye, X } from 'lucide-react';
+import { getMediaUrl } from '../utils';
 
 interface StudentPreviewProps {
   question: Question;
@@ -10,6 +11,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
   const [userAnswer, setUserAnswer] = useState<any>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [essayContent, setEssayContent] = useState('');
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const resetPreview = () => {
     setUserAnswer(null);
@@ -47,11 +49,19 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
             }
 
             return (
-              <button
+              <div
                 key={opt.id}
-                disabled={showFeedback}
-                onClick={() => handleToggle(opt.id)}
-                className={`p-4 rounded-xl border text-left flex items-center gap-4 transition-all ${statusClass}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => !showFeedback && handleToggle(opt.id)}
+                onKeyDown={(e) => {
+                  if (showFeedback) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleToggle(opt.id);
+                  }
+                }}
+                className={`p-4 rounded-xl border text-left flex items-center gap-4 transition-all ${statusClass} ${!showFeedback ? 'cursor-pointer' : 'cursor-default'}`}
               >
                 <div className={`w-6 h-6 shrink-0 border flex items-center justify-center ${data.multiple_select ? 'rounded' : 'rounded-full'} ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
                    {isSelected && <div className="w-2 h-2 bg-white rounded-full"></div>}
@@ -59,17 +69,28 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
                 <span className="font-bold text-gray-400 w-4">{String.fromCharCode(65 + idx)}.</span>
                 <div className="flex-1 flex items-center gap-3">
                     {opt.image && (
-                        <img 
-                            src={`http://localhost:8080${opt.image}`} 
-                            alt={`Option ${idx + 1}`} 
-                            className="w-10 h-10 object-cover rounded shadow-sm border border-gray-100"
-                        />
+                        <div 
+                            className="relative group cursor-pointer shrink-0" 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewImageUrl(getMediaUrl(opt.image));
+                            }}
+                        >
+                            <img 
+                                src={getMediaUrl(opt.image)} 
+                                alt="Option" 
+                                className="w-14 h-14 object-cover rounded-lg border border-gray-100 bg-white shadow-sm"
+                            />
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                <Eye size={16} className="text-blue-600" />
+                            </div>
+                        </div>
                     )}
                     <span className="text-gray-700">{opt.label}</span>
                 </div>
                 {showFeedback && isCorrect && <CheckCircle2 size={18} className="text-green-600" />}
                 {showFeedback && isSelected && !isCorrect && <XCircle size={18} className="text-red-600" />}
-              </button>
+              </div>
             );
           })}
         </div>
@@ -220,15 +241,40 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
               }
 
               return (
-                <button
+                <div
                   key={left.id}
-                  disabled={showFeedback}
-                  onClick={() => handleLeftClick(left.id.toString())}
-                  className={`w-full p-2 rounded-lg border text-sm text-left transition-all flex items-center gap-2 ${statusClass}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => !showFeedback && handleLeftClick(left.id.toString())}
+                  onKeyDown={(e) => {
+                    if (showFeedback) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleLeftClick(left.id.toString());
+                    }
+                  }}
+                  className={`w-full p-2 rounded-lg border text-sm text-left transition-all flex items-center gap-2 ${statusClass} ${!showFeedback ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  {left.image && <img src={`http://localhost:8080${left.image}`} className="w-8 h-8 object-cover rounded" />}
+                  {left.image && (
+                    <div 
+                        className="relative group cursor-pointer shrink-0" 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImageUrl(getMediaUrl(left.image));
+                        }}
+                    >
+                        <img 
+                            src={getMediaUrl(left.image)} 
+                            alt="Left item" 
+                            className="w-10 h-10 object-cover rounded border border-gray-100 shadow-sm"
+                        />
+                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                            <Eye size={12} className="text-blue-600" />
+                        </div>
+                    </div>
+                  )}
                   <span className="flex-1">{left.text}</span>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -245,15 +291,40 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
               }
 
               return (
-                <button
+                <div
                   key={right.id}
-                  disabled={showFeedback || isUsed || !isTargeted}
-                  onClick={() => handleRightClick(right.id.toString())}
-                  className={`w-full p-2 rounded-lg border text-sm text-left transition-all flex items-center gap-2 ${statusClass}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => !showFeedback && !isUsed && isTargeted && handleRightClick(right.id.toString())}
+                  onKeyDown={(e) => {
+                    if (showFeedback || isUsed || !isTargeted) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleRightClick(right.id.toString());
+                    }
+                  }}
+                  className={`w-full p-2 rounded-lg border text-sm text-left transition-all flex items-center gap-2 ${statusClass} ${!showFeedback && !isUsed && isTargeted ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  {right.image && <img src={`http://localhost:8080${right.image}`} className="w-8 h-8 object-cover rounded" />}
+                  {right.image && (
+                    <div 
+                        className="relative group cursor-pointer shrink-0" 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImageUrl(getMediaUrl(right.image));
+                        }}
+                    >
+                        <img 
+                            src={getMediaUrl(right.image)} 
+                            alt="Right item" 
+                            className="w-10 h-10 object-cover rounded border border-green-100 shadow-sm bg-white"
+                        />
+                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                            <Eye size={12} className="text-green-600" />
+                        </div>
+                    </div>
+                  )}
                   <span className="flex-1">{right.text}</span>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -348,17 +419,41 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
         {/* Media simulation */}
         {question.mediaUrls && question.mediaUrls.length > 0 && (
           <div className="flex flex-wrap gap-4 py-4 border-y border-gray-100">
-             {question.mediaUrls.map((url, i) => (
-               <div key={i} className="max-w-xs rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                  {question.mediaTypes?.[i].startsWith('image/') ? (
-                    <img src={`http://localhost:8080${url}`} className="max-h-48 object-cover" alt="Stimulus" />
-                  ) : question.mediaTypes?.[i].startsWith('video/') ? (
-                    <video src={`http://localhost:8080${url}`} className="max-h-48" controls />
-                  ) : (
-                    <div className="p-4 bg-white"><audio src={`http://localhost:8080${url}`} controls /></div>
-                  )}
-               </div>
-             ))}
+             {question.mediaUrls
+               .map((url, i) => ({ url, type: question.mediaTypes?.[i] || '' }))
+                .filter(item => !item.url.includes('/media/answers/'))
+                .map((item, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-lg shadow-blue-500/5 max-w-lg mb-4">
+                   {item.type.startsWith('image/') ? (
+                    <div className="relative group cursor-pointer" onClick={() => setPreviewImageUrl(getMediaUrl(item.url))}>
+                      <img 
+                        src={getMediaUrl(item.url)} 
+                        alt="Stimulus" 
+                        className="w-full h-auto max-h-80 object-contain bg-gray-50" 
+                      />
+                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="bg-white/90 p-3 rounded-full shadow-xl text-blue-600 hover:scale-110 transition-transform">
+                          <Eye size={24} />
+                        </div>
+                      </div>
+                    </div>
+                  ) : item.type.startsWith('video/') ? (
+                    <div className="p-1 bg-black">
+                      <video src={getMediaUrl(item.url)} className="w-full max-h-80 rounded-xl" controls />
+                    </div>
+                  ) : item.type.startsWith('audio/') ? (
+                    <div className="p-6 bg-blue-50">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22"/><path d="M17 5v14"/><path d="M22 9v6"/><path d="M7 9v6"/><path d="M2 5v14"/></svg>
+                        </div>
+                        <span className="text-xs font-bold text-blue-800 uppercase tracking-widest">Listen Carefully</span>
+                      </div>
+                      <audio src={getMediaUrl(item.url)} controls className="w-full" />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
           </div>
         )}
 
@@ -394,9 +489,31 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
          </div>
          <p className="text-[11px] text-amber-800 leading-tight">
-           <strong>Previewing Student UX:</strong> This view simulates how students interact with the content. Interactivity and feedback are local only and do not affect the database.
+            <strong>Previewing Student UX:</strong> This view simulates how students interact with the content. Interactivity and feedback are local only and do not affect the database.
          </p>
       </div>
+
+      {/* Full Size Image Preview Modal */}
+      {previewImageUrl && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setPreviewImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={previewImageUrl} 
+              alt="Full Size Preview" 
+              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

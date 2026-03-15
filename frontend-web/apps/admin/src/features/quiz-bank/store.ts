@@ -14,10 +14,20 @@ interface QuizBankState {
   
   // Async Data Fetching
   fetchQuestions: (skill?: SkillType) => Promise<void>;
+  fetchQuestionsPaginated: (params: { 
+    skill?: SkillType; 
+    type?: string; 
+    difficulty?: string; 
+    search?: string;
+    limit: number; 
+    lastSeenId?: number | null; 
+    append?: boolean 
+  }) => Promise<any>;
   fetchQuestionById: (id: number) => Promise<Question | null>;
   createQuestion: (question: Omit<Question, 'id'>, mediaFiles?: File[]) => Promise<void>;
   updateQuestion: (id: number, question: Partial<Question>, mediaFiles?: File[]) => Promise<void>;
   deleteQuestion: (id: number) => Promise<void>;
+  uploadMedia: (file: File, context?: string) => Promise<string>;
 
   fetchExams: () => Promise<void>;
   createExam: (exam: Omit<Exam, 'id' | 'created_at'>) => Promise<void>;
@@ -25,7 +35,7 @@ interface QuizBankState {
   deleteExam: (id: number) => Promise<void>;
 }
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = 'http://localhost/api/v1';
 
 const getHeaders = () => {
   const token = localStorage.getItem('admin_token');
@@ -61,6 +71,34 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
     } catch (err: any) {
       console.error('[QuizBankStore] fetchQuestions Error:', err);
       set({ error: err.message || 'Failed to fetch questions', isLoading: false });
+    }
+  },
+
+  fetchQuestionsPaginated: async ({ skill, type, difficulty, search, limit, lastSeenId, append }) => {
+    set({ isLoading: true, error: null });
+    try {
+      const url = new URL(`${API_BASE_URL}/questions/paginated`);
+      if (skill) url.searchParams.append('skill', skill);
+      if (type) url.searchParams.append('type', type);
+      if (difficulty) url.searchParams.append('difficulty', difficulty);
+      if (search) url.searchParams.append('search', search);
+      if (limit) url.searchParams.append('limit', limit.toString());
+      if (lastSeenId) url.searchParams.append('lastSeenId', lastSeenId.toString());
+
+      const response = await fetch(url.toString(), { headers: getHeaders() });
+      if (!response.ok) throw new Error('Failed to fetch paginated questions');
+      const data = await response.json(); // { items, nextCursor, hasMore }
+      
+      set((state) => ({ 
+        questions: append ? [...state.questions, ...data.items] : data.items,
+        isLoading: false 
+      }));
+      
+      return data; // Return full payload for component-level cursor management
+    } catch (err: any) {
+      console.error('[QuizBankStore] fetchQuestionsPaginated Error:', err);
+      set({ error: err.message || 'Failed to fetch paginated questions', isLoading: false });
+      throw err;
     }
   },
 
@@ -158,6 +196,41 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
     } catch (err: any) {
       console.error('[QuizBankStore] updateQuestion Error:', err);
       set({ error: err.message || 'Failed to update question', isLoading: false });
+    }
+  },
+
+  uploadMedia: async (file: File, context?: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers = getHeaders();
+      delete (headers as any)['Content-Type'];
+
+      const url = new URL(`${API_BASE_URL.replace('/v1', '')}/media/upload`);
+      if (context) {
+        url.searchParams.append('context', context);
+      }
+
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload media');
+      }
+
+      const data = await response.json();
+      console.log(`[QuizBankStore] Media uploaded to ${context || 'default'}:`, data.storedPath);
+      set({ isLoading: false });
+      return data.storedPath;
+    } catch (err: any) {
+      console.error('[QuizBankStore] uploadMedia Error:', err);
+      set({ error: err.message || 'Failed to upload media', isLoading: false });
+      throw err;
     }
   },
 

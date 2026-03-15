@@ -1,30 +1,9 @@
-import { DashboardLayout, NavItem } from "@english-learning/ui";
-import { Layout, Users, Calendar, Database, Eye, PlusCircle, MessageSquare } from "lucide-react";
+import { TeacherLayout } from "../components/TeacherLayout";
+import { Calendar, Database } from "lucide-react";
 
 export default function TeacherDashboard() {
-    const sidebarItems: NavItem[] = [
-        { title: "My Dashboard", href: "/teacher/dashboard", icon: <Layout size={20} /> },
-        {
-            title: "1-on-1 Coaching",
-            icon: <Users size={20} />,
-            children: [
-                { title: "Student List", href: "/teacher/coaching/students" },
-                { title: "Session Calendar", href: "/teacher/coaching/calendar" },
-            ],
-        },
-        {
-            title: "Questions Bank",
-            icon: <Database size={20} />,
-            children: [
-                { title: "View Questions", href: "/teacher/questions/view", icon: <Eye size={16} /> },
-                { title: "Submit New Question", href: "/teacher/questions/submit", icon: <PlusCircle size={16} /> },
-            ],
-        },
-        { title: "Communication", href: "/teacher/messages", icon: <MessageSquare size={20} /> },
-    ];
-
     return (
-        <DashboardLayout sidebarItems={sidebarItems} userName="Teacher User" userRole="ESL Instructor">
+        <TeacherLayout>
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome back, Teacher!</h2>
                 <p className="text-gray-500">Here's your schedule and recent updates for today.</p>
@@ -63,6 +42,6 @@ export default function TeacherDashboard() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </TeacherLayout>
     );
 }

@@ -2,51 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuizBankStore } from '../../features/quiz-bank/store';
 import { Question, MultipleChoiceData, MatchingData, FillBlankData } from '../../features/quiz-bank/types';
-import { DashboardLayout, NavItem, toast } from '@english-learning/ui';
-import { ArrowLeft, Edit2, Home, Database, Briefcase, Users, Settings, CheckCircle2, Eye, XCircle } from 'lucide-react';
+import { toast } from '@english-learning/ui';
+import { ArrowLeft, Edit2, CheckCircle2, Eye, XCircle, X } from 'lucide-react';
 import { StudentPreview } from '../../features/quiz-bank/components/StudentPreview';
-
-const sidebarItems: NavItem[] = [
-    { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
-    {
-        title: "Questions Bank",
-        icon: <Database size={20} />,
-        children: [
-            { title: "Vocabulary", href: "/admin/questions/vocabulary" },
-            { title: "Listening", href: "/admin/questions/listening" },
-            { title: "Reading", href: "/admin/questions/reading" },
-            { title: "Writing", href: "/admin/questions/writing" },
-            { title: "Exam", href: "/admin/questions/exam" },
-        ],
-    },
-    {
-        title: "Teacher Management",
-        icon: <Briefcase size={20} />,
-        children: [
-            { title: "Teacher List", href: "/admin/teachers/list" },
-            { title: "Performance & Logs", href: "/admin/teachers/logs" },
-        ],
-    },
-    {
-        title: "Customer Management",
-        icon: <Users size={20} />,
-        children: [
-            { title: "Customer List", href: "/admin/customers/list" },
-            { title: "Messages", href: "/admin/customers/messages" },
-            { title: "Reports", href: "/admin/customers/reports" },
-            { title: "Requests", href: "/admin/customers/requests" },
-            { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
-        ],
-    },
-    { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
-];
+import { AdminLayout } from '../../components/AdminLayout';
+import { getMediaUrl } from '../../features/quiz-bank/utils';
 
 export const QuestionDetailView: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { fetchQuestionById, currentUser, isLoading } = useQuizBankStore();
+    const { fetchQuestionById, isLoading } = useQuizBankStore();
     const [question, setQuestion] = useState<Question | null>(null);
     const [viewMode, setViewMode] = useState<'ADMIN' | 'STUDENT'>('ADMIN');
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (id) {
@@ -63,11 +31,11 @@ export const QuestionDetailView: React.FC = () => {
 
     if (isLoading && !question) {
         return (
-            <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+            <AdminLayout>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            </DashboardLayout>
+            </AdminLayout>
         );
     }
 
@@ -88,11 +56,16 @@ export const QuestionDetailView: React.FC = () => {
                                         <span className="font-bold text-gray-400 w-6">{String.fromCharCode(65 + idx)}.</span>
                                         <div className="flex-1 flex items-center gap-3">
                                             {opt.image && (
-                                                <img 
-                                                    src={`http://localhost:8080${opt.image}`} 
-                                                    alt={`Option ${idx + 1}`} 
-                                                    className="w-12 h-12 object-cover rounded shadow-sm border border-gray-200"
-                                                />
+                                                <div className="relative group cursor-pointer shrink-0" onClick={() => setPreviewImageUrl(getMediaUrl(opt.image))}>
+                                                    <img 
+                                                        src={getMediaUrl(opt.image)} 
+                                                        alt="Option" 
+                                                        className="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-white shadow-sm"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                                        <Eye size={16} className="text-blue-600" />
+                                                    </div>
+                                                </div>
                                             )}
                                             <span className={`${isCorrect ? 'text-green-800 font-medium' : 'text-gray-700'}`}>{opt.label}</span>
                                         </div>
@@ -116,12 +89,40 @@ export const QuestionDetailView: React.FC = () => {
                                 return (
                                     <div key={left.id} className="flex items-center gap-4">
                                         <div className="flex-1 p-3 bg-white border border-gray-200 rounded-lg text-sm flex items-center gap-3">
-                                            {left.image && <img src={`http://localhost:8080${left.image}`} className="w-10 h-10 object-cover rounded" />}
+                                            {left.image && (
+                                                <div 
+                                                    className="relative group cursor-pointer shrink-0" 
+                                                    onClick={() => setPreviewImageUrl(getMediaUrl(left.image))}
+                                                >
+                                                    <img 
+                                                        src={getMediaUrl(left.image)} 
+                                                        alt="Left item" 
+                                                        className="w-10 h-10 object-cover rounded border border-gray-100 shadow-sm"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                                                        <Eye size={12} className="text-blue-600" />
+                                                    </div>
+                                                </div>
+                                            )}
                                             <span>{left.text}</span>
                                         </div>
                                         <div className="text-gray-400">→</div>
                                         <div className="flex-1 p-3 bg-green-50 border border-green-100 rounded-lg text-sm text-green-800 font-medium flex items-center gap-3">
-                                            {right?.image && <img src={`http://localhost:8080${right.image}`} className="w-10 h-10 object-cover rounded" />}
+                                            {right?.image && (
+                                                <div 
+                                                    className="relative group cursor-pointer shrink-0" 
+                                                    onClick={() => setPreviewImageUrl(getMediaUrl(right.image))}
+                                                >
+                                                    <img 
+                                                        src={getMediaUrl(right.image)} 
+                                                        alt="Right item" 
+                                                        className="w-10 h-10 object-cover rounded border border-green-100 shadow-sm bg-white"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                                                        <Eye size={12} className="text-green-600" />
+                                                    </div>
+                                                </div>
+                                            )}
                                             <span>{right?.text || 'N/A'}</span>
                                         </div>
                                     </div>
@@ -191,7 +192,7 @@ export const QuestionDetailView: React.FC = () => {
     };
 
     return (
-        <DashboardLayout sidebarItems={sidebarItems} userName={currentUser.name} userRole={currentUser.role === 'ADMIN' ? 'System Admin' : 'Teacher'}>
+        <AdminLayout>
             <div className="max-w-5xl mx-auto py-8 px-4">
                 {/* Header / Breadcrumbs */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -236,24 +237,55 @@ export const QuestionDetailView: React.FC = () => {
                                     {question.instruction || "No instruction provided."}
                                 </div>
 
-                                {/* Media Display */}
+                                 {/* Media Display */}
                                 {question.mediaUrls && question.mediaUrls.length > 0 && (
                                     <div className="mt-8 pt-8 border-t border-gray-100">
-                                        <h3 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Attachments</h3>
+                                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Attachments</h2>
                                         <div className="flex flex-wrap gap-4">
-                                            {question.mediaUrls.map((url, idx) => {
-                                                const type = question.mediaTypes?.[idx] || '';
+                                            {question.mediaUrls
+                                                .map((url, idx) => ({ url, type: question.mediaTypes?.[idx] || '' }))
+                                                .filter(item => !item.url.includes('/media/answers/'))
+                                                .map((item, idx) => {
                                                 return (
-                                                    <div key={idx} className="border rounded-xl overflow-hidden shadow-sm bg-gray-50 max-w-xs">
-                                                        {type.startsWith('image/') ? (
-                                                            <img src={`http://localhost:8080${url}`} alt="Media" className="max-h-48 w-full object-cover" />
-                                                        ) : type.startsWith('video/') ? (
-                                                            <video src={`http://localhost:8080${url}`} controls className="max-h-48" />
-                                                        ) : type.startsWith('audio/') ? (
-                                                            <div className="p-4"><audio src={`http://localhost:8080${url}`} controls className="w-full" /></div>
+                                                    <div key={idx} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white max-w-sm">
+                                                        {item.type.startsWith('image/') ? (
+                                                            <div className="relative group cursor-pointer" onClick={() => setPreviewImageUrl(getMediaUrl(item.url))}>
+                                                                <img 
+                                                                    src={getMediaUrl(item.url)} 
+                                                                    alt="Stimulus" 
+                                                                    className="w-full h-auto max-h-64 object-contain bg-gray-50"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                    <div className="bg-white/90 p-2 rounded-full shadow-lg text-blue-600">
+                                                                        <Eye size={20} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ) : item.type.startsWith('video/') ? (
+                                                            <div className="p-1 bg-black rounded-lg">
+                                                                <video src={getMediaUrl(item.url)} controls className="w-full max-h-64 rounded" />
+                                                            </div>
+                                                        ) : item.type.startsWith('audio/') ? (
+                                                            <div className="p-4 bg-gray-50 border-t border-gray-100 italic flex flex-col gap-2">
+                                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Audio Content</span>
+                                                                <audio src={getMediaUrl(item.url)} controls className="w-full" />
+                                                            </div>
                                                         ) : (
-                                                            <div className="p-4 text-sm text-blue-600 underline">
-                                                                <a href={`http://localhost:8080${url}`} target="_blank" rel="noreferrer">Download Attachment</a>
+                                                            <div className="p-4 flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                                                                    <Eye size={20} />
+                                                                </div>
+                                                                <div className="flex-1 overflow-hidden">
+                                                                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 line-clamp-1">Other Attachment</div>
+                                                                    <a 
+                                                                        href={getMediaUrl(item.url)} 
+                                                                        target="_blank" 
+                                                                        rel="noreferrer"
+                                                                        className="text-sm font-medium text-blue-600 hover:text-blue-800 underline truncate block"
+                                                                    >
+                                                                        Download File
+                                                                    </a>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>
@@ -316,6 +348,28 @@ export const QuestionDetailView: React.FC = () => {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+
+            {/* Full Size Image Preview Modal */}
+            {previewImageUrl && (
+                <div 
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+                    onClick={() => setPreviewImageUrl(null)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                            onClick={() => setPreviewImageUrl(null)}
+                            className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+                        >
+                            <X size={20} />
+                        </button>
+                        <img 
+                            src={previewImageUrl} 
+                            alt="Full Size Preview" 
+                            className="max-w-full max-h-[85vh] object-contain rounded-sm"
+                        />
+                    </div>
+                </div>
+            )}
+        </AdminLayout>
     );
 };

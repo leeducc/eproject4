@@ -7,9 +7,16 @@ export interface DashboardLayoutProps {
     sidebarItems: NavItem[];
     userName?: string;
     userRole?: string;
+    onLogout?: () => void;
 }
 
-export function DashboardLayout({ children, sidebarItems, userName = "Patricia Peters", userRole = "Online" }: DashboardLayoutProps) {
+export function DashboardLayout({ 
+    children, 
+    sidebarItems, 
+    userName = "Patricia Peters", 
+    userRole = "Online",
+    onLogout
+}: DashboardLayoutProps) {
     return (
         <div className="flex h-screen bg-dashboard-bg overflow-hidden font-sans">
             <Sidebar items={sidebarItems} appName="EnglishHub" />
@@ -56,7 +63,13 @@ export function DashboardLayout({ children, sidebarItems, userName = "Patricia P
                                 {/* Avatar Placeholder */}
                                 <span className="text-lg">🧑‍🏫</span>
                             </div>
-                            <Settings className="w-5 h-5 text-gray-400 ml-2 cursor-pointer hover:text-gray-600" />
+                            <Settings 
+                                className="w-5 h-5 text-gray-400 ml-2 cursor-pointer hover:text-gray-600" 
+                                onClick={() => {
+                                    console.log("[DashboardLayout] Settings/Logout icon clicked");
+                                    onLogout?.();
+                                }}
+                            />
                         </div>
                     </div>
                 </header>

@@ -27,7 +27,7 @@ public class MediaService {
         this.mediaRepository = mediaRepository;
     }
 
-    public MediaFile uploadFile(MultipartFile file, Long uploaderId) throws IOException {
+    public MediaFile uploadFile(MultipartFile file, Long uploaderId, String context) throws IOException {
         String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         String extension = getExtension(originalFilename);
 
@@ -35,8 +35,8 @@ public class MediaService {
 
         String storedFilename = UUID.randomUUID().toString() + extension;
 
-        // Determine sub-directory based on file type
-        String subDir = getSubDir(extension);
+        // Determine sub-directory based on file type and context
+        String subDir = getSubDir(extension, context);
         Path targetLocation = Paths.get(uploadDir, subDir).toAbsolutePath().normalize();
 
         Files.createDirectories(targetLocation);
@@ -75,13 +75,18 @@ public class MediaService {
         }
     }
 
-    private String getSubDir(String extension) {
+    private String getSubDir(String extension, String context) {
         if (extension.matches("(?i)\\.(mp4|avi|mov|mkv)"))
             return "videos";
         if (extension.matches("(?i)\\.(mp3|wav|ogg)"))
             return "audio";
-        if (extension.matches("(?i)\\.(jpg|jpeg|png|gif|webp)"))
-            return "images";
+        if (extension.matches("(?i)\\.(jpg|jpeg|png|gif|webp)")) {
+            // If context is provided and valid, use it; otherwise default to "answers"
+            if (StringUtils.hasText(context) && (context.equalsIgnoreCase("questions") || context.equalsIgnoreCase("answers"))) {
+                return context.toLowerCase();
+            }
+            return "answers";
+        }
         return "documents";
     }
 
