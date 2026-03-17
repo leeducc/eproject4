@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'favorite_manager.dart';
 import 'result_screen.dart';
 
 class PracticeScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   final FlutterTts tts = FlutterTts();
   final Random random = Random();
+  final FavoriteManager favoriteManager = FavoriteManager();
   int startTime = 0;
 
   List<Map<String, dynamic>> weakWords = [];
@@ -263,7 +265,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
           weakWords.add({
             "word": currentWord!['word'],
-            "meaning": currentWord!['meaning_vi'],
+            "meaning_vi": currentWord!['meaning_vi'],
             "pos": currentWord!['pos'],
             "phonetic": currentWord!['phonetic'],
           });
@@ -431,7 +433,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
       weakWords.add({
         "word": currentWord!['word'],
-        "meaning": currentWord!['meaning_vi'],
+        "meaning_vi": currentWord!['meaning_vi'],
         "pos": currentWord!['pos'],
         "phonetic": currentWord!['phonetic'],
       });
@@ -476,14 +478,16 @@ class _PracticeScreenState extends State<PracticeScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              (currentWord?['favorite'] ?? false)
+              favoriteManager.isFavorite(currentWord?['word'])
                   ? Icons.star
                   : Icons.star_border,
               color: Colors.amber,
             ),
             onPressed: () {
+              if (currentWord == null) return;
+
               setState(() {
-                currentWord!['favorite'] = !(currentWord?['favorite'] ?? false);
+                favoriteManager.toggleFavorite(currentWord!);
               });
             },
           ),
@@ -763,5 +767,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    tts.stop();
+    super.dispose();
   }
 }

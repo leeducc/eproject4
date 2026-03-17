@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'favorite_manager.dart';
 import 'practice_screen.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ResultScreenState extends State<ResultScreen>
   static const cardColor = Color(0xFF1F2430);
   static const primaryColor = Color(0xFF4F7CFE);
   late AnimationController controller;
-
+  final FavoriteManager favoriteManager = FavoriteManager();
   @override
   void initState() {
     super.initState();
@@ -430,7 +431,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                                       /// MEANING
                                       Text(
-                                        w["meaning"],
+                                        w["meaning_vi"],
                                         style: const TextStyle(
                                           fontSize: 20,
                                           color: Colors.white70,
@@ -441,9 +442,18 @@ class _ResultScreenState extends State<ResultScreen>
                                 ),
 
                                 /// STAR
-                                const Icon(
-                                  Icons.star_border,
-                                  color: primaryColor,
+                                IconButton(
+                                  icon: Icon(
+                                    favoriteManager.isFavorite(w["word"])
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: primaryColor,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      favoriteManager.toggleFavorite(w);
+                                    });
+                                  },
                                 ),
                               ],
                             ),
@@ -526,5 +536,10 @@ class _ResultScreenState extends State<ResultScreen>
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'favorite_manager.dart';
 
 import 'practice_screen.dart';
 
@@ -25,6 +26,7 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   late PageController _controller;
   late int currentIndex;
   final FlutterTts tts = FlutterTts();
+  final FavoriteManager favoriteManager = FavoriteManager();
   bool showMeaning = false;
   bool isSlowMode = false;
 
@@ -47,6 +49,7 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   @override
   void dispose() {
     tts.stop();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -80,15 +83,16 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
           // ⭐ Favorite
           IconButton(
             icon: Icon(
-              (widget.vocabularies[currentIndex]['favorite'] ?? false)
+              favoriteManager.isFavorite(widget.vocabularies[currentIndex]['word'])
                   ? Icons.star
                   : Icons.star_border,
               color: Colors.amber,
             ),
             onPressed: () {
               setState(() {
-                widget.vocabularies[currentIndex]['favorite'] =
-                    !(widget.vocabularies[currentIndex]['favorite'] ?? false);
+                favoriteManager.toggleFavorite(
+                  widget.vocabularies[currentIndex],
+                );
               });
             },
           ),

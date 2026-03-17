@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'favorite_manager.dart';
+import 'favorite_screen.dart';
 import 'topic_vocabulary_screen.dart';
 import 'vocabulary_detail_screen.dart';
 
@@ -16,7 +18,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
   static const cardColor = Color(0xFF141E30);
   static const primaryBlue = Color(0xFF3B82F6);
   static const borderBlue = Color(0xFF60A5FA);
-
+  final favoriteManager = FavoriteManager();
   late TabController _tabController;
   final Map<String, List<Map<String, dynamic>>> topicVocabularyData = {
     'Colors': [
@@ -1582,6 +1584,28 @@ class _VocabularyScreenState extends State<VocabularyScreen>
     _tabController.addListener(() {
       setState(() {});
     });
+    favoriteManager.addListener(() {
+      setState(() {});
+    });
+  }
+  int _countFavoriteInLevel(int index) {
+
+    final topics = hskData[index]['topics'] as List<Map>;
+    int count = 0;
+
+    for (var topic in topics) {
+      final title = topic['title'];
+
+      final vocabList = topicVocabularyData[title] ?? [];
+
+      for (var v in vocabList) {
+        if (favoriteManager.isFavorite(v['word'])) {
+          count++;
+        }
+      }
+    }
+
+    return count;
   }
 
   @override
@@ -1676,7 +1700,12 @@ class _VocabularyScreenState extends State<VocabularyScreen>
           ],
           onSelected: (value) {
             if (value == 1) {
-              // TODO: reset progress
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FavoriteScreen(),
+                ),
+              );
             } else if (value == 2) {
               // TODO: show info
             }
@@ -1698,7 +1727,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
   // ===== Top Card =====
   Widget _buildTopCardByIndex(int index) {
     final current = hskData[index];
-
+    final favCount = _countFavoriteInLevel(index);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1731,7 +1760,7 @@ class _VocabularyScreenState extends State<VocabularyScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '0 / ${current['total']}    ⭐ 0 / ${current['lessons']}',
+                  '$favCount / ${current['total']}    ⭐ $favCount',
                   style: const TextStyle(color: Colors.white54),
                 ),
               ],
