@@ -3,8 +3,9 @@ import 'package:just_audio/just_audio.dart';
 import '../models/dialogue_true_false_question.dart';
 
 class DialogueTrueFalseScreen extends StatefulWidget {
+  final String title;
   final List<DialogueTrueFalseQuestion> questions;
-  const DialogueTrueFalseScreen({super.key, required this.questions});
+  const DialogueTrueFalseScreen({super.key, required this.title, required this.questions});
 
   @override
   State<DialogueTrueFalseScreen> createState() => _DialogueTrueFalseScreenState();
@@ -168,7 +169,7 @@ class _DialogueTrueFalseScreenState extends State<DialogueTrueFalseScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Dialogue True/False"),
+          title: Text(widget.title),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -314,8 +315,13 @@ class _DialogueTrueFalseScreenState extends State<DialogueTrueFalseScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Text(_currentIndex < widget.questions.length - 1 ? "Next Question" : "Finish"),
                       ),
