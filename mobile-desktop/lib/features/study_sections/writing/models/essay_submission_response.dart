@@ -1,4 +1,5 @@
 import 'topic_model.dart';
+import 'writing_correction.dart';
 
 class EssaySubmissionResponse {
   final int id;
@@ -8,6 +9,13 @@ class EssaySubmissionResponse {
   final String? aiFeedback;
   final double? score;
 
+  // New fields for structured feedback
+  final double? taskAchievement;
+  final double? grammaticalRange;
+  final double? lexicalResource;
+  final double? cohesionCoherence;
+  final List<WritingCorrection> corrections;
+
   EssaySubmissionResponse({
     required this.id,
     required this.topic,
@@ -15,9 +23,21 @@ class EssaySubmissionResponse {
     required this.gradingType,
     this.aiFeedback,
     this.score,
+    this.taskAchievement,
+    this.grammaticalRange,
+    this.lexicalResource,
+    this.cohesionCoherence,
+    this.corrections = const [],
   });
 
   factory EssaySubmissionResponse.fromJson(Map<String, dynamic> json) {
+    var correctionsList = <WritingCorrection>[];
+    if (json['corrections'] != null) {
+      correctionsList = (json['corrections'] as List)
+          .map((i) => WritingCorrection.fromJson(i))
+          .toList();
+    }
+
     return EssaySubmissionResponse(
       id: json['id'],
       topic: Topic.fromJson(json['topic']),
@@ -25,6 +45,19 @@ class EssaySubmissionResponse {
       gradingType: json['gradingType'],
       aiFeedback: json['aiFeedback'],
       score: json['score'] != null ? (json['score'] as num).toDouble() : null,
+      taskAchievement: json['taskAchievement'] != null
+          ? (json['taskAchievement'] as num).toDouble()
+          : null,
+      grammaticalRange: json['grammaticalRange'] != null
+          ? (json['grammaticalRange'] as num).toDouble()
+          : null,
+      lexicalResource: json['lexicalResource'] != null
+          ? (json['lexicalResource'] as num).toDouble()
+          : null,
+      cohesionCoherence: json['cohesionCoherence'] != null
+          ? (json['cohesionCoherence'] as num).toDouble()
+          : null,
+      corrections: correctionsList,
     );
   }
 }

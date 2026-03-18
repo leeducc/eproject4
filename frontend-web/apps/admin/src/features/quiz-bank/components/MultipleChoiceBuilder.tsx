@@ -15,7 +15,7 @@ import { getMediaUrl } from '../utils';
 export interface MultipleChoiceBuilderProps {
   skill?: SkillType;
   initialQuestion?: Question | null;
-  onSave?: () => void;
+  onSave?: (data: Partial<Question>) => void;
 }
 
 export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
@@ -158,14 +158,17 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       retainedMediaUrls: [...retainedMedia.map(m => m.url), ...optionMediaUrls]
     };
 
-    if (initialQuestion) {
+    if (initialQuestion?.id) {
       console.log('[MultipleChoiceBuilder] Updating question', { instruction, data });
       await updateQuestion(initialQuestion.id, payload);
-    } else {
+    } else if (!initialQuestion) {
       console.log('[MultipleChoiceBuilder] Saving question', { instruction, data });
       await createQuestion(payload);
+    } else {
+      console.log('[MultipleChoiceBuilder] Draft saved locally');
     }
-    if (onSave) onSave();
+
+    if (onSave) onSave(payload);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,11 +228,11 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
 
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans">
+    <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans transition-colors">
       {/* Header */}
-      <div className="flex items-center p-4 border-b bg-gray-50">
+      <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
-          className="border-gray-300 rounded-md shadow-sm border p-2 text-sm bg-white"
+          className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
           value={difficultyBand}
           onChange={(e) => setDifficultyBand(e.target.value as DifficultyBand)}
         >
@@ -238,15 +241,15 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
           <option value="BAND_7_8">Level 7-8</option>
           <option value="BAND_9">Level 9</option>
         </select>
-        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200">
+        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200 dark:border-slate-800">
           <input 
             type="checkbox" 
             id="premium-mc"
             checked={isPremium}
             onChange={(e) => setIsPremium(e.target.checked)}
-            className="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500"
+            className="w-4 h-4 text-amber-500 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-amber-500"
           />
-          <label htmlFor="premium-mc" className="text-sm font-medium text-gray-700 flex items-center gap-1">Premium Content</label>
+          <label htmlFor="premium-mc" className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-1">Premium Content</label>
         </div>
       </div>
 
@@ -254,14 +257,14 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       <div className="p-6 space-y-6">
         {/* Question Input */}
         <div className="space-y-2">
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
+          <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-800 transition-colors">
             <textarea
-              className="w-full p-4 border-none focus:ring-0 resize-none min-h-[100px] outline-none"
+              className="w-full p-4 border-none focus:ring-0 bg-transparent text-gray-700 dark:text-slate-200 resize-none min-h-[100px] outline-none"
               placeholder="Type your question here..."
               value={instruction}
               onChange={(e) => setInstruction(e.target.value)}
             />
-            <div className="flex flex-col gap-2 p-3 px-4 border-t bg-gray-50 text-gray-500">
+            <div className="flex flex-col gap-2 p-3 px-4 border-t dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30 text-gray-500 dark:text-slate-400 transition-colors">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">Attach Media for Question (Max 3 Images OR 1 Video/Audio):</span>
                 <input 
@@ -269,17 +272,17 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="text-sm text-gray-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="text-sm text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors"
                 />
               </div>
 
                     {/* Retained Media previews (includes newly uploaded) */}
                     {retainedMedia.map((media, idx) => (
-                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
                         {media.type?.startsWith('image/') ? (
                           <button 
                             onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
-                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                            className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 uppercase tracking-tighter"
                           >
                             <Eye size={12} /> View file
                           </button>
@@ -311,7 +314,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
 
         {/* Settings Row */}
         <div className="flex items-center gap-6">
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300 cursor-pointer">
             <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
               <input 
                 type="checkbox" 
@@ -321,23 +324,23 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                   setIsMultipleAnswer(e.target.checked);
                   setCorrectIds([]); // Reset on type change
                 }}
-                className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ${isMultipleAnswer ? 'translate-x-5 border-blue-500' : 'translate-x-0 border-gray-300'}`}
+                className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white dark:bg-slate-200 border-4 appearance-none cursor-pointer transition-transform duration-200 ${isMultipleAnswer ? 'translate-x-5 border-blue-500 dark:border-blue-400' : 'translate-x-0 border-gray-300 dark:border-slate-700'}`}
               />
-              <label className={`toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer ${isMultipleAnswer ? 'bg-blue-500' : ''}`}></label>
+              <label className={`toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-slate-800 cursor-pointer ${isMultipleAnswer ? 'bg-blue-500 dark:bg-blue-600' : ''}`}></label>
             </div>
             Multiple answer
           </label>
           
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300 cursor-pointer">
             <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
               <input 
                 type="checkbox" 
                 name="toggleImage" 
                 checked={isAnswerWithImage}
                 onChange={(e) => setIsAnswerWithImage(e.target.checked)}
-                className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ${isAnswerWithImage ? 'translate-x-5 border-blue-500' : 'translate-x-0 border-gray-300'}`}
+                className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white dark:bg-slate-200 border-4 appearance-none cursor-pointer transition-transform duration-200 ${isAnswerWithImage ? 'translate-x-5 border-blue-500 dark:border-blue-400' : 'translate-x-0 border-gray-300 dark:border-slate-700'}`}
               />
-              <label className={`toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer ${isAnswerWithImage ? 'bg-blue-500' : ''}`}></label>
+              <label className={`toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-slate-800 cursor-pointer ${isAnswerWithImage ? 'bg-blue-500 dark:bg-blue-600' : ''}`}></label>
             </div>
             Answer with image
           </label>
@@ -351,16 +354,16 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                 className="cursor-pointer flex items-center justify-center w-6 h-6 shrink-0"
                 onClick={() => handleToggleCorrect(opt.id)}
               >
-                <div className={`w-5 h-5 flex items-center justify-center border ${isMultipleAnswer ? 'rounded' : 'rounded-full'} ${correctIds.includes(opt.id) ? 'bg-green-500 border-green-500' : 'border-gray-300 bg-white hover:border-green-400'}`}>
+                <div className={`w-5 h-5 flex items-center justify-center border transition-colors ${isMultipleAnswer ? 'rounded' : 'rounded-full'} ${correctIds.includes(opt.id) ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-green-400 dark:hover:border-green-500'}`}>
                    {correctIds.includes(opt.id) && <div className={`${isMultipleAnswer ? 'w-3 h-3 bg-white' : 'w-2.5 h-2.5 bg-white rounded-full'}`}></div>}
                 </div>
               </div>
               
-              <div className="flex-1 flex items-center border rounded-md px-3 py-2 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
-                 <span className="text-gray-400 mr-2 font-medium">{String.fromCharCode(65 + index)}.</span>
+              <div className="flex-1 flex items-center border dark:border-slate-800 rounded-md px-3 py-2 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-800 transition-colors">
+                 <span className="text-gray-400 dark:text-slate-500 mr-2 font-medium">{String.fromCharCode(65 + index)}.</span>
                  <input 
                    type="text"
-                   className="flex-1 outline-none text-gray-700 bg-transparent"
+                   className="flex-1 outline-none text-gray-700 dark:text-slate-200 bg-transparent"
                    value={opt.label}
                    onChange={(e) => handleOptionChange(opt.id, e.target.value)}
                    placeholder="Type an exact answer..."
@@ -368,7 +371,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                    {isAnswerWithImage && (
                     <div className="flex items-center gap-2 ml-2">
                        {optionImages[opt.id] ? (
-                         <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                         <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
                             <button
                               onClick={() => {
                                 const img = optionImages[opt.id];
@@ -378,20 +381,20 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                                   setPreviewImageUrl(URL.createObjectURL(img));
                                 }
                               }}
-                              className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                              className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 uppercase tracking-tighter"
                             >
                               <Eye size={12} /> View file
                             </button>
                             <button 
                               onClick={() => handleRemoveOptionImage(opt.id)}
-                              className="text-red-500 hover:bg-red-50 rounded p-0.5 transition-colors"
+                              className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded p-0.5 transition-colors"
                               title="Remove image"
                             >
                               <X size={14} />
                             </button>
                          </div>
                        ) : (
-                         <label className="text-gray-400 hover:text-blue-600 cursor-pointer">
+                         <label className="text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
                            <ImageIcon size={18} />
                            <input 
                              type="file" 
@@ -427,18 +430,18 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
           
           <button 
             onClick={handleAddOption}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium mt-4 disabled:opacity-50"
+            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium mt-4 disabled:opacity-50 transition-colors"
           >
             <Plus size={16} /> Add answers
           </button>
         </div>
 
         {/* Explanation Input */}
-        <div className="space-y-2 pt-4 border-t border-dashed">
-          <label className="text-sm font-semibold text-gray-800">Explanation (Optional)</label>
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
+        <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800">
+          <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation (Optional)</label>
+          <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-800 transition-colors">
             <textarea
-              className="w-full p-4 border-none focus:ring-0 resize-none min-h-[80px] outline-none"
+              className="w-full p-4 border-none focus:ring-0 bg-transparent text-gray-700 dark:text-slate-200 resize-none min-h-[80px] outline-none"
               placeholder="Provide an explanation for the correct answer..."
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -448,7 +451,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       </div>
 
       {/* Footer Settings */}
-      <div className="bg-gray-50 p-4 border-t flex items-center justify-end">
+      <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex items-center justify-end transition-colors">
         <div>
            <button 
              onClick={handleSave}
@@ -472,20 +475,20 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       {/* Full Size Image Preview Modal */}
       {previewImageUrl && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"
           onClick={() => setPreviewImageUrl(null)}
         >
-          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-xl p-2 shadow-2xl scale-in border border-transparent dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
             <button 
               onClick={() => setPreviewImageUrl(null)}
-              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+              className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border dark:border-slate-700"
             >
               <X size={20} />
             </button>
             <img 
               src={previewImageUrl} 
               alt="Full Size Preview" 
-              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
               onLoad={() => {
                 if (previewImageUrl.startsWith('blob:')) {
                   // Keep it for now, logic to revoke would go here if we didn't need it multiple times

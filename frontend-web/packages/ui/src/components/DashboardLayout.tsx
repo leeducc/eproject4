@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Sidebar, NavItem } from "./Sidebar";
-import { Bell, Mail, Target, Settings, Search, Sun, Moon } from "lucide-react";
+import { Bell, Mail, Target, LogOut, Search, Sun, Moon } from "lucide-react";
 
 export interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -8,6 +8,8 @@ export interface DashboardLayoutProps {
     userName?: string;
     userRole?: string;
     onLogout?: () => void;
+    theme?: "light" | "dark";
+    toggleTheme?: () => void;
 }
 
 export function DashboardLayout({ 
@@ -15,58 +17,76 @@ export function DashboardLayout({
     sidebarItems, 
     userName = "Patricia Peters", 
     userRole = "Online",
-    onLogout
+    onLogout,
+    theme = "light",
+    toggleTheme
 }: DashboardLayoutProps) {
-    return (
-        <div className="flex h-screen bg-dashboard-bg overflow-hidden font-sans">
-            <Sidebar items={sidebarItems} appName="EnglishHub" />
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-            <div className="flex-1 flex flex-col overflow-hidden">
+    return (
+        <div className="flex h-screen overflow-hidden font-sans transition-colors duration-300 bg-dashboard-bg dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+            <Sidebar 
+                items={sidebarItems} 
+                appName="EnglishHub" 
+                isCollapsed={isSidebarCollapsed} 
+                onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+            />
+
+            <div className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Top Header */}
-                <header className="h-20 bg-white/50 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 shrink-0">
-                    <div className="flex items-center bg-white border border-gray-100 rounded-full px-4 py-2 w-96 shadow-sm">
+                <header className="h-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-8 shrink-0 transition-all duration-300">
+                    <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-full px-4 py-2 w-96 shadow-sm">
                         <Search className="w-4 h-4 text-gray-400 mr-2" />
                         <input
                             type="text"
                             placeholder="Search here..."
-                            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-gray-400 text-gray-700"
+                            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-gray-400 text-gray-700 dark:text-slate-200"
                         />
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-3 border-r border-gray-100 pr-6">
-                            <Sun className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
-                            <div className="w-10 h-5 bg-primary rounded-full relative cursor-pointer flex items-center">
-                                <div className="w-3.5 h-3.5 bg-white rounded-full absolute left-1"></div>
+                        <div className="flex items-center gap-3 border-r border-gray-100 dark:border-slate-800 pr-6">
+                            <Sun 
+                                className={`w-5 h-5 cursor-pointer transition-colors ${theme === 'light' ? 'text-primary' : 'text-gray-400 hover:text-gray-300'}`} 
+                                onClick={toggleTheme}
+                            />
+                            <div 
+                                className="w-10 h-5 bg-gray-200 dark:bg-slate-700 rounded-full relative cursor-pointer flex items-center"
+                                onClick={toggleTheme}
+                            >
+                                <div className={`w-3.5 h-3.5 bg-white rounded-full absolute transition-all duration-300 ${theme === 'dark' ? 'translate-x-5 bg-primary' : 'translate-x-1'}`}></div>
                             </div>
-                            <Moon className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
+                            <Moon 
+                                className={`w-5 h-5 cursor-pointer transition-colors ${theme === 'dark' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`} 
+                                onClick={toggleTheme}
+                            />
                         </div>
 
-                        <div className="flex items-center gap-4 border-r border-gray-100 pr-6">
-                            <Target className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+                        <div className="flex items-center gap-4 border-r border-gray-100 dark:border-slate-800 pr-6">
+                            <Target className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
                             <div className="relative">
-                                <Bell className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
-                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-white text-[10px] items-center justify-center flex font-bold rounded-full border-2 border-white">1</span>
+                                <Bell className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-white text-[10px] items-center justify-center flex font-bold rounded-full border-2 border-white dark:border-slate-900">1</span>
                             </div>
-                            <Mail className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+                            <Mail className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
                         </div>
 
                         <div className="flex items-center gap-3">
                             <div className="flex flex-col items-end">
-                                <span className="text-sm font-bold text-gray-800">{userName}</span>
+                                <span className="text-sm font-bold text-gray-800 dark:text-slate-200">{userName}</span>
                                 <div className="flex items-center gap-1.5">
                                     <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                                    <span className="text-xs text-sidebar-inactive">{userRole}</span>
+                                    <span className="text-xs text-sidebar-inactive dark:text-slate-400">{userRole}</span>
                                 </div>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-orange-100 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
                                 {/* Avatar Placeholder */}
                                 <span className="text-lg">🧑‍🏫</span>
                             </div>
-                            <Settings 
-                                className="w-5 h-5 text-gray-400 ml-2 cursor-pointer hover:text-gray-600" 
+                            <LogOut 
+                                className="w-5 h-5 text-gray-400 ml-2 cursor-pointer hover:text-red-500 transition-colors" 
                                 onClick={() => {
-                                    console.log("[DashboardLayout] Settings/Logout icon clicked");
+                                    console.log("[DashboardLayout] Logout icon clicked");
                                     onLogout?.();
                                 }}
                             />
@@ -75,7 +95,7 @@ export function DashboardLayout({
                 </header>
 
                 {/* Main Content Area */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-dashboard-bg p-8">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-dashboard-bg dark:bg-slate-950 p-8 transition-colors duration-300">
                     {children}
                 </main>
             </div>

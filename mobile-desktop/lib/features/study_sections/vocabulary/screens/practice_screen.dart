@@ -2,12 +2,20 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'favorite_manager.dart';
 import 'result_screen.dart';
 
 class PracticeScreen extends StatefulWidget {
   final List<Map<String, dynamic>> vocabList;
+  final String level;
+  final String topic;
 
-  const PracticeScreen({super.key, required this.vocabList});
+  const PracticeScreen({
+    super.key,
+    required this.vocabList,
+    required this.level,
+    required this.topic,
+  });
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
@@ -16,6 +24,10 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   final FlutterTts tts = FlutterTts();
   final Random random = Random();
+  final FavoriteManager favoriteManager = FavoriteManager();
+  int startTime = 0;
+
+  List<Map<String, dynamic>> weakWords = [];
   Map<String, List<String>> sentenceTemplates = {
     "noun": [
       "I see a ____.",
@@ -58,6 +70,18 @@ class _PracticeScreenState extends State<PracticeScreen> {
   bool isCorrectAnswer = false;
   bool showMatchConfirm = false;
 
+  Future<void> speakNormal(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.5); // tốc độ bình thường
+    await tts.speak(text);
+  }
+
+  Future<void> speakSlow(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.1); // đọc chậm
+    await tts.speak(text);
+  }
+
   /// ✔ tăng lên 20 câu
   int totalQuestion = 20;
 
@@ -72,6 +96,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   void initState() {
     super.initState();
+    startTime = DateTime.now().millisecondsSinceEpoch;
     loadQuestion();
   }
 
@@ -196,6 +221,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   void finishPractice() {
+    int endTime = DateTime.now().millisecondsSinceEpoch;
+    int timeSpent = ((endTime - startTime) / 1000).round();
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -203,6 +231,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
           correct: correctCount,
           wrong: wrongCount,
           total: totalQuestion,
+          time: timeSpent,
+          weakWords: weakWords,
+          vocabList: widget.vocabList,
+          level: widget.level,
+          topic: widget.topic,
         ),
       ),
     );
@@ -229,6 +262,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
           correctCount++;
         } else {
           wrongCount++;
+
+          weakWords.add({
+            "word": currentWord!['word'],
+            "meaning_vi": currentWord!['meaning_vi'],
+            "pos": currentWord!['pos'],
+            "phonetic": currentWord!['phonetic'],
+          });
         }
 
         setState(() {
@@ -390,6 +430,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
       correctCount++;
     } else {
       wrongCount++;
+
+      weakWords.add({
+        "word": currentWord!['word'],
+        "meaning_vi": currentWord!['meaning_vi'],
+        "pos": currentWord!['pos'],
+        "phonetic": currentWord!['phonetic'],
+      });
     }
 
     setState(() {
@@ -431,14 +478,16 @@ class _PracticeScreenState extends State<PracticeScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              (currentWord?['favorite'] ?? false)
+              favoriteManager.isFavorite(currentWord?['word'])
                   ? Icons.star
                   : Icons.star_border,
               color: Colors.amber,
             ),
             onPressed: () {
+              if (currentWord == null) return;
+
               setState(() {
-                currentWord!['favorite'] = !(currentWord?['favorite'] ?? false);
+                favoriteManager.toggleFavorite(currentWord!);
               });
             },
           ),
@@ -490,15 +539,32 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                 const SizedBox(height: 20),
 
-                IconButton(
-                  icon: const Icon(
-                    Icons.volume_up,
-                    size: 50,
-                    color: Colors.blue,
-                  ),
-                  onPressed: () {
-                    speak(currentWord!['word']);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    /// loa thường
+                    IconButton(
+                      iconSize: 70,
+                      icon: const Icon(Icons.volume_up, color: Colors.blue),
+                      onPressed: () {
+                        speakNormal(currentWord!['word']);
+                      },
+                    ),
+
+                    const SizedBox(width: 20),
+
+                    /// loa đọc chậm
+                    IconButton(
+                      iconSize: 40,
+                      icon: const Icon(
+                        Icons.slow_motion_video,
+                        color: Colors.blue,
+                      ),
+                      onPressed: () {
+                        speakSlow(currentWord!['word']);
+                      },
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 30),
@@ -518,15 +584,32 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                 const SizedBox(height: 20),
 
-                IconButton(
-                  icon: const Icon(
-                    Icons.volume_up,
-                    size: 50,
-                    color: Colors.blue,
-                  ),
-                  onPressed: () {
-                    speak(currentWord!['word']);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    /// loa thường
+                    IconButton(
+                      iconSize: 70,
+                      icon: const Icon(Icons.volume_up, color: Colors.blue),
+                      onPressed: () {
+                        speakNormal(currentWord!['word']);
+                      },
+                    ),
+
+                    const SizedBox(width: 20),
+
+                    /// loa đọc chậm
+                    IconButton(
+                      iconSize: 40,
+                      icon: const Icon(
+                        Icons.slow_motion_video,
+                        color: Colors.blue,
+                      ),
+                      onPressed: () {
+                        speakSlow(currentWord!['word']);
+                      },
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 30),
@@ -684,5 +767,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    tts.stop();
+    super.dispose();
   }
 }

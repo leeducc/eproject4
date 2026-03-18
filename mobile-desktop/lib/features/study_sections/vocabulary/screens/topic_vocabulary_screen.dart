@@ -5,10 +5,12 @@ import 'vocabulary_detail_screen.dart';
 
 class TopicVocabularyScreen extends StatelessWidget {
   final String topicName;
+  final String level;
   final List<Map<String, dynamic>> vocabularies;
 
   const TopicVocabularyScreen({
     Key? key,
+    required this.level,
     required this.topicName,
     required this.vocabularies,
   }) : super(key: key);
@@ -91,6 +93,8 @@ class TopicVocabularyScreen extends StatelessWidget {
                         builder: (_) => VocabularyDetailScreen(
                           vocabularies: vocabularies,
                           initialIndex: index,
+                          level: level,
+                          topic: topicName,
                         ),
                       ),
                     );
@@ -119,6 +123,8 @@ class TopicVocabularyScreen extends StatelessWidget {
                           builder: (_) => VocabularyDetailScreen(
                             vocabularies: vocabularies,
                             initialIndex: 0,
+                            level: level,
+                            topic: topicName,
                           ),
                         ),
                       );
@@ -135,8 +141,11 @@ class TopicVocabularyScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              PracticeScreen(vocabList: vocabularies),
+                          builder: (_) => PracticeScreen(
+                            vocabList: vocabularies,
+                            level: level,
+                            topic: topicName,
+                          ),
                         ),
                       );
                     },

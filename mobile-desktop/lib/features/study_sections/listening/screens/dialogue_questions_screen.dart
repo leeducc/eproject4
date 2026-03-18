@@ -3,8 +3,9 @@ import 'package:just_audio/just_audio.dart';
 import '../models/dialogue_question.dart';
 
 class DialogueQuestionsScreen extends StatefulWidget {
+  final String title;
   final List<DialogueQuestion> questions;
-  const DialogueQuestionsScreen({super.key, required this.questions});
+  const DialogueQuestionsScreen({super.key, required this.title, required this.questions});
 
   @override
   State<DialogueQuestionsScreen> createState() => _DialogueQuestionsScreenState();
@@ -159,7 +160,7 @@ class _DialogueQuestionsScreenState extends State<DialogueQuestionsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Dialogue Question"),
+          title: Text(widget.title),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -331,10 +332,15 @@ class _DialogueQuestionsScreenState extends State<DialogueQuestionsScreen> {
                 ElevatedButton(
                   onPressed: _nextQuestion,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: Colors.blueAccent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(_currentIndex < widget.questions.length - 1 ? "Next Question" : "Finish"),
                 ),

@@ -20,5 +20,14 @@ public class ExamResponse {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    @JsonProperty("question_ids")
+    private List<Long> questionIds;
+
+    @JsonProperty("group_ids")
+    private List<Long> groupIds;
+
+    private List<String> categories;
+
     private List<QuestionResponse> questions;
+    private List<QuestionGroupResponse> groups;
 }

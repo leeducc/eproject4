@@ -3,8 +3,9 @@ import '../models/true_false_question.dart';
 import '../services/audio_service.dart';
 
 class TrueFalseScreen extends StatefulWidget {
+  final String title;
   final List<TrueFalseQuestion> questions;
-  const TrueFalseScreen({super.key, required this.questions});
+  const TrueFalseScreen({super.key, required this.title, required this.questions});
 
   @override
   State<TrueFalseScreen> createState() => _TrueFalseScreenState();
@@ -12,7 +13,6 @@ class TrueFalseScreen extends StatefulWidget {
 
 class _TrueFalseScreenState extends State<TrueFalseScreen> {
   final audio = AudioService();
-  final controller = PageController();
   
   int index = 0;
   bool isSpeaking = false;
@@ -127,12 +127,68 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
   @override
   void dispose() {
     audio.stop();
-    controller.dispose();
     super.dispose();
+  }
+
+  void nextQuestion() async {
+    if (index != widget.questions.length - 1) {
+      audio.stop();
+      setState(() {
+        index++;
+        isSpeaking = false;
+      });
+      return;
+    }
+
+    int? unanswered = getFirstUnansweredIndex();
+
+    if (unanswered != null) {
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Incomplete"),
+          content: Text(
+            "You still haven't answered question ${unanswered + 1}.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+
+      setState(() {
+        index = unanswered;
+        isSpeaking = false;
+      });
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Your Results 🎯"),
+        content: buildResultList(),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text("CLOSE"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final q = widget.questions[index];
+    final result = userAnswers[index];
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -143,7 +199,7 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("True / False"),
+          title: Text(widget.title),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -172,146 +228,75 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
               ),
             ),
             Expanded(
-              child: PageView.builder(
-                controller: controller,
-                itemCount: widget.questions.length,
-                onPageChanged: (i) {
-                  audio.stop();
-                  setState(() {
-                    index = i;
-                    isSpeaking = false; // Reset speaking state on page change
-                  });
-                },
-                itemBuilder: (_, i) {
-                  final q = widget.questions[i];
-                  final result = userAnswers[i];
-
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.network(q.image, height: 220),
-                      const SizedBox(height: 30),
-                      IconButton(
-                        icon: Icon(
-                          Icons.volume_up,
-                          size: 60,
-                          color: isSpeaking ? Colors.green : Colors.white,
-                        ),
-                        onPressed: () => audio.speak(widget.questions[index].word),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 40),
+                    Image.network(q.image, height: 220),
+                    const SizedBox(height: 30),
+                    IconButton(
+                      icon: Icon(
+                        Icons.volume_up,
+                        size: 60,
+                        color: isSpeaking ? Colors.green : Colors.white,
                       ),
-                      if (isSpeaking)
-                        const Text(
-                          "Listening...",
-                          style: TextStyle(color: Colors.green),
-                        ),
-                      if (result != null) ...[
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              result ? Icons.check_circle : Icons.cancel,
+                      onPressed: () => audio.speak(widget.questions[index].word),
+                    ),
+                    if (isSpeaking)
+                      const Text(
+                        "Listening...",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    if (result != null) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            result ? Icons.check_circle : Icons.cancel,
+                            color: result ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            result ? "Correct" : "Incorrect",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                               color: result ? Colors.green : Colors.red,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              result ? "Correct" : "Incorrect",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: result ? Colors.green : Colors.red,
-                              ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(q.word, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        height: 50,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(q.word, style: const TextStyle(fontSize: 20)),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              foregroundColor: Colors.white,
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (index != widget.questions.length - 1) {
-                                // Stop audio and reset UI state before moving to next page
-                                audio.stop();
-                                setState(() {
-                                  isSpeaking = false;
-                                });
-                                
-                                controller.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.ease,
-                                );
-                                return;
-                              }
-
-                              int? unanswered = getFirstUnansweredIndex();
-
-                              if (unanswered != null) {
-                                await showDialog(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text("Incomplete"),
-                                    content: Text(
-                                      "You still haven't answered question ${unanswered! + 1}.",
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text("OK"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-
-                                controller.animateToPage(
-                                  unanswered,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.ease,
-                                );
-                                return;
-                              }
-
-                              showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  title: const Text("Your Results 🎯"),
-                                  content: buildResultList(),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("CLOSE"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: Text(
-                              index == widget.questions.length - 1
-                                  ? "DONE"
-                                  : "NEXT QUESTION",
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
+                          onPressed: nextQuestion,
+                          child: Text(
+                            index == widget.questions.length - 1
+                                ? "DONE"
+                                : "NEXT QUESTION",
+                          ),
                         ),
-                      ],
+                      ),
                     ],
-                  );
-                },
+                  ],
+                ),
               ),
             ),
             SafeArea(

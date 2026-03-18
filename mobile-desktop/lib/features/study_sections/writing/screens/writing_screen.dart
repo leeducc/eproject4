@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/topic_model.dart';
 import '../models/essay_submission_response.dart';
+import '../models/writing_correction.dart';
 import '../services/writing_api_service.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/ielts_level_provider.dart';
 import '../../../home/screens/choose_level_screen.dart';
-import '../services/writing_provider.dart';
+
 
 class WritingScreen extends StatefulWidget {
   final Topic topic;
@@ -16,14 +17,21 @@ class WritingScreen extends StatefulWidget {
   State<WritingScreen> createState() => _WritingScreenState();
 }
 
-class _WritingScreenState extends State<WritingScreen> {
+class _WritingScreenState extends State<WritingScreen> with SingleTickerProviderStateMixin {
   final WritingApiService _apiService = WritingApiService();
   final TextEditingController _contentController = TextEditingController();
+  late TabController _tabController;
 
   String _gradingType = 'AI';
   bool _isSubmitting = false;
-  String? _aiFeedback;
+  EssaySubmissionResponse? _submissionResponse;
   bool _showHint = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
 
   Future<void> _submitEssay() async {
     if (_contentController.text.trim().isEmpty) {
@@ -33,7 +41,7 @@ class _WritingScreenState extends State<WritingScreen> {
 
     setState(() {
       _isSubmitting = true;
-      _aiFeedback = null; // reset if grading again
+      _submissionResponse = null; // reset if grading again
     });
 
     try {
@@ -50,9 +58,35 @@ class _WritingScreenState extends State<WritingScreen> {
       if (_gradingType == 'HUMAN') {
         _showHumanGradingDialog();
       } else {
+        // Use data from API, fallback to defaults if not present
+        final finalResponse = EssaySubmissionResponse(
+          id: response.id,
+          topic: response.topic,
+          content: response.content,
+          gradingType: response.gradingType,
+          aiFeedback: response.aiFeedback,
+          score: response.score,
+          taskAchievement: response.taskAchievement ?? 0.0,
+          grammaticalRange: response.grammaticalRange ?? 0.0,
+          lexicalResource: response.lexicalResource ?? 0.0,
+          cohesionCoherence: response.cohesionCoherence ?? 0.0,
+          corrections: response.corrections.isNotEmpty 
+              ? response.corrections 
+              : [
+                  WritingCorrection(
+                    original: "Example: I is...",
+                    corrected: "I am...",
+                    explanation: "Note: Real AI corrections will appear here if the backend provides them.",
+                  ),
+                ],
+        );
+
         setState(() {
-          _aiFeedback = response.aiFeedback;
+          _submissionResponse = finalResponse;
         });
+
+        // Switch to Result tab automatically
+        _tabController.animateTo(2);
       }
     } catch (e) {
       setState(() {
@@ -93,13 +127,13 @@ class _WritingScreenState extends State<WritingScreen> {
   @override
   void dispose() {
     _contentController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final level = context.watch<IeltsLevelProvider>().selectedLevel;
-    final writingProvider = context.watch<WritingProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF161A23),
@@ -118,245 +152,458 @@ class _WritingScreenState extends State<WritingScreen> {
           _LevelBadge(level: level),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Topic Title
-            Text(
-              widget.topic.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          // 1. Grader Toggle
+          _buildGraderToggle(),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  
+                  // 2. Main Essay View (Input or Corrected View)
+                  _buildEssayView(),
+                  
+                  const SizedBox(height: 24),
+
+                  // 3. Submit Button (only show if not submitted or if re-editing)
+                  if (_submissionResponse == null) _buildSubmitButton(),
+
+                  const SizedBox(height: 24),
+
+                  // 4. Bottom Tab Layout (Feedback Sections)
+                  _buildFeedbackTabs(),
+                  
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Topic Description
-            Text(
-              widget.topic.description,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Optional Image
-            if (widget.topic.imageUrl != null && widget.topic.imageUrl!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    widget.topic.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Text('Không thể tải hình ảnh.', style: TextStyle(color: Colors.redAccent)),
-                  ),
-                ),
-              ),
-
-            // Optional Audio (Placeholder for a generic audio player UI)
-            if (widget.topic.audioUrl != null && widget.topic.audioUrl!.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2330),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.audiotrack, color: Colors.blueAccent),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'File âm thanh đính kèm',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.play_arrow, color: Colors.blueAccent),
-                      onPressed: () {
-                        // TODO: Implement Audio playing logic
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Chức năng phát âm thanh đang được hoàn thiện.')),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-            // Toggleable Hint
-            if (widget.topic.hint != null && widget.topic.hint!.isNotEmpty)
-              Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  title: const Text(
-                    'Xem gợi ý bài viết (Hint)',
-                    style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-                  ),
-                  iconColor: Colors.blueAccent,
-                  collapsedIconColor: Colors.blueAccent,
-                  onExpansionChanged: (expanded) {
-                    setState(() {
-                      _showHint = expanded;
-                    });
-                  },
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
-                      ),
-                      child: Text(
-                        widget.topic.hint!,
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            
-            const SizedBox(height: 20),
-            const Text(
-              'Phương thức chấm điểm:',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            Row(
-              children: [
-                Radio<String>(
-                  value: 'AI',
-                  groupValue: _gradingType,
-                  activeColor: Colors.blueAccent,
-                  fillColor: MaterialStateProperty.resolveWith((states) => Colors.blueAccent),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _gradingType = value!;
-                    });
-                  },
-                ),
-                const Text('AI (Ollama)', style: TextStyle(color: Colors.white)),
-                const SizedBox(width: 20),
-                Radio<String>(
-                  value: 'HUMAN',
-                  groupValue: _gradingType,
-                  activeColor: Colors.blueAccent,
-                  fillColor: MaterialStateProperty.resolveWith((states) => Colors.blueAccent),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _gradingType = value!;
-                    });
-                  },
-                ),
-                const Text('Giáo viên', style: TextStyle(color: Colors.white)),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Text Input For Essay
-            Container(
-              height: 300, // Fixed height for input area
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2330),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: TextField(
-                controller: _contentController,
-                style: const TextStyle(color: Colors.white),
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                decoration: const InputDecoration(
-                  hintText: 'Nhập bài luận của bạn vào đây...',
-                  hintStyle: TextStyle(color: Colors.white30),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Submit Button or Loading State
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitEssay,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: _isSubmitting
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(color: Colors.white),
-                          SizedBox(width: 12),
-                          Text(
-                            'AI đang chấm bài của bạn, vui lòng đợi...',
-                            style: TextStyle(color: Colors.white),
-                          )
-                        ],
-                      )
-                    : const Text(
-                        'Nộp bài',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-              ),
-            ),
-
-            // Inline AI Feedback display
-            if (_aiFeedback != null && _gradingType == 'AI')
-              Container(
-                margin: const EdgeInsets.only(top: 24),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2330),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.greenAccent.withOpacity(0.5)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.greenAccent),
-                        SizedBox(width: 8),
-                        Text(
-                          'Kết quả chấm từ AI',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _aiFeedback!,
-                      style: const TextStyle(color: Colors.white70, height: 1.5),
-                    )
-                  ],
-                ),
-              ),
-              
-            const SizedBox(height: 40), // Padding at bottom of scrollable area
-          ],
+  Widget _buildGraderToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: SegmentedButton<String>(
+        segments: const <ButtonSegment<String>>[
+          ButtonSegment<String>(
+            value: 'HUMAN',
+            label: Text('Giáo viên'),
+            icon: Icon(Icons.person_outline),
+          ),
+          ButtonSegment<String>(
+            value: 'AI',
+            label: Text('AI Grader'),
+            icon: Icon(Icons.auto_awesome),
+          ),
+        ],
+        selected: <String>{_gradingType},
+        onSelectionChanged: (Set<String> newSelection) {
+          setState(() {
+            _gradingType = newSelection.first;
+          });
+        },
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: _gradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
+          selectedForegroundColor: _gradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
+          side: BorderSide(color: _gradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.5) : Colors.blueAccent.withOpacity(0.5)),
         ),
       ),
+    );
+  }
+
+  Widget _buildEssayView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Bài viết của bạn',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            if (_submissionResponse != null)
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _submissionResponse = null;
+                  });
+                },
+                icon: const Icon(Icons.edit, size: 16),
+                label: const Text('Viết lại'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          constraints: const BoxConstraints(minHeight: 200),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E2330),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: _submissionResponse == null 
+            ? _buildEssayInput() 
+            : _buildRichTextEssay(_submissionResponse!.content, _submissionResponse!.corrections),
+        ),
+        _buildWordCount(),
+      ],
+    );
+  }
+
+  Widget _buildEssayInput() {
+    return TextField(
+      controller: _contentController,
+      style: const TextStyle(color: Colors.white, height: 1.5),
+      maxLines: null,
+      decoration: const InputDecoration(
+        hintText: 'Nhập bài luận của bạn vào đây...',
+        hintStyle: TextStyle(color: Colors.white30),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  Widget _buildRichTextEssay(String content, List<WritingCorrection> corrections) {
+    // Basic logic: highlight original parts that were corrected
+    List<TextSpan> spans = [];
+    String remaining = content;
+
+    if (corrections.isEmpty) {
+      spans.add(TextSpan(text: content, style: const TextStyle(color: Colors.white70)));
+    } else {
+      // Very simplified highlighting for demo purposes
+      // In a real app, this would use character offsets from the AI response
+      for (var correction in corrections) {
+        int index = remaining.indexOf(correction.original);
+        if (index != -1) {
+          // Add text before correction
+          spans.add(TextSpan(text: remaining.substring(0, index)));
+          
+          // Add original (strikethrough)
+          spans.add(TextSpan(
+            text: correction.original,
+            style: TextStyle(
+              color: Colors.redAccent.withOpacity(0.8),
+              decoration: TextDecoration.lineThrough,
+              backgroundColor: Colors.redAccent.withOpacity(0.1),
+            ),
+          ));
+
+          // Add corrected (bold, green)
+          spans.add(TextSpan(
+            text: ' ${correction.corrected} ',
+            style: const TextStyle(
+              color: Colors.greenAccent,
+              fontWeight: FontWeight.bold,
+              backgroundColor: Color(0x2200FF00),
+            ),
+          ));
+          
+          remaining = remaining.substring(index + correction.original.length);
+        }
+      }
+      spans.add(TextSpan(text: remaining));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.6),
+          children: spans,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWordCount() {
+    int count = _contentController.text.trim().isEmpty 
+        ? 0 
+        : _contentController.text.trim().split(RegExp(r'\s+')).length;
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, left: 4),
+      child: Chip(
+        visualDensity: VisualDensity.compact,
+        backgroundColor: Colors.white10,
+        label: Text(
+          '$count từ',
+          style: const TextStyle(color: Colors.white60, fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isSubmitting ? null : _submitEssay,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _gradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+        ),
+        child: _isSubmitting
+            ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                  SizedBox(width: 12),
+                  Text('Đang xử lý...'),
+                ],
+              )
+            : Text(
+                _gradingType == 'AI' ? 'Chấm điểm bằng AI ✨' : 'Nộp bài cho giáo viên',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildFeedbackTabs() {
+    return Column(
+      children: [
+        TabBar(
+          controller: _tabController,
+          labelColor: Colors.blueAccent,
+          unselectedLabelColor: Colors.white30,
+          indicatorColor: Colors.blueAccent,
+          dividerColor: Colors.white10,
+          tabs: const [
+            Tab(text: 'Đề bài'),
+            Tab(text: 'Sửa lỗi'),
+            Tab(text: 'Kết quả'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 400, // Fixed height for tab content
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildQuestionTab(),
+              _buildCorrectionsTab(),
+              _buildResultTab(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuestionTab() {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(), // Handled by outer scroll
+      children: [
+        Text(
+          widget.topic.title,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          widget.topic.prompt,
+          style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+        ),
+        if (widget.topic.imageUrl != null && widget.topic.imageUrl!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(widget.topic.imageUrl!),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCorrectionsTab() {
+    if (_submissionResponse == null || _submissionResponse!.corrections.isEmpty) {
+      return const Center(
+        child: Text(
+          'Chưa có dữ liệu sửa lỗi.',
+          style: TextStyle(color: Colors.white30),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: _submissionResponse!.corrections.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final correction = _submissionResponse!.corrections[index];
+        return Card(
+          color: const Color(0xFF1E2330),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.white10)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        correction.original,
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        correction.corrected,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 24, color: Colors.white10),
+                Text(
+                  correction.explanation,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildResultTab() {
+    if (_submissionResponse == null) {
+      return const Center(
+        child: Text(
+          'Nộp bài để xem kết quả.',
+          style: TextStyle(color: Colors.white30),
+        ),
+      );
+    }
+
+    return ListView(
+      children: [
+        // Total Score
+        Center(
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.blueAccent, width: 4),
+            ),
+            child: Center(
+              child: Text(
+                '${_submissionResponse!.score ?? "-"}',
+                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+        const Center(child: Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text('OVERALL BAND', style: TextStyle(color: Colors.white30, letterSpacing: 1.2)),
+        )),
+        
+        const SizedBox(height: 32),
+        
+        // Sub-scores Grid
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          childAspectRatio: 1.8,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          children: [
+            _buildScoreItem('Task Achievement', _submissionResponse!.taskAchievement ?? 0),
+            _buildScoreItem('Cohesion & Coherence', _submissionResponse!.cohesionCoherence ?? 0),
+            _buildScoreItem('Lexical Resource', _submissionResponse!.lexicalResource ?? 0),
+            _buildScoreItem('Grammatical Range', _submissionResponse!.grammaticalRange ?? 0),
+          ],
+        ),
+
+        const SizedBox(height: 32),
+
+        // Feedback Text
+        const Text(
+          'Nhận xét chi tiết',
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            _submissionResponse!.aiFeedback ?? "Không có nhận xét.",
+            style: const TextStyle(color: Colors.white70, height: 1.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScoreItem(String label, double score) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              '$score',
+              style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: score / 9.0,
+            backgroundColor: Colors.white12,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+            minHeight: 6,
+          ),
+        ),
+      ],
     );
   }
 }

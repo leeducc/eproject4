@@ -23,27 +23,25 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     
     setState(() => _isLoading = true);
-    bool success = await AuthApi.login(
+    final response = await AuthApi.login(
       _emailController.text.trim(),
       _passwordController.text,
     );
     setState(() => _isLoading = false);
 
     if (!mounted) return;
-    if (success) {
+    if (response['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công!')),
       );
-
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainLayout()),
       );
-
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sai email hoặc mật khẩu. Hãy thử: user1@gmail.com / User@123')),
+        SnackBar(content: Text(response['error'] ?? 'Sai email hoặc mật khẩu.')),
       );
     }
   }

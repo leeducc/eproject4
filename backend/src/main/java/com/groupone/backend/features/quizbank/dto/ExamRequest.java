@@ -20,4 +20,7 @@ public class ExamRequest {
 
     @JsonProperty("question_ids")
     private List<Long> questionIds;
+
+    @JsonProperty("group_ids")
+    private List<Long> groupIds;
 }
