@@ -108,8 +108,7 @@ hs_err_pid*
 # ===========================
 # AI Agent
 # ===========================
-#.agent/rules/
-!.agent/rules/api-docs-rule.md
+.agent/rules/
 
 # ===========================
 # Miscellaneous
