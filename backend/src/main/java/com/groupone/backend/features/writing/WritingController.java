@@ -1,10 +1,12 @@
 package com.groupone.backend.features.writing;
 
+import com.groupone.backend.features.identity.User;
 import com.groupone.backend.features.writing.dto.EssaySubmissionRequest;
 import com.groupone.backend.features.writing.dto.EssaySubmissionResponse;
 import com.groupone.backend.features.writing.dto.TopicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,9 @@ public class WritingController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<EssaySubmissionResponse> submitEssay(@RequestBody EssaySubmissionRequest request) {
-        return ResponseEntity.ok(writingService.submitEssay(request));
+    public ResponseEntity<EssaySubmissionResponse> submitEssay(
+            @RequestBody EssaySubmissionRequest request,
+            @AuthenticationPrincipal User student) {
+        return ResponseEntity.ok(writingService.submitEssay(request, student));
     }
 }

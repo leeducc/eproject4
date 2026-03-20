@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardLayout, NavItem } from "@english-learning/ui";
+import { DashboardLayout, NavItem, toast } from "@english-learning/ui";
 import { Home, Database, Users, Settings, Briefcase } from "lucide-react";
 
 interface AdminLayoutProps {
     children: React.ReactNode;
 }
 
-import { toast } from "@english-learning/ui";
+import { useThemeStore } from "../store/useThemeStore";
 
 export function AdminLayout({ children }: AdminLayoutProps) {
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     console.log("[AdminLayout] User confirmed logout. Clearing session...");
                     localStorage.removeItem("admin_token");
                     toast.success("Logged out successfully");
-                    navigate("/");
+                    navigate("/login");
                 },
             },
             cancel: {
@@ -61,11 +61,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 { title: "Messages", href: "/admin/customers/messages" },
                 { title: "Reports", href: "/admin/customers/reports" },
                 { title: "Requests", href: "/admin/customers/requests" },
-                { title: "iCoin Transactions", href: "/admin/customer-management/icoin" },
+                { title: "iCoin Transactions", href: "/admin/customers/icoin" },
             ],
         },
         { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
     ];
+
+    const theme = useThemeStore((state) => state.theme);
+    const toggleTheme = useThemeStore((state) => state.toggleTheme);
+
+    const handleToggle = useCallback(() => {
+        toggleTheme();
+    }, [toggleTheme]);
 
     return (
         <DashboardLayout 
@@ -73,6 +80,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             userName="Admin User" 
             userRole="System Admin"
             onLogout={handleLogout}
+            theme={theme}
+            toggleTheme={handleToggle}
         >
             {children}
         </DashboardLayout>

@@ -10,6 +10,8 @@ import com.groupone.backend.features.identity.dto.RegisterRequest;
 import com.groupone.backend.features.identity.dto.ResetPasswordRequest;
 import com.groupone.backend.features.identity.dto.GoogleLoginRequest;
 import com.groupone.backend.shared.enums.UserRole;
+import com.groupone.backend.shared.enums.UserStatus;
+import com.groupone.backend.shared.exception.AccountSuspendedException;
 import com.groupone.backend.shared.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,17 +81,34 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        long t0 = System.currentTimeMillis();
+        System.out.println("[AuthService] login() started for: " + request.getEmail());
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+        System.out.println("[AuthService] DB lookup took " + (System.currentTimeMillis() - t0) + "ms");
 
+        long t1 = System.currentTimeMillis();
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            System.out.println("[AuthService] BCrypt check took " + (System.currentTimeMillis() - t1) + "ms (password mismatch)");
             throw new IllegalArgumentException("Invalid email or password");
         }
+        System.out.println("[AuthService] BCrypt check took " + (System.currentTimeMillis() - t1) + "ms (OK)");
 
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            System.out.println("LOGIN ERROR: Account suspended for email: " + user.getEmail());
+            throw new AccountSuspendedException("Your account has been suspended. Please contact support.");
+        }
+
+        long t2 = System.currentTimeMillis();
         String token = jwtUtil.generateToken(user);
+        System.out.println("[AuthService] JWT generation took " + (System.currentTimeMillis() - t2) + "ms");
+
         String fullName = user.getProfile() != null ? user.getProfile().getFullName() : null;
 
+        System.out.println("[AuthService] login() total time: " + (System.currentTimeMillis() - t0) + "ms");
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .email(user.getEmail())
                 .role(user.getRole())
@@ -131,10 +150,16 @@ public class AuthService {
                     return newUser;
                 });
 
+                if (user.getStatus() == UserStatus.SUSPENDED) {
+                    System.out.println("GOOGLE LOGIN ERROR: Account suspended for email: " + user.getEmail());
+                    throw new AccountSuspendedException("Your account has been suspended. Please contact support.");
+                }
+
                 String token = jwtUtil.generateToken(user);
                 String fullName = user.getProfile() != null ? user.getProfile().getFullName() : null;
 
                 return AuthResponse.builder()
+                        .id(user.getId())
                         .token(token)
                         .email(user.getEmail())
                         .role(user.getRole())

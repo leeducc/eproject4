@@ -50,6 +50,7 @@ dev_dependencies:
   flutter_tts:
   webview_flutter:
   shared_preferences:
+  confetti:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

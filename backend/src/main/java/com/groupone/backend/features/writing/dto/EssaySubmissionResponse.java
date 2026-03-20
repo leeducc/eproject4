@@ -21,15 +21,37 @@ public class EssaySubmissionResponse {
     private Double score;
     private LocalDateTime createdAt;
 
+    // Detailed assessment
+    private Double taskAchievement;
+    private Double cohesionCoherence;
+    private Double lexicalResource;
+    private Double grammaticalRange;
+    private String teacherFeedback;
+    private String taskAchievementReason;
+    private String cohesionCoherenceReason;
+    private String lexicalResourceReason;
+    private String grammaticalRangeReason;
+    private String correctionsJson;
+
     public static EssaySubmissionResponse fromEntity(WritingSubmission submission) {
         return EssaySubmissionResponse.builder()
                 .id(submission.getId())
-                .topic(TopicResponse.fromEntity(submission.getTopic()))
+                .topic(TopicResponse.fromEntity(submission.getQuestion()))
                 .content(submission.getContent())
                 .gradingType(submission.getGradingType())
                 .aiFeedback(submission.getAiFeedback())
                 .score(submission.getScore())
                 .createdAt(submission.getCreatedAt())
+                .taskAchievement(submission.getTaskAchievement())
+                .cohesionCoherence(submission.getCohesionCoherence())
+                .lexicalResource(submission.getLexicalResource())
+                .grammaticalRange(submission.getGrammaticalRange())
+                .teacherFeedback(submission.getTeacherFeedback())
+                .taskAchievementReason(submission.getTaskAchievementReason())
+                .cohesionCoherenceReason(submission.getCohesionCoherenceReason())
+                .lexicalResourceReason(submission.getLexicalResourceReason())
+                .grammaticalRangeReason(submission.getGrammaticalRangeReason())
+                .correctionsJson(submission.getCorrectionsJson())
                 .build();
     }
 }

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthApi {
 
-  static final String baseUrl = '${dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8080/api'}/auth';
+  static final String baseUrl = '${dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api'}/auth';
   
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
 
@@ -56,15 +56,18 @@ class AuthApi {
     }
   }
 
-  static Future<bool> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
+      print('Attempting login for: $email at ${Uri.parse('$baseUrl/login')}');
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 10));
+      
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
         if (data.containsKey('token')) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', data['token']);
@@ -73,13 +76,23 @@ class AuthApi {
           }
           print('Saved token from email login');
         }
-        return true;
+        return {'success': true, ...data};
+      } else {
+        print('Login failed: ${response.statusCode} - ${response.body}');
+        return {
+          'success': false, 
+          'error': data['error'] ?? 'Sai email hoặc mật khẩu.'
+        };
       }
-      print('Login false: ${response.statusCode} - ${response.body}');
-      return false;
     } catch (e) {
-      print('Login error: $e');
-      return false;
+      print('Login error details: $e');
+      String userMessage = 'Lỗi kết nối';
+      if (e.toString().contains('TimeoutException')) {
+        userMessage = 'Yêu cầu đăng nhập quá hạn. Vui lòng kiểm tra mạng hoặc máy chủ.';
+      } else if (e.toString().contains('Connection refused')) {
+        userMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra máy chủ backend.';
+      }
+      return {'success': false, 'error': '$userMessage: ${e.toString()}'};
     }
   }
 

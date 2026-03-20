@@ -1,0 +1,45 @@
+package com.groupone.backend.features.vocabulary;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "vocabulary", indexes = {
+    @Index(name = "idx_vocabulary_word", columnList = "word"),
+    @Index(name = "idx_vocabulary_type_level", columnList = "type, levelGroup")
+})
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class VocabularyEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String word;
+
+    @Column(nullable = false)
+    private String type; // "word" or "phrase"
+
+    private String level; // a1, a2, b1, b2, c1, c2
+    private String levelGroup; // 0-4, 5-6, 7-8, 9
+    private String pos; // part of speech
+    
+    @Column(length = 500)
+    private String definitionUrl;
+    
+    @Column(length = 500)
+    private String voiceUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String definition;
+
+    @Column(columnDefinition = "TEXT")
+    private String examplesJson;
+
+    @Column(columnDefinition = "TEXT")
+    private String synonymsJson;
+}

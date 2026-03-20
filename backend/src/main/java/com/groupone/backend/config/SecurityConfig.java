@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.groupone.backend.shared.security.JwtFilter;
+import com.groupone.backend.shared.security.RateLimitingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 
@@ -29,19 +30,34 @@ import org.springframework.http.HttpMethod;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // Strength 8 is faster (~80ms) vs default 10 (~300ms) — sufficient for security
+        System.out.println("[SecurityConfig] Initializing BCryptPasswordEncoder with strength=8");
+        return new BCryptPasswordEncoder(8);
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // NOTE: Spring's CorsConfiguration does NOT support wildcard ports like "http://10.0.2.2:*".
+        // Using a wildcard pattern means it NEVER matches, causing CORS preflight to silently fail
+        // and the Flutter client to wait until the 10s timeout fires.
+        // Fix: list each allowed origin explicitly.
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002",
+            "http://10.0.2.2:8123"   // Android Emulator -> host machine port 8123
+        ));
+        // Also allow any origin pattern for the Android emulator on any port (dev convenience)
+        configuration.setAllowedOriginPatterns(List.of("http://10.0.2.2:*", "http://localhost:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        System.out.println("[SecurityConfig] CORS configured. Allowed origin patterns: http://10.0.2.2:*, http://localhost:*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -55,6 +71,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/vocabulary/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/questions/seed").permitAll()
@@ -62,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         .anyRequest().authenticated());
 
+        http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

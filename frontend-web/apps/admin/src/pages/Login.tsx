@@ -36,7 +36,7 @@ export default function AdminLogin() {
             localStorage.setItem("admin_token", token);
             navigate("/admin/dashboard");
         } catch (err: any) {
-            setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+            setError(err.response?.data?.error || err.response?.data?.message || "Invalid credentials. Please try again.");
         } finally {
             setIsLoading(false);
         }

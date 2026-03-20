@@ -3,6 +3,8 @@ import '../../../../features/study_sections/writing/models/topic_model.dart';
 import '../../../../features/study_sections/writing/services/writing_api_service.dart';
 import '../../../../features/profile/screens/upgrade_pro_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../services/writing_provider.dart';
 import 'writing_screen.dart';
 
 class TopicListScreen extends StatefulWidget {
@@ -13,40 +15,29 @@ class TopicListScreen extends StatefulWidget {
 }
 
 class _TopicListScreenState extends State<TopicListScreen> {
-  final WritingApiService _apiService = WritingApiService();
-  List<Topic> _topics = [];
   bool _isLoading = true;
   bool _isPro = false;
 
   @override
   void initState() {
     super.initState();
-    _loadTopics();
+    _checkProStatus();
   }
 
-  Future<void> _loadTopics() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final isProUser = prefs.getBool('is_pro') ?? false;
-
-      final topics = await _apiService.fetchTopics();
-      setState(() {
-        _topics = topics;
-        _isPro = isProUser;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi tải danh sách chủ đề: $e'), backgroundColor: Colors.redAccent),
-      );
-    }
+  Future<void> _checkProStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isPro = prefs.getBool('is_pro') ?? false;
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final writingProvider = context.watch<WritingProvider>();
+    final topics = writingProvider.items;
+    final isLoading = writingProvider.state == LoadState.loading || _isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFF161A23),
       appBar: AppBar(
@@ -61,9 +52,9 @@ class _TopicListScreenState extends State<TopicListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading
+      body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
-          : _topics.isEmpty
+          : topics.isEmpty
               ? const Center(
                   child: Text(
                     'Không có chủ đề nào.',
@@ -72,9 +63,14 @@ class _TopicListScreenState extends State<TopicListScreen> {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(16.0),
-                  itemCount: _topics.length,
+                  itemCount: topics.length,
                   itemBuilder: (context, index) {
-                    final topic = _topics[index];
+                    final topicPrompt = topics[index];
+                    final title = topicPrompt.title;
+                    final description = topicPrompt.promptText;
+                    final topicId = int.tryParse(topicPrompt.id) ?? 0;
+                    const isProOnly = false; 
+
                     return Card(
                       color: const Color(0xFF1E2330),
                       margin: const EdgeInsets.only(bottom: 12),
@@ -83,10 +79,18 @@ class _TopicListScreenState extends State<TopicListScreen> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-                          if (topic.isProOnly && !_isPro) {
+                          if (isProOnly && !_isPro) {
                             _showUpgradePrompt();
                             return;
                           }
+                          
+                          // Convert back to Topic for WritingScreen
+                          final topic = Topic(
+                            id: topicId,
+                            title: title,
+                            prompt: description,
+                          );
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -102,7 +106,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    topic.title,
+                                    title,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -111,7 +115,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    topic.description,
+                                    description,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -122,7 +126,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                 ],
                               ),
                             ),
-                            if (topic.isProOnly && !_isPro)
+                            if (isProOnly && !_isPro)
                               const Positioned(
                                 top: 16,
                                 right: 16,

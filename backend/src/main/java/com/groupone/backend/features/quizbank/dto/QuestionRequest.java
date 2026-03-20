@@ -37,4 +37,10 @@ public class QuestionRequest {
     private List<String> mediaTypes;
 
     private List<String> retainedMediaUrls;
+
+    private Long groupId;
+
+    private Long authorId;
+
+    private List<String> tags; // List of tags in format "namespace:name" or just "name"
 }

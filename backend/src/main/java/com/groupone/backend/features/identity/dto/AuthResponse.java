@@ -11,6 +11,7 @@ import com.groupone.backend.shared.enums.UserRole;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponse {
+    private Long id;
     private String token;
     private String email;
     private UserRole role;
