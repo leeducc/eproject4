@@ -108,7 +108,7 @@ hs_err_pid*
 # ===========================
 # AI Agent
 # ===========================
-.agent/rules/
+.agent/
 
 # ===========================
 # Miscellaneous
@@ -128,5 +128,6 @@ coverage/
 # ===========================
 # Media & Uploads
 # ===========================
-backend/uploads/
+backend/uploads/*
+!backend/uploads/dictionary/
 /logs/
