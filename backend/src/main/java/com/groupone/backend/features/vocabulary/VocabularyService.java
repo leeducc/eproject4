@@ -37,7 +37,7 @@ public class VocabularyService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
-    private static final String CSV_DIR = "D:\\project\\eproject4\\backend\\uploads\\dictionary";
+    private static final String CSV_DIR = "uploads/dictionary";
     private static final String WORDS_FILE = "oxford-5k.csv";
     private static final String PHRASES_FILE = "oxford-phrase.csv";
 

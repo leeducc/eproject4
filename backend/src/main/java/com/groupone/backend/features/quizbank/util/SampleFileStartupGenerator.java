@@ -14,7 +14,7 @@ import java.io.IOException;
 @Slf4j
 public class SampleFileStartupGenerator implements CommandLineRunner {
 
-    private static final String FILE_PATH = "d:/project/eproject4/database/sample_questions.xlsx";
+    private static final String FILE_PATH = "uploads/sample_questions.xlsx";
 
     @Override
     public void run(String... args) throws Exception {

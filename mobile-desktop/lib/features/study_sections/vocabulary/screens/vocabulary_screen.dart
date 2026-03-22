@@ -1772,25 +1772,32 @@ class _VocabularyScreenState extends State<VocabularyScreen>
   }
 
   SliverGrid _buildTopicGridSliver(int index) {
-    final topics = hskData[index]['topics'] as List<Map>;
+    final current = hskData[index];
+    final topics = current['topics'] as List<Map>;
+
+    // 👉 tổng số ô (có thể chỉnh)
+    final totalLevels = topics.length * 3; // ví dụ mỗi topic chia 3 level
 
     return SliverGrid(
       delegate: SliverChildBuilderDelegate((context, i) {
-        final topic = topics[i];
-        final topicTitle = topic['title'] as String;
+        int levelNumber = i + 1;
 
         return InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            final vocabByTopic = topicVocabularyData[topicTitle] ?? [];
+            // 👉 chia level -> topic
+            int topicIndex = i % topics.length;
+            final topic = topics[topicIndex];
+            final topicTitle = topic['title'] as String;
 
-            final levelTitle = hskData[index]['level'] as String;
+            final vocabByTopic = topicVocabularyData[topicTitle] ?? [];
+            final levelTitle = current['level'] as String;
 
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => TopicVocabularyScreen(
-                  level: levelTitle,
+                  level: "$levelTitle - Level $levelNumber",
                   topicName: topicTitle,
                   vocabularies: vocabByTopic,
                 ),
@@ -1798,43 +1805,26 @@ class _VocabularyScreenState extends State<VocabularyScreen>
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(12),
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: borderBlue, width: 1.2),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: primaryBlue.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(topic['icon'], color: primaryBlue, size: 24),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  topicTitle,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            child: Text(
+              "$levelNumber",
+              style: const TextStyle(
+                color: Colors.blue,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         );
-      }, childCount: topics.length),
+      }, childCount: totalLevels),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 1.3,
+        crossAxisCount: 4, // giống hình của bạn
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
     );
   }
@@ -1961,7 +1951,7 @@ class VocabularySearchDelegate extends SearchDelegate {
             final vocabList = item['__topicList'] as List<Map<String, dynamic>>;
 
             final startIndex = vocabList.indexWhere(
-              (e) => e['word'] == item['word'],
+                  (e) => e['word'] == item['word'],
             );
 
             close(context, null);
