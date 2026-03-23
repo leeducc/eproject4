@@ -10,7 +10,7 @@ import { getMediaUrl } from '../utils';
 export interface MatchingBuilderProps {
   skill?: SkillType;
   initialQuestion?: Question | null;
-  onSave?: () => void;
+  onSave?: (data: Partial<Question>) => void;
 }
 
 export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
@@ -166,12 +166,15 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       retainedMediaUrls: [...retainedMedia.map(m => m.url), ...itemMediaUrls]
     };
     
-    if (initialQuestion) {
-      await updateQuestion(initialQuestion.id, payload);
+    if (initialQuestion?.id) {
+       await updateQuestion(initialQuestion.id, payload);
+    } else if (!initialQuestion) {
+       await createQuestion(payload);
     } else {
-      await createQuestion(payload);
+       console.log('[MatchingBuilder] Draft saved locally');
     }
-    if (onSave) onSave();
+
+    if (onSave) onSave(payload);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,11 +206,11 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
   };
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8">
+    <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8 transition-colors">
       {/* Header */}
-      <div className="flex items-center p-4 border-b bg-gray-50">
+      <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
-          className="border-gray-300 rounded-md shadow-sm border p-2 text-sm bg-white"
+          className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
           value={difficultyBand}
           onChange={(e) => setDifficultyBand(e.target.value as DifficultyBand)}
         >
@@ -216,15 +219,15 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
           <option value="BAND_7_8">Level 7-8</option>
           <option value="BAND_9">Level 9</option>
         </select>
-        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200">
+        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200 dark:border-slate-800">
           <input 
             type="checkbox" 
             id="premium-matching"
             checked={isPremium}
             onChange={(e) => setIsPremium(e.target.checked)}
-            className="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500"
+            className="w-4 h-4 text-amber-500 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-amber-500"
           />
-          <label htmlFor="premium-matching" className="text-sm font-medium text-gray-700 flex items-center gap-1">Premium Content</label>
+          <label htmlFor="premium-matching" className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-1">Premium Content</label>
         </div>
       </div>
 
@@ -232,28 +235,28 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       <div className="p-6 space-y-6">
         {/* Question Input */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-bold text-gray-800 bg-gray-100 w-max px-2 py-1 rounded">
-             <span className="bg-gray-800 text-white rounded w-4 h-4 flex items-center justify-center text-[10px]">?</span>
+          <div className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 w-max px-2 py-1 rounded transition-colors">
+             <span className="bg-gray-800 dark:bg-slate-700 text-white rounded w-4 h-4 flex items-center justify-center text-[10px]">?</span>
              Question
           </div>
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-gray-50/50 flex flex-col justify-between group">
+          <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-gray-50/50 dark:bg-slate-800/30 flex flex-col justify-between group transition-colors">
             <div className="p-2">
                <textarea
-                 className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none outline-none font-medium text-gray-800 min-h-[50px]"
+                 className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none outline-none font-medium text-gray-800 dark:text-slate-200 min-h-[50px]"
                  placeholder="Type your instruction..."
                  value={instruction}
                  onChange={(e) => setInstruction(e.target.value)}
                />
             </div>
-            <div className="flex flex-col gap-2 p-3 bg-white border-t text-sm">
+            <div className="flex flex-col gap-2 p-3 bg-white dark:bg-slate-800/50 border-t dark:border-slate-800 text-sm transition-colors">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-700">Attach Media (Question Level):</span>
+                <span className="font-semibold text-gray-700 dark:text-slate-300">Attach Media (Question Level):</span>
                 <input 
                   type="file" 
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="outline-none"
+                  className="outline-none text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors"
                 />
               </div>
               
@@ -262,23 +265,23 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                 <div className="flex flex-wrap gap-4 mt-2">
                   {retainedMedia
                     .map((media, idx) => (
-                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2 py-1 pr-1">
+                      <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
                         {media.type?.startsWith('image/') ? (
                           <button 
                             type="button"
                             onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
-                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-tighter"
+                            className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 uppercase tracking-tighter"
                           >
                             <Eye size={12} /> View file
                           </button>
                         ) : (
-                          <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter italic">
+                          <span className="text-[10px] font-bold text-blue-400 dark:text-blue-500 uppercase tracking-tighter italic">
                              Media File
                           </span>
                         )}
                         <button 
                           onClick={() => setFileToDelete({ type: 'retained', index: idx })}
-                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -292,7 +295,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
 
         {/* Pairs List */}
         <div className="space-y-3">
-          <div className="flex items-center gap-4 mb-2 pl-8 text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <div className="flex items-center gap-4 mb-2 pl-8 text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
             <div className="flex-1">Column A (Item)</div>
             <div className="flex-1">Column B (Match)</div>
             {!isTeacher && <div className="w-8"></div>}
@@ -300,18 +303,18 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
               
           {pairs.map((pair, index) => (
             <div key={index} className="flex items-center gap-3 group">
-              <div className="cursor-grab text-gray-300 group-hover:text-gray-500">
+              <div className="cursor-grab text-gray-300 dark:text-slate-700 group-hover:text-gray-500 dark:group-hover:text-slate-500 transition-colors">
                 <GripVertical size={16} />
               </div>
-              <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
+              <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-slate-400 transition-colors">
                  {index + 1}
               </div>
               
               {/* Left Item */}
-              <div className="flex-1 border rounded-lg p-2 bg-gray-50 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+              <div className="flex-1 border dark:border-slate-800 rounded-lg p-2 bg-gray-50 dark:bg-slate-800/40 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all">
                 <div className="flex items-center gap-2">
                   <input 
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium outline-none"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium outline-none text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500"
                     value={pair.left}
                     onChange={(e) => handleUpdatePair(index, 'left', e.target.value)}
                     placeholder="Text..."
@@ -329,20 +332,20 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                               setPreviewImageUrl(URL.createObjectURL(img));
                             }
                           }}
-                          className="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                          className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                         >
                           <Eye size={12} /> View
                         </button>
                         <button 
                           type="button"
                           onClick={() => setFileToDelete({ type: 'item', side: 'left', index })}
-                          className="text-gray-400 hover:text-red-500 p-1"
+                          className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-1 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
                       </div>
                     ) : (
-                      <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
+                      <label className="text-gray-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer p-1 transition-colors">
                         <ImageIcon size={18} />
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'left', e.target.files[0])} />
                       </label>
@@ -351,13 +354,13 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                 </div>
               </div>
 
-              <div className="text-gray-300">→</div>
+              <div className="text-gray-300 dark:text-slate-700">→</div>
 
               {/* Right Item */}
-              <div className="flex-1 border rounded-lg p-2 bg-blue-50/30 border-blue-100 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+              <div className="flex-1 border rounded-lg p-2 bg-blue-50/30 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all">
                 <div className="flex items-center gap-2">
                   <input 
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-blue-900 outline-none"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-blue-900 dark:text-blue-400 outline-none placeholder-blue-300 dark:placeholder-blue-900/50"
                     value={pair.right}
                     onChange={(e) => handleUpdatePair(index, 'right', e.target.value)}
                     placeholder="Match..."
@@ -375,20 +378,20 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                               setPreviewImageUrl(URL.createObjectURL(img));
                             }
                           }}
-                          className="bg-white text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors shadow-sm"
+                          className="bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors shadow-sm"
                         >
                           <Eye size={12} /> View
                         </button>
                         <button 
                           type="button"
                           onClick={() => setFileToDelete({ type: 'item', side: 'right', index })}
-                          className="text-gray-400 hover:text-red-500 p-1"
+                          className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-1 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
                       </div>
                     ) : (
-                      <label className="text-gray-400 hover:text-blue-500 cursor-pointer p-1">
+                      <label className="text-gray-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer p-1 transition-colors">
                         <ImageIcon size={18} />
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'right', e.target.files[0])} />
                       </label>
@@ -398,24 +401,24 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
               </div>
 
               {!isTeacher && pairs.length > 1 && (
-                <button onClick={() => handleRemovePair(index)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"><Trash2 size={16}/></button>
+                <button onClick={() => handleRemovePair(index)} className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 size={16}/></button>
               )}
             </div>
           ))}
           
           <button 
             onClick={handleAddPair}
-            className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 mt-4 pl-8"
+            className="flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-4 pl-8 transition-colors"
           >
             <Plus size={16} /> Add Matching Pair
           </button>
         </div>
 
         {/* Explanation */}
-        <div className="space-y-2 pt-4 border-t border-dashed">
-          <label className="text-sm font-semibold text-gray-800">Explanation (Optional)</label>
+        <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800 transition-colors">
+          <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation (Optional)</label>
           <textarea
-            className="w-full p-3 border rounded-md focus:ring-1 focus:ring-blue-500 outline-none min-h-[80px]"
+            className="w-full p-3 border dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none min-h-[80px] transition-colors"
             value={explanation}
             onChange={(e) => setExplanation(e.target.value)}
             placeholder="Why are these matches correct?"
@@ -423,8 +426,8 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
         </div>
       </div>
 
-      <div className="bg-gray-50 p-4 border-t flex justify-end">
-        <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-bold text-sm shadow-sm transition-all">Save Changes</button>
+      <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex justify-end transition-colors">
+        <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-6 py-2 rounded-md font-bold text-sm shadow-sm transition-all">Save Changes</button>
       </div>
 
       <ConfirmDialog
@@ -440,20 +443,20 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       {/* Full Size Image Preview Modal */}
       {previewImageUrl && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"
           onClick={() => setPreviewImageUrl(null)}
         >
-          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-xl p-2 shadow-2xl scale-in border border-transparent dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
             <button 
               onClick={() => setPreviewImageUrl(null)}
-              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+              className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border dark:border-slate-700"
             >
               <X size={20} />
             </button>
             <img 
               src={previewImageUrl} 
               alt="Full Size Preview" 
-              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
             />
           </div>
         </div>

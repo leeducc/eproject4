@@ -1,7 +1,28 @@
 export type Role = 'ADMIN' | 'TEACHER';
 export type SkillType = 'READING' | 'LISTENING' | 'VOCABULARY' | 'WRITING';
-export type QuestionType = 'MULTIPLE_CHOICE' | 'MATCHING' | 'FILL_BLANK' | 'ESSAY';
+export type QuestionType = 'MULTIPLE_CHOICE' | 'MATCHING' | 'FILL_BLANK' | 'ESSAY' | 'COMPREHENSION';
 export type DifficultyBand = 'BAND_0_4' | 'BAND_5_6' | 'BAND_7_8' | 'BAND_9';
+
+export interface QuestionGroup {
+  id: number;
+  skill: SkillType;
+  title: string;
+  content: string;
+  mediaUrl?: string;
+  mediaType?: string;
+  difficultyBand: DifficultyBand;
+  authorId?: number;
+  createdAt: string;
+  questions: Question[];
+  tags: Tag[];
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+  namespace: string;
+  color?: string;
+}
 
 export interface Passage {
   id: number;
@@ -44,13 +65,34 @@ export interface Question {
   retainedMediaUrls?: string[];
   data: any | MultipleChoiceData | MatchingData | FillBlankData;
   isPremiumContent: boolean;
+  groupId?: number;
+  authorId?: number;
+  isGroup?: boolean;
+  childCount?: number;
+  tags: Tag[];
 }
+
+export type ExamType = 'ORG_EXAM' | 'REAL_EXAM' | 'IELTS';
 
 export interface Exam {
   id: number;
   title: string;
   description?: string;
+  exam_type: ExamType;
   created_at: string;
   categories: SkillType[];
   question_ids: number[]; // References to Questions stored in the Exam
+  group_ids: number[]; // References to QuestionGroups stored in the Exam
+  tags: Tag[];
+}
+
+export interface QuestionHistory {
+  id: number;
+  questionId: number;
+  editorId: number;
+  editorEmail: string;
+  action: string;
+  snapshot: string;
+  changes?: string;
+  createdAt: string;
 }

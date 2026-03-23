@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MultipleChoiceData, MatchingData, FillBlankData, Question } from '../types';
 import { CheckCircle2, XCircle, RefreshCcw, Eye, X } from 'lucide-react';
 import { getMediaUrl } from '../utils';
+import { QuestionRenderer } from './QuestionRenderer';
 
 interface StudentPreviewProps {
   question: Question;
@@ -458,11 +459,21 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
         )}
 
         <div className="pt-2">
-            {question.type === 'MULTIPLE_CHOICE' ? renderMultipleChoice() :
-             question.type === 'MATCHING' ? renderMatching() :
-             question.type === 'FILL_BLANK' ? renderFillBlank() :
-             renderEssay()
-            }
+            <QuestionRenderer 
+              question={question} 
+              userAnswer={userAnswer} 
+              setUserAnswer={setUserAnswer} 
+              showFeedback={showFeedback} 
+            />
+            {!question.tags?.some(t => t.namespace === 'UI') && (
+              <>
+                {question.type === 'MULTIPLE_CHOICE' ? renderMultipleChoice() :
+                 question.type === 'MATCHING' ? renderMatching() :
+                 question.type === 'FILL_BLANK' ? renderFillBlank() :
+                 renderEssay()
+                }
+              </>
+            )}
         </div>
 
         <div className="flex justify-center pt-8">

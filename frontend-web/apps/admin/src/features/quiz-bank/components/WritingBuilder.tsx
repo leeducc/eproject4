@@ -115,11 +115,11 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
   };
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans">
+    <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8 transition-colors">
       {/* Header */}
-      <div className="flex items-center p-4 border-b bg-gray-50">
+      <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
-          className="border-gray-300 rounded-md shadow-sm border p-2 text-sm bg-white"
+          className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
           value={difficultyBand}
           onChange={(e) => setDifficultyBand(e.target.value as DifficultyBand)}
         >
@@ -128,56 +128,56 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
           <option value="BAND_7_8">Level 7-8</option>
           <option value="BAND_9">Level 9</option>
         </select>
-        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200">
+        <div className="ml-auto flex items-center gap-2 border-l pl-4 border-gray-200 dark:border-slate-800">
           <input 
             type="checkbox" 
             id="premium-writing"
             checked={isPremium}
             onChange={(e) => setIsPremium(e.target.checked)}
-            className="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-500"
+            className="w-4 h-4 text-amber-500 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-amber-500"
           />
-          <label htmlFor="premium-writing" className="text-sm font-medium text-gray-700 flex items-center gap-1">Premium Content</label>
+          <label htmlFor="premium-writing" className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-1">Premium Content</label>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="p-6 space-y-6">
         <div className="space-y-3">
-          <label className="text-sm font-semibold text-gray-800">Writing Prompt / Task Description</label>
-          <p className="text-sm text-gray-500 mb-2">
+          <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Writing Prompt / Task Description</label>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">
             Provide the topic, images, or stimulus material for the writing task here. There are no "correct answers" to set as this requires manual or AI grading later.
           </p>
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-gray-50/50 flex flex-col justify-between">
+          <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-gray-50/50 dark:bg-slate-800/30 flex flex-col justify-between transition-colors">
             <div className="p-2 pb-0">
                <textarea
-                 className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none outline-none font-medium text-gray-800 min-h-[150px]"
+                 className="w-full p-2 bg-transparent border-none focus:ring-0 resize-none outline-none font-medium text-gray-800 dark:text-slate-200 min-h-[150px]"
                  placeholder="Type your prompt here..."
                  value={instruction}
                  onChange={(e) => setInstruction(e.target.value)}
                />
             </div>
-            <div className="flex flex-col gap-2 p-3 bg-white border-t">
+            <div className="flex flex-col gap-2 p-3 bg-white dark:bg-slate-800/50 border-t dark:border-slate-800 transition-colors">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-700">Attach Media (Max 3 Images OR 1 Video/Audio):</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">Attach Media (Max 3 Images OR 1 Video/Audio):</span>
                 <input 
                   type="file" 
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="text-sm text-gray-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 outline-none"
+                  className="text-sm text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors outline-none"
                 />
               </div>
               
               {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
-                <div className="mt-2 text-sm text-gray-500">
-                  <div className="font-semibold mb-2">Media Previews:</div>
+                <div className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+                  <div className="font-semibold mb-2 text-gray-700 dark:text-slate-300">Media Previews:</div>
                   <div className="flex flex-wrap gap-4">
                     {/* Retained Media previews */}
                     {retainedMedia.map((media, idx) => (
-                      <div key={`retained-${idx}`} className="relative border rounded p-1 inline-block">
+                      <div key={`retained-${idx}`} className="relative border dark:border-slate-800 rounded p-1 inline-block transition-colors">
                         <button 
                           onClick={() => removeRetainedMedia(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                          className="absolute -top-2 -right-2 bg-red-500 dark:bg-red-600 text-white rounded-full p-0.5 shadow-sm z-10"
                         >
                           <X size={14} />
                         </button>
@@ -185,16 +185,18 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
                           <button 
                             type="button"
                             onClick={() => setPreviewImageUrl(getMediaUrl(media.url))}
-                            className="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                            className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight flex items-center gap-1 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                           >
                             <Eye size={12} /> View file
                           </button>
                         ) : media.type?.startsWith('video/') ? (
-                          <video src={getMediaUrl(media.url)} controls className="max-h-32 w-64 max-w-full" />
+                          <div className="bg-slate-100 dark:bg-slate-800 rounded overflow-hidden">
+                             <video src={getMediaUrl(media.url)} controls className="max-h-32 w-64 max-w-full" />
+                          </div>
                         ) : media.type?.startsWith('audio/') ? (
                           <audio src={getMediaUrl(media.url)} controls className="w-64 max-w-full" />
                         ) : (
-                          <a href={getMediaUrl(media.url)} target="_blank" rel="noreferrer" className="text-blue-500 underline text-xs">View File</a>
+                          <a href={getMediaUrl(media.url)} target="_blank" rel="noreferrer" className="text-blue-500 dark:text-blue-400 underline text-xs">View File</a>
                         )}
                       </div>
                     ))}
@@ -203,21 +205,23 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
                     {mediaFiles.map((file, idx) => {
                        const objectUrl = URL.createObjectURL(file);
                        return (
-                         <div key={`new-${idx}`} className="relative border border-blue-200 bg-blue-50 rounded p-1 inline-block">
+                         <div key={`new-${idx}`} className="relative border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10 rounded p-1 inline-block transition-colors">
                            <button 
                              onClick={() => removeNewFile(idx)}
-                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                             className="absolute -top-2 -right-2 bg-red-500 dark:bg-red-600 text-white rounded-full p-0.5 shadow-sm z-10"
                            >
                              <X size={14} />
                            </button>
                            {file.type.startsWith('image/') ? (
-                             <img src={objectUrl} alt="Preview" className="max-h-32 object-contain" onLoad={() => URL.revokeObjectURL(objectUrl)} />
+                             <img src={objectUrl} alt="Preview" className="max-h-32 object-contain rounded" onLoad={() => URL.revokeObjectURL(objectUrl)} />
                            ) : file.type.startsWith('video/') ? (
-                             <video src={objectUrl} controls className="max-h-32 w-64 max-w-full" />
+                             <div className="bg-slate-100 dark:bg-slate-800 rounded overflow-hidden">
+                               <video src={objectUrl} controls className="max-h-32 w-64 max-w-full" />
+                             </div>
                            ) : file.type.startsWith('audio/') ? (
                              <audio src={objectUrl} controls className="w-64 max-w-full" />
                            ) : (
-                             <div className="p-4">{file.name}</div>
+                             <div className="p-4 text-gray-600 dark:text-slate-400">{file.name}</div>
                            )}
                          </div>
                        );
@@ -230,11 +234,11 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
         </div>
 
         {/* Explanation Input */}
-        <div className="space-y-2 pt-4 border-t border-dashed">
-          <label className="text-sm font-semibold text-gray-800">Explanation / Grading Rubric (Optional)</label>
-          <div className="border rounded-md focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 bg-white">
+        <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800 transition-colors">
+          <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation / Grading Rubric (Optional)</label>
+          <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-900 transition-colors">
             <textarea
-              className="w-full p-4 border-none focus:ring-0 resize-none min-h-[80px] outline-none"
+              className="w-full p-4 border-none focus:ring-0 bg-transparent text-gray-700 dark:text-slate-200 resize-none min-h-[80px] outline-none"
               placeholder="Provide an explanation or grading rubric for this writing task..."
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -244,7 +248,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
       </div>
 
       {/* Footer Settings */}
-      <div className="bg-gray-50 p-4 border-t flex items-center justify-end">
+      <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex items-center justify-end transition-colors">
         <div>
            <button 
              onClick={handleSave}
@@ -268,20 +272,20 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
       {/* Full Size Image Preview Modal */}
       {previewImageUrl && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"
           onClick={() => setPreviewImageUrl(null)}
         >
-          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg p-2 shadow-2xl scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-xl p-2 shadow-2xl scale-in border border-transparent dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
             <button 
               onClick={() => setPreviewImageUrl(null)}
-              className="absolute -top-4 -right-4 bg-white text-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors border"
+              className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border dark:border-slate-700"
             >
               <X size={20} />
             </button>
             <img 
               src={previewImageUrl} 
               alt="Full Size Preview" 
-              className="max-w-full max-h-[85vh] object-contain rounded-sm"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
             />
           </div>
         </div>

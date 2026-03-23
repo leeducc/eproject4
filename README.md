@@ -59,7 +59,7 @@ Configure your database and external services:
 Create a `.env` file in the `mobile-desktop` directory with the following keys:
 
 ```env
-API_BASE_URL=http://localhost:8080/api
+API_BASE_URL=http://localhost:8123/api
 GOOGLE_SERVER_CLIENT_ID=your_google_server_client_id
 GOOGLE_CLIENT_ID=your_google_client_id
 ```

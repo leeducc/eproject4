@@ -29,4 +29,13 @@ public class UserProfile {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "birthday")
+    private java.time.LocalDate birthday;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 }

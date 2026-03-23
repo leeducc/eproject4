@@ -1,6 +1,7 @@
 package com.groupone.backend.features.identity;
 
 import com.groupone.backend.shared.enums.UserRole;
+import com.groupone.backend.shared.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,6 +31,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private UserStatus status = UserStatus.INACTIVE;
 
     @Builder.Default
     @Column(name = "is_email_confirmed", nullable = false)

@@ -6,6 +6,9 @@ import com.groupone.backend.features.quizbank.enums.SkillType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "qb_questions")
 @Data
@@ -18,15 +21,15 @@ public class Question {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private SkillType skill;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private QuestionType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "difficulty_band", nullable = false)
+    @Column(name = "difficulty_band", nullable = false, columnDefinition = "VARCHAR(255)")
     private DifficultyBand difficultyBand;
 
     @Column(columnDefinition = "TEXT")
@@ -46,4 +49,21 @@ public class Question {
 
     @Column(name = "media_type", length = 50)
     private String mediaType;
+
+    @Column(name = "author_id")
+    private Long authorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    @ToString.Exclude
+    private QuestionGroup group;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "qb_question_tags",
+        joinColumns = @JoinColumn(name = "question_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    @Builder.Default
+    private List<Tag> tags = new ArrayList<>();
 }

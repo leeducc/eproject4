@@ -9,3 +9,13 @@ export const QuestionSchema = z.object({
 });
 
 export type Question = z.infer<typeof QuestionSchema>;
+
+export interface QuestionHistory {
+    id: number;
+    questionId: number;
+    editorId: number;
+    editorEmail: string;
+    action: string;
+    snapshot: string;
+    createdAt: string;
+}

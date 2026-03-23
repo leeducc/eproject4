@@ -10,7 +10,15 @@ import { MatchingBuilder } from '../../features/quiz-bank/components/MatchingBui
 import { WritingBuilder } from '../../features/quiz-bank/components/WritingBuilder';
 import { AdminLayout } from '../../components/AdminLayout';
 
-export const QuestionEditPage: React.FC = () => {
+interface QuestionEditPageProps {
+    basePath?: string;
+    Layout?: React.ComponentType<{ children: React.ReactNode }>;
+}
+
+export const QuestionEditPage: React.FC<QuestionEditPageProps> = ({
+    basePath = '/admin',
+    Layout = AdminLayout
+}) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { fetchQuestionById, isLoading } = useQuizBankStore();
@@ -31,11 +39,11 @@ export const QuestionEditPage: React.FC = () => {
 
     if (isLoading && !question) {
         return (
-            <AdminLayout>
+            <Layout>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            </AdminLayout>
+            </Layout>
         );
     }
 
@@ -43,11 +51,11 @@ export const QuestionEditPage: React.FC = () => {
 
     const handleSaveComplete = () => {
         toast.success("Question updated successfully");
-        navigate(`/admin/questions/${id}`);
+        navigate(`${basePath}/questions/${id}`);
     };
 
     return (
-        <AdminLayout>
+        <Layout>
             <div className="max-w-6xl mx-auto py-8 px-4">
                 <div className="mb-8">
                     <button 
@@ -56,20 +64,20 @@ export const QuestionEditPage: React.FC = () => {
                     >
                         <ArrowLeft size={16} /> Cancel and Go Back
                     </button>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
                         Editing {question.type.replace('_', ' ')} Question 
-                        <span className="text-gray-400 ml-2 font-normal text-lg">ID: #{id}</span>
+                        <span className="text-gray-400 dark:text-slate-500 ml-2 font-normal text-lg">ID: #{id}</span>
                     </h1>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-10">
-                    <div className="mb-10 pb-6 border-b border-gray-100 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm p-6 md:p-10 transition-colors">
+                    <div className="mb-10 pb-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                          <div>
-                            <p className="text-gray-500 text-sm">Update the fields below and save to apply changes. All modifications will reflect immediately on the detail view.</p>
+                            <p className="text-gray-500 dark:text-slate-400 text-sm">Update the fields below and save to apply changes. All modifications will reflect immediately on the detail view.</p>
                          </div>
                     </div>
 
-                    {question.type === 'ESSAY' ? (
+                    {question.skill === 'WRITING' || question.type === 'ESSAY' ? (
                         <WritingBuilder 
                             initialQuestion={question} 
                             onSave={handleSaveComplete} 
@@ -95,6 +103,6 @@ export const QuestionEditPage: React.FC = () => {
                     )}
                 </div>
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };

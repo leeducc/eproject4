@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.groupone.backend.features.quizbank.enums.DifficultyBand;
 import com.groupone.backend.features.quizbank.enums.QuestionType;
 import com.groupone.backend.features.quizbank.enums.SkillType;
+import com.groupone.backend.features.quizbank.entity.Tag;
 import lombok.Builder;
 import lombok.Data;
 import java.util.Map;
@@ -31,4 +32,14 @@ public class QuestionResponse {
     private List<String> mediaUrls;
     
     private List<String> mediaTypes;
+    
+    private Long groupId;
+
+    private Long authorId;
+
+    private Boolean isGroup;
+
+    private Integer childCount;
+
+    private List<Tag> tags;
 }

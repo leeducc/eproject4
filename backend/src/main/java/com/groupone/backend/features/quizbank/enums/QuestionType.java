@@ -4,5 +4,6 @@ public enum QuestionType {
     MULTIPLE_CHOICE,
     MATCHING,
     FILL_BLANK,
-    ESSAY
+    ESSAY,
+    COMPREHENSION
 }

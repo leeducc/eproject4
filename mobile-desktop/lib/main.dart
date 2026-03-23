@@ -5,7 +5,8 @@ import 'core/providers/ielts_level_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/study_sections/listening/services/mock_listening_repository.dart';
 import 'features/study_sections/listening/services/listening_provider.dart';
-import 'features/study_sections/writing/services/mock_writing_repository.dart';
+import 'features/study_sections/writing/services/writing_api_service.dart';
+import 'features/study_sections/writing/services/real_writing_repository.dart';
 import 'features/study_sections/writing/services/writing_provider.dart';
 
 Future<void> main() async {
@@ -19,6 +20,9 @@ class EnglishStudyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('[EnglishStudyApp] build – setting up MultiProvider');
+    
+    final writingApiService = WritingApiService();
+
     return MultiProvider(
       providers: [
         // ── Global level state ───────────────────────────────────
@@ -65,7 +69,7 @@ class EnglishStudyApp extends StatelessWidget {
 
         // ── Writing section ───────────────────────────────────
         ChangeNotifierProxyProvider<IeltsLevelProvider, WritingProvider>(
-          create: (_) => WritingProvider(MockWritingRepository()),
+          create: (_) => WritingProvider(RealWritingRepository(writingApiService)),
           update: (_, levelProvider, writingProvider) {
             writingProvider!.loadForBand(levelProvider.selectedLevel.band);
             return writingProvider;

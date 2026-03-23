@@ -1,19 +1,21 @@
 class Topic {
   final int id;
   final String title;
-  final String description;
+  final String prompt;
   final String? hint;
   final String? imageUrl;
   final String? audioUrl;
+  final String? difficultyBand;
   final bool isProOnly;
 
   Topic({
     required this.id,
     required this.title,
-    required this.description,
+    required this.prompt,
     this.hint,
     this.imageUrl,
     this.audioUrl,
+    this.difficultyBand,
     this.isProOnly = false,
   });
 
@@ -21,10 +23,11 @@ class Topic {
     return Topic(
       id: json['id'],
       title: json['title'],
-      description: json['description'] ?? '',
+      prompt: json['prompt'] ?? json['description'] ?? '',
       hint: json['hint'],
       imageUrl: json['imageUrl'],
       audioUrl: json['audioUrl'],
+      difficultyBand: json['difficultyBand'],
       isProOnly: json['isProOnly'] ?? false,
     );
   }
@@ -33,10 +36,11 @@ class Topic {
     return {
       'id': id,
       'title': title,
-      'description': description,
+      'prompt': prompt,
       'hint': hint,
       'imageUrl': imageUrl,
       'audioUrl': audioUrl,
+      'difficultyBand': difficultyBand,
       'isProOnly': isProOnly,
     };
   }
