@@ -74,4 +74,30 @@ class WritingApiService {
       throw Exception('Failed to submit essay: $e');
     }
   }
+
+  Future<List<EssaySubmissionResponse>> fetchMySubmissions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/my-submissions'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => EssaySubmissionResponse.fromJson(json)).toList();
+      } else {
+        print('Failed to fetch submissions: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to fetch submissions');
+      }
+    } catch (e) {
+      print('Error fetching submissions: $e');
+      throw Exception('Failed to fetch submissions: $e');
+    }
+  }
 }

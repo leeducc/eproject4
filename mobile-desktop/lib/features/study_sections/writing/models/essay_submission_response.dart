@@ -8,12 +8,18 @@ class EssaySubmissionResponse {
   final String gradingType;
   final String? aiFeedback;
   final double? score;
+  final String? status;
+  final String? createdAt;
 
-  // New fields for structured feedback
   final double? taskAchievement;
   final double? grammaticalRange;
   final double? lexicalResource;
   final double? cohesionCoherence;
+  final String? teacherFeedback;
+  final String? taskAchievementReason;
+  final String? cohesionCoherenceReason;
+  final String? lexicalResourceReason;
+  final String? grammaticalRangeReason;
   final List<WritingCorrection> corrections;
 
   EssaySubmissionResponse({
@@ -23,10 +29,17 @@ class EssaySubmissionResponse {
     required this.gradingType,
     this.aiFeedback,
     this.score,
+    this.status,
+    this.createdAt,
     this.taskAchievement,
     this.grammaticalRange,
     this.lexicalResource,
     this.cohesionCoherence,
+    this.teacherFeedback,
+    this.taskAchievementReason,
+    this.cohesionCoherenceReason,
+    this.lexicalResourceReason,
+    this.grammaticalRangeReason,
     this.corrections = const [],
   });
 
@@ -42,9 +55,11 @@ class EssaySubmissionResponse {
       id: json['id'],
       topic: Topic.fromJson(json['topic']),
       content: json['content'],
-      gradingType: json['gradingType'],
+       gradingType: json['gradingType'],
       aiFeedback: json['aiFeedback'],
       score: json['score'] != null ? (json['score'] as num).toDouble() : null,
+      status: json['status'],
+      createdAt: json['createdAt'],
       taskAchievement: json['taskAchievement'] != null
           ? (json['taskAchievement'] as num).toDouble()
           : null,
@@ -57,6 +72,11 @@ class EssaySubmissionResponse {
       cohesionCoherence: json['cohesionCoherence'] != null
           ? (json['cohesionCoherence'] as num).toDouble()
           : null,
+      teacherFeedback: json['teacherFeedback'],
+      taskAchievementReason: json['taskAchievementReason'],
+      cohesionCoherenceReason: json['cohesionCoherenceReason'],
+      lexicalResourceReason: json['lexicalResourceReason'],
+      grammaticalRangeReason: json['grammaticalRangeReason'],
       corrections: correctionsList,
     );
   }

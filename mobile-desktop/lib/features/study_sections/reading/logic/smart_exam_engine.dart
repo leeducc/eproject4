@@ -1,123 +1,146 @@
-import 'dart:math';
-import '../data/question_bank.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/question_model.dart';
-import '../user/user_history.dart';
+
+class ExamResult {
+  final int examId;
+  final List<Question> questions;
+
+  ExamResult({
+    required this.examId,
+    required this.questions,
+  });
+}
 
 class SmartExamEngine {
 
-  static List<Question> generateExam({
+  static const String baseUrl = "http://10.0.2.2:8080/api/v1";
 
+
+  static Future<ExamResult> generateExam({
     required String level,
     required String skill,
     required int totalQuestions,
     required bool smartMode,
+  }) async {
 
-  }) {
+    List<Question> questions = await _getQuestions(
+      level: level,
+      skill: skill,
+      total: totalQuestions,
+    );
 
-    // ===== 1. FILTER =====
-    List<Question> filtered = QuestionBank.questions.where((q) {
+    int examId = await _createExam(
+      questions,
+      level,
+      skill,
+      totalQuestions,
+    );
 
-      bool matchLevel = q.level == level;
-
-      bool matchSkill = skill == "Both"
-          ? true
-          : q.skill.toLowerCase() == skill.toLowerCase();
-
-      return matchLevel && matchSkill;
-
-    }).toList();
-
-    // ===== 2. FALLBACK nếu thiếu =====
-    if(filtered.length < totalQuestions){
-
-      List<Question> backup = QuestionBank.questions.where((q) {
-        return skill == "Both"
-            ? true
-            : q.skill.toLowerCase() == skill.toLowerCase();
-      }).toList();
-
-      filtered = backup;
-    }
-
-    // ===== 3. RANDOM MODE =====
-    if(!smartMode){
-      return _fillEnough(filtered, totalQuestions);
-    }
-
-    // ===== 4. SMART MODE =====
-    List<Question> poolA = []; // sai
-    List<Question> poolB = []; // mới
-    List<Question> poolC = []; // đúng
-
-    for(var q in filtered){
-
-      if(UserHistory.wrongQuestions.contains(q.id)){
-        poolA.add(q);
-      } else if(UserHistory.correctQuestions.contains(q.id)){
-        poolC.add(q);
-      } else {
-        poolB.add(q);
-      }
-    }
-
-    int aCount = (totalQuestions * 0.5).round();
-    int bCount = (totalQuestions * 0.4).round();
-    int cCount = totalQuestions - aCount - bCount;
-
-    List<Question> result = [];
-
-    result.addAll(_pick(poolA, aCount));
-    result.addAll(_pick(poolB, bCount));
-    result.addAll(_pick(poolC, cCount));
-
-    // ===== 5. FILL CHO ĐỦ =====
-    if(result.length < totalQuestions){
-
-      List<Question> remain = filtered.where((q) => !result.contains(q)).toList();
-
-      remain.shuffle();
-
-      result.addAll(remain.take(totalQuestions - result.length));
-
-    }
-
-    // vẫn thiếu → random lại từ đầu
-    if(result.length < totalQuestions){
-      result = _fillEnough(filtered, totalQuestions);
-    }
-
-    result.shuffle();
-
-    return result;
+    return ExamResult(
+      examId: examId,
+      questions: questions,
+    );
   }
 
-  // ===== HELPER: lấy ngẫu nhiên =====
-  static List<Question> _pick(List<Question> list, int count){
 
-    list.shuffle();
-    return list.take(count).toList();
-  }
+  static Future<List<dynamic>> getAllExams() async {
 
-  // ===== HELPER: luôn đủ số câu =====
-  static List<Question> _fillEnough(List<Question> source, int total){
+    final uri = Uri.parse("$baseUrl/exams");
 
-    List<Question> result = [];
-    Random random = Random();
+    final response = await http.get(uri);
 
-    while(result.length < total){
-
-      source.shuffle();
-
-      for(var q in source){
-
-        if(result.length < total){
-          result.add(q);
-        } else {
-          break;
-        }
-      }
+    if (response.statusCode != 200) {
+      throw Exception("Lỗi lấy danh sách exam");
     }
 
-    return result;
+    return jsonDecode(response.body);
+  }
+
+
+  static Future<List<Question>> _getQuestions({
+    required String level,
+    required String skill,
+    required int total,
+  }) async {
+
+    String difficulty = _mapLevel(level);
+
+
+    Map<String, String> query = {
+      "difficulty": difficulty,
+      "limit": total.toString(),
+      "type": "mock",
+      "search": "",
+      "lastSeenId": "0",
+    };
+
+    if (skill != "Both") {
+      query["skill"] = skill.toLowerCase();
+    }
+
+    final uri = Uri.parse("$baseUrl/questions/paginated")
+        .replace(queryParameters: query);
+
+    final response = await http.get(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception("Lỗi lấy câu hỏi");
+    }
+
+    final data = jsonDecode(response.body);
+
+    List list = data["items"]
+        ?? data["content"]
+        ?? data["data"]
+        ?? [];
+
+    return list.map((e) => Question.fromJson(e)).toList();
+  }
+
+
+  static Future<int> _createExam(
+      List<Question> questions,
+      String level,
+      String skill,
+      int total,
+      ) async {
+
+    final uri = Uri.parse("$baseUrl/exams");
+
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "questionIds": questions.map((q) => q.id).toList(),
+        "skill": skill == "Both" ? null : skill.toLowerCase(),
+        "difficulty": _mapLevel(level),
+        "total": total,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Lỗi tạo exam");
+    }
+
+    final data = jsonDecode(response.body);
+
+    return data["id"] ?? data["examId"] ?? 0;
+  }
+
+
+  static String _mapLevel(String level) {
+    switch (level) {
+      case "0-4":
+        return "easy";
+      case "5-6":
+        return "medium";
+      case "7-8":
+        return "hard";
+      case "9":
+        return "very_hard";
+      default:
+        return "medium";
+    }
   }
 }

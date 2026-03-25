@@ -1,12 +1,20 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/question_model.dart';
 import 'result_screen.dart';
 
 class SmartExamScreen extends StatefulWidget {
 
   final List<Question> questions;
+  final int examId;
 
-  const SmartExamScreen({super.key, required this.questions});
+  const SmartExamScreen({
+    super.key,
+    required this.questions,
+    required this.examId,
+  });
 
   @override
   State<SmartExamScreen> createState() => _SmartExamScreenState();
@@ -18,25 +26,48 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   int score = 0;
   int? selected;
 
+  Future<void> submitExam() async {
+
+    try {
+
+      final uri = Uri.parse(
+        "http://10.0.2.2:8080/api/v1/exams/${widget.examId}",
+      );
+
+      await http.put(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "score": score
+        }),
+      );
+
+    } catch (e) {
+      print("Submit lỗi: $e");
+    }
+  }
+
   void nextQuestion() {
 
     Question q = widget.questions[index];
 
-    if(selected == q.correctIndex){
+    if (selected == q.correctIndex) {
       score++;
       q.status = 2;
-    }else{
+    } else {
       q.status = 1;
     }
 
-    if(index < widget.questions.length - 1){
+    if (index < widget.questions.length - 1) {
 
       setState(() {
         index++;
         selected = null;
       });
 
-    }else{
+    } else {
+
+      submitExam();
 
       Navigator.pushReplacement(
         context,
@@ -47,7 +78,6 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
           ),
         ),
       );
-
     }
   }
 
@@ -130,15 +160,14 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                   Color bgColor = Colors.white;
                   Color borderColor = Colors.grey.shade300;
 
-                  // 🎯 HIỆU ỨNG ĐÚNG / SAI
-                  if(selected != null){
+                  if (selected != null) {
 
-                    if(isCorrect){
+                    if (isCorrect) {
                       bgColor = Colors.green.withOpacity(0.2);
                       borderColor = Colors.green;
                     }
 
-                    if(isSelected && !isCorrect){
+                    if (isSelected && !isCorrect) {
                       bgColor = Colors.red.withOpacity(0.2);
                       borderColor = Colors.red;
                     }
@@ -147,7 +176,7 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                   return GestureDetector(
 
                     onTap: (){
-                      if(selected == null){
+                      if (selected == null) {
                         setState(() {
                           selected = i;
                         });
@@ -173,17 +202,16 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                               q.options[i],
                               style: const TextStyle(
                                 fontSize: 17,
-                                fontWeight: FontWeight.bold, // 👈 ĐẬM HƠN
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
                           ),
 
-                          // ICON ĐÚNG SAI
-                          if(selected != null)
-                            if(isCorrect)
+                          if (selected != null)
+                            if (isCorrect)
                               const Icon(Icons.check, color: Colors.green)
-                            else if(isSelected)
+                            else if (isSelected)
                               const Icon(Icons.close, color: Colors.red)
 
                         ],

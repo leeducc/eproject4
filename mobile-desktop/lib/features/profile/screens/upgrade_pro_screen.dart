@@ -16,21 +16,21 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
   final List<Map<String, dynamic>> _packages = [
     {
       'duration': '1 tháng',
-      'price': 1000,
+      'price': '15,99',
       'originalPrice': null,
       'discount': null,
-      'subtitle': '1000 iCoin/tháng'
+      'subtitle': '15,99 USD/tháng'
     },
     {
       'duration': '12 tháng',
-      'price': 5000,
-      'originalPrice': 12000,
-      'discount': '58% off',
-      'subtitle': '416 iCoin/tháng'
+      'price': '25,99',
+      'originalPrice': '102,99',
+      'discount': '74% off',
+      'subtitle': '2,17 USD/tháng'
     },
     {
       'duration': 'PLUS trọn đời',
-      'price': 8000,
+      'price': '109,99',
       'originalPrice': null,
       'discount': null,
       'subtitle': 'Thanh toán 1 lần'
@@ -39,92 +39,88 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building UpgradeProScreen');
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'PLUS',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildPackages(),
-                      const SizedBox(height: 32),
-                      _buildBuyButton(),
-                      const SizedBox(height: 16),
-                      _buildFooterText(),
-                    ],
-                  ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPlanTabs(),
+                    const SizedBox(height: 16),
+                    _buildPackages(),
+
+                    const SizedBox(height: 30),
+                    _buildBuyButton(),
+
+                    const SizedBox(height: 16),
+                    _buildFooterText(),
+                  ],
                 ),
               ),
-            ),
-          ],
+              _buildContentBelow(),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlanTabs() {
+    return Row(
+      children: [
+        _buildTab('PLUS', true),
+        const SizedBox(width: 16),
+        _buildTab('MAX', false),
+      ],
+    );
+  }
+
+  Widget _buildTab(String text, bool isActive) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: isActive ? Colors.orange : Colors.grey,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      height: 250,
+      height: 230,
       decoration: const BoxDecoration(
-        color: Colors.blue,
         gradient: LinearGradient(
-          colors: [Color(0xFF3A7BD5), Color(0xFF3A6073)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
         ),
       ),
       child: Stack(
         children: [
           Positioned(
-            top: 16,
-            left: 16,
+            top: 10,
+            left: 10,
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () {
-                print('Navigating back from UpgradeProScreen');
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             ),
           ),
-          Positioned(
-            top: 70,
-            left: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'SuperTest PLUS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Chuẩn bị IELTS một cách\ndễ dàng và hiệu quả',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
-              ],
+          const Center(
+            child: Text(
+              'Mùa xuân gieo hạt giống\nNăm sau gặt thành công!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -134,128 +130,171 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
   Widget _buildPackages() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: List.generate(_packages.length, (index) {
-        final package = _packages[index];
+        final p = _packages[index];
         final isSelected = _selectedPackageIndex == index;
 
         return Expanded(
           child: GestureDetector(
-            onTap: () {
-              print('Selected package index $index - ${package['duration']}');
-              setState(() {
-                _selectedPackageIndex = index;
-              });
-            },
+            onTap: () => setState(() => _selectedPackageIndex = index),
             child: Container(
               margin: EdgeInsets.only(
-                left: index == 0 ? 0 : 8,
-                right: index == _packages.length - 1 ? 0 : 8,
+                left: index == 0 ? 0 : 6,
+                right: index == _packages.length - 1 ? 0 : 6,
               ),
+              height: 155,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
+                  // CARD BACKGROUND
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 4),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFFFE0B2) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: isSelected
+                          ? const LinearGradient(
+                        colors: [Color(0xFFFFE29F), Color(0xFFFFC371)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )
+                          : null,
+                      color: isSelected ? null : Colors.white,
                       border: Border.all(
-                        color: isSelected ? Colors.orange : Colors.transparent,
-                        width: 2,
+                        color: isSelected
+                            ? Colors.orange
+                            : Colors.grey.shade300,
                       ),
                     ),
+                  ),
+
+                  Positioned(
+                    top: 14,
+                    left: 3,
+                    right: 3,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          package['duration'],
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 13,
+                        // TITLE
+                        SizedBox(
+                          height: 16,
+                          child: Text(
+                            p['duration'],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isSelected
+                                  ? const Color(0xFF5A3E2B)
+                                  : Colors.black87,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+
+                        const SizedBox(height: 10),
+
+                        // PRICE
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '${package['price']}',
+                              p['price'],
                               style: TextStyle(
-                                color: isSelected ? Colors.brown[800] : Colors.black,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w700,
+                                color: isSelected
+                                    ? const Color(0xFF5A3E2B)
+                                    : Colors.black,
                               ),
                             ),
-                            const SizedBox(width: 2),
-                            const Text(
-                              'iCoin',
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 10,
+                            const SizedBox(width: 4),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              child: Text(
+                                'USD',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: isSelected
+                                      ? const Color(0xFF5A3E2B)
+                                      : Colors.black,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        if (package['originalPrice'] != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '${package['originalPrice']} iCoin',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 10,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        ] else ...[
-                          const SizedBox(height: 14),
-                        ],
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: isSelected ? Colors.orange[200] : Colors.grey[200],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            package['subtitle'],
+
+                        const SizedBox(height: 6),
+
+                        // 🔥 ORIGINAL PRICE (ĐẸP + RÕ)
+                        SizedBox(
+                          height: 16,
+                          child: p['originalPrice'] != null
+                              ? Text(
+                            '${p['originalPrice']} USD',
                             style: TextStyle(
-                              color: isSelected ? Colors.brown[800] : Colors.black54,
-                              fontSize: 9,
+                              decoration: TextDecoration.lineThrough,
+                              decorationThickness: 3,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isSelected
+                                  ? const Color(0xFF5A3E2B)
+                                  : Colors.black,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          )
+                              : null,
                         ),
                       ],
                     ),
                   ),
-                  if (package['discount'] != null)
+
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFFFFD89B)
+                            : const Color(0xFFF3F4F6),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        p['subtitle'],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected
+                              ? const Color(0xFF5A3E2B)
+                              : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // BADGE
+                  if (p['discount'] != null)
                     Positioned(
                       top: -10,
-                      left: 0,
+                      left: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            bottomRight: Radius.circular(8),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6B00),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          package['discount'],
+                          p['discount'],
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 9,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -273,78 +312,260 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
   Widget _buildBuyButton() {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 55,
       child: ElevatedButton(
-        onPressed: _isLoading
-            ? null
-            : () async {
-                final package = _packages[_selectedPackageIndex];
-                final price = package['price'] as int;
-                
-                int months = 1;
-                if (_selectedPackageIndex == 1) months = 12;
-                if (_selectedPackageIndex == 2) months = 1200; // Lifetime
-
-                print('Mua ngay tapped for package: ${package['duration']}, price: $price iCoin');
-                
-                setState(() {
-                  _isLoading = true;
-                });
-
-                bool success = await SubscriptionService.purchasePro(months, price);
-
-                if (!mounted) return;
-
-                setState(() {
-                  _isLoading = false;
-                });
-
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Nâng cấp PLUS thành công!')),
-                  );
-                  Navigator.pop(context); // Go back after success
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Không đủ iCoin hoặc có lỗi xảy ra.')),
-                  );
-                }
-              },
+        onPressed: _isLoading ? null : () {},
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF7B61FF), // Purple color from screenshot
+          padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(30),
           ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : const Text(
-                'Mua ngay',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        child: Ink(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF7B61FF), Color(0xFF9F7AEA)],
+            ),
+            borderRadius: BorderRadius.all(Radius.circular(30)),
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            child: const Text(
+              'Mua ngay',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildFooterText() {
     return const Text(
-      'Bấm vào mua/gia hạn nghĩa là bạn đã đọc và đồng ý với 《Quy tắc tự động gia hạn》 《Vui lòng đánh dấu vào mục "Chính sách bảo mật và điều khoản sử dụng"》',
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 12,
-      ),
+      'Bấm vào mua/gia hạn nghĩa là bạn đã đọc và đồng ý với điều khoản sử dụng',
       textAlign: TextAlign.center,
+      style: TextStyle(color: Colors.grey, fontSize: 12),
+    );
+  }
+  Widget _buildContentBelow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 🔥 DIVIDER TRÊN CÙNG
+        _buildDivider(),
+
+        const SizedBox(height: 10),
+
+        // ===== BAO ĐỖ HSK =====
+        const Center(
+          child: Text(
+            'Bao đỗ HSK',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        _buildFeatureItem(
+          icon: Icons.show_chart,
+          title: 'Thiết kế khoá học',
+          desc:
+          'Sự kết hợp giữa 20 năm kinh nghiệm giảng dạy và dữ liệu 100 triệu lần trả lời câu hỏi',
+          colors: [Color(0xFFFF9A9E), Color(0xFFFAD0C4)],
+        ),
+
+        _buildFeatureItem(
+          icon: Icons.security,
+          title: 'Trí tuệ nhân tạo AI',
+          desc: 'Luyện tập được cá nhân hoá, học từ dễ đến khó',
+          colors: [Color(0xFFFFC371), Color(0xFFFFE29F)],
+        ),
+
+        _buildFeatureItem(
+          icon: Icons.track_changes,
+          title: 'Nâng cao điểm số',
+          desc:
+          'Luyện tập trọng điểm, nâng cao điểm số một cách hiệu quả',
+          colors: [Color(0xFFA1C4FD), Color(0xFFC2E9FB)],
+        ),
+
+        _buildDivider(),
+
+        // ===== LUYỆN TẬP KỸ NĂNG =====
+        const Center(
+          child: Text(
+            'Luyện tập kỹ năng',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        _buildSkillItem(
+          title: 'Đề thi thật, đề mô phỏng',
+          desc:
+          'Mô phỏng theo đề HSK, giúp bạn làm quen hoàn toàn với các dạng đề thi',
+          colors: [Color(0xFFFF7E5F), Color(0xFFFF4E50)],
+          icon: Icons.description,
+        ),
+
+        _buildSkillItem(
+          title: 'Luyện tập từ vựng',
+          desc:
+          'Học và luyện từ vựng xuất hiện nhiều trong bài thi',
+          colors: [Color(0xFFFFB75E), Color(0xFFED8F03)],
+          icon: Icons.translate,
+        ),
+
+        _buildSkillItem(
+          title: 'Nghe - Đọc - Viết',
+          desc: 'Từng dạng đề luyện tập theo kỹ năng',
+          colors: [Color(0xFF6A82FB), Color(0xFF5F72BD)],
+          icon: Icons.headphones,
+        ),
+
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+  Widget _buildDivider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20),
+      width: MediaQuery.of(context).size.width,
+      height: 8,
+      color: const Color(0xFF1E293B),
+    );
+  }
+  Widget _buildFeatureItem({
+    required IconData icon,
+    required String title,
+    required String desc,
+    required List<Color> colors,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  Widget _buildSkillItem({
+    required String title,
+    required String desc,
+    required List<Color> colors,
+    required IconData icon,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          // TEXT
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // 🔥 ICON STYLE GIỐNG ẢNH
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ package com.groupone.backend.features.quizbank.controller;
 
 import com.groupone.backend.features.quizbank.dto.ExamRequest;
 import com.groupone.backend.features.quizbank.dto.ExamResponse;
+import com.groupone.backend.features.quizbank.enums.ExamType;
 import com.groupone.backend.features.quizbank.service.ExamService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class ExamController {
     @GetMapping("/{id}")
     public ResponseEntity<ExamResponse> getExamById(@PathVariable Long id) {
         return ResponseEntity.ok(examService.getExamById(id));
+    }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<ExamResponse>> getExamsByType(@PathVariable ExamType type) {
+        return ResponseEntity.ok(examService.getExamsByType(type));
     }
 
     @PostMapping

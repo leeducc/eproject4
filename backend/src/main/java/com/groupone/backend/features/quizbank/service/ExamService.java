@@ -39,6 +39,12 @@ public class ExamService {
         return examRepository.findAll().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
+    public List<ExamResponse> getExamsByType(ExamType examType) {
+        return examRepository.findByExamType(examType).stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public ExamResponse getExamById(Long id) {
         Exam e = examRepository.findById(id).orElseThrow(() -> new RuntimeException("Exam not found"));
         return mapToResponseDTO(e);
@@ -53,6 +59,7 @@ public class ExamService {
         e.setTitle(req.getTitle());
         e.setExamType(req.getExamType());
         e.setDescription(req.getDescription());
+        e.setDifficultyBand(req.getDifficultyBand());
         
         if (req.getQuestionIds() != null && !req.getQuestionIds().isEmpty()) {
             List<Question> questions = questionRepository.findAllById(req.getQuestionIds());
@@ -77,6 +84,7 @@ public class ExamService {
         e.setTitle(req.getTitle());
         e.setExamType(req.getExamType());
         e.setDescription(req.getDescription());
+        e.setDifficultyBand(req.getDifficultyBand());
         
         if (req.getQuestionIds() != null) {
             List<Question> questions = questionRepository.findAllById(req.getQuestionIds());
@@ -176,6 +184,7 @@ public class ExamService {
                 .title(e.getTitle())
                 .examType(e.getExamType())
                 .description(e.getDescription())
+                .difficultyBand(e.getDifficultyBand())
                 .createdAt(e.getCreatedAt())
                 .questionIds(qIds)
                 .groupIds(gIds)

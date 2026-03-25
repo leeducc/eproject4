@@ -20,6 +20,7 @@ public class EssaySubmissionResponse {
     private String aiFeedback;
     private Double score;
     private LocalDateTime createdAt;
+    private String status;
 
     // Detailed assessment
     private Double taskAchievement;
@@ -42,6 +43,7 @@ public class EssaySubmissionResponse {
                 .aiFeedback(submission.getAiFeedback())
                 .score(submission.getScore())
                 .createdAt(submission.getCreatedAt())
+                .status(submission.getStatus() != null ? submission.getStatus().name() : null)
                 .taskAchievement(submission.getTaskAchievement())
                 .cohesionCoherence(submission.getCohesionCoherence())
                 .lexicalResource(submission.getLexicalResource())

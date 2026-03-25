@@ -8,6 +8,9 @@ import 'features/study_sections/listening/services/listening_provider.dart';
 import 'features/study_sections/writing/services/writing_api_service.dart';
 import 'features/study_sections/writing/services/real_writing_repository.dart';
 import 'features/study_sections/writing/services/writing_provider.dart';
+import 'features/study_sections/vocabulary/providers/vocabulary_provider.dart';
+import 'features/study_sections/vocabulary/repositories/real_vocabulary_repository.dart';
+import 'features/study_sections/vocabulary/services/vocabulary_api_service.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -34,20 +37,16 @@ class EnglishStudyApp extends StatelessWidget {
         ),
 
         // ── Vocabulary section ───────────────────────────────────
-        // ChangeNotifierProxyProvider automatically calls update()
-        // every time IeltsLevelProvider.notifyListeners() fires,
-        // which triggers VocabularyProvider.loadForBand(newBand).
-        // ChangeNotifierProxyProvider<IeltsLevelProvider, VocabularyProvider>(
-        //   create: (_) => VocabularyProvider(MockVocabularyRepository()),
-        //   update: (_, levelProvider, vocabProvider) {
-        //     debugPrint(
-        //         '[main] Level changed → ${levelProvider.selectedLevel.label} '
-        //         '(${levelProvider.selectedLevel.band}) – reloading vocabulary');
-        //     // Fire-and-forget; VocabularyProvider manages its own state
-        //     vocabProvider!.loadForBand(levelProvider.selectedLevel.band);
-        //     return vocabProvider;
-        //   },
-        // ),
+        ChangeNotifierProxyProvider<IeltsLevelProvider, VocabularyProvider>(
+          create: (_) => VocabularyProvider(RealVocabularyRepository(VocabularyApiService())),
+          update: (_, levelProvider, vocabProvider) {
+            debugPrint(
+                '[main] Level changed → ${levelProvider.selectedLevel.label} '
+                '(${levelProvider.selectedLevel.band}) – reloading vocabulary');
+            vocabProvider!.loadForBand(levelProvider.selectedLevel.band);
+            return vocabProvider;
+          },
+        ),
 
         // // ── Reading section ───────────────────────────────────
         // ChangeNotifierProxyProvider<IeltsLevelProvider, ReadingProvider>(

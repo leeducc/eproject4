@@ -1,5 +1,6 @@
 package com.groupone.backend.features.quizbank.entity;
 
+import com.groupone.backend.features.quizbank.enums.DifficultyBand;
 import com.groupone.backend.features.quizbank.enums.ExamType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,10 @@ public class Exam {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "difficulty_band", columnDefinition = "VARCHAR(50)")
+    private DifficultyBand difficultyBand;
 
     @Column(name = "created_at", nullable = false)
     @Builder.Default

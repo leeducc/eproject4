@@ -51,6 +51,13 @@ public class WritingService {
                 log.info("Teacher {} is re-claiming their own locked submission {}", teacher.getEmail(), id);
                 return submission;
             }
+            
+            // Allow viewing if already graded
+            if (submission.getStatus() == SubmissionStatus.GRADED) {
+                log.info("Teacher {} is viewing graded submission {}", teacher.getEmail(), id);
+                return submission;
+            }
+
             throw new RuntimeException("Submission is already claimed or graded");
         }
 
@@ -87,7 +94,20 @@ public class WritingService {
         WritingSubmission submission = submissionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Submission not found"));
 
+        if (submission.getStatus() != SubmissionStatus.IN_PROGRESS) {
+            log.error("Teacher {} attempted to grade submission {} which is in status {}", 
+                teacher.getEmail(), id, submission.getStatus());
+            throw new RuntimeException("Submission must be IN_PROGRESS to be graded");
+        }
+
+        if (submission.getLockedBy() == null) {
+            log.error("Submission {} is IN_PROGRESS but lockedBy is null", id);
+            throw new RuntimeException("Submission is not locked by any teacher");
+        }
+
         if (!submission.getLockedBy().getId().equals(teacher.getId())) {
+            log.error("Teacher {} attempted to grade submission {} locked by teacher ID {}", 
+                teacher.getEmail(), id, (submission.getLockedBy() != null ? submission.getLockedBy().getId() : "null"));
             throw new RuntimeException("You do not have the lock for this submission");
         }
 
@@ -156,5 +176,25 @@ public class WritingService {
             log.error("Critical error during essay submission: {}", e.getMessage(), e);
             throw e;
         }
+    }
+    public List<EssaySubmissionResponse> getStudentSubmissions(User student) {
+        log.info("Fetching all writing submissions for student {}", student.getEmail());
+        return submissionRepository.findByStudentOrderByCreatedAtDesc(student).stream()
+                .map(EssaySubmissionResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public EssaySubmissionResponse getSubmissionDetail(Long id, User student) {
+        log.info("Fetching essay submission detail {} for student {}", id, student.getEmail());
+        WritingSubmission submission = submissionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Submission not found"));
+
+        if (!submission.getStudent().getId().equals(student.getId())) {
+            log.error("User {} attempted to access submission {} belonging to user {}", 
+                student.getEmail(), id, submission.getStudent().getId());
+            throw new RuntimeException("You do not have permission to view this submission");
+        }
+
+        return EssaySubmissionResponse.fromEntity(submission);
     }
 }

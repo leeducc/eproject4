@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuizBankStore } from '../store';
-import { SkillType, ExamType } from '../types';
+import { SkillType, ExamType, DifficultyBand } from '../types';
 import { Search, BookOpen, Layers, CheckCircle2, AlertCircle, Eye, X, Music, FileText } from 'lucide-react';
 import { toast } from '@english-learning/ui';
 import { getMediaUrl } from '../utils';
 import { StudentPreview } from './StudentPreview';
+import { ExamPreviewModal } from './ExamPreviewModal';
 import { Question } from '../types';
 
 interface ExamCompositionUIProps {
@@ -21,7 +22,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
     fetchGroups, 
     createExam, 
     updateExam,
-    fetchExamById 
+    fetchExamById
   } = useQuizBankStore();
   
   const [title, setTitle] = useState('');
@@ -29,6 +30,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
   const [examType, setExamType] = useState<ExamType>('ORG_EXAM');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSkillFilter, setSelectedSkillFilter] = useState<SkillType | 'ALL'>('ALL');
+  const [examLevel, setExamLevel] = useState<DifficultyBand | 'MIXED'>('MIXED');
   
   // Selection
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
@@ -36,6 +38,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
 
   // Preview
   const [previewItem, setPreviewItem] = useState<{ item: any, type: 'QUESTION' | 'GROUP' } | null>(null);
+  const [showExamPreview, setShowExamPreview] = useState(false);
 
   useEffect(() => {
     fetchQuestions();
@@ -49,6 +52,9 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
           setExamType(exam.exam_type);
           setSelectedQuestions(exam.question_ids || []);
           setSelectedGroups(exam.group_ids || []);
+          if (exam.difficulty_band) {
+            setExamLevel(exam.difficulty_band);
+          }
         }
       });
     }
@@ -57,6 +63,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
   // Combined Pool
   const filteredPool = useMemo(() => {
     const qPool = questions.filter(q => {
+      if (q.skill !== 'WRITING') return false; // Strict enforce: only show standalone writing tasks
       const matchesSkill = selectedSkillFilter === 'ALL' || q.skill === selectedSkillFilter;
       const matchesSearch = (q.instruction || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
                             q.type.toLowerCase().includes(searchQuery.toLowerCase());
@@ -122,7 +129,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
     ieltsCounts.writingQuestions === 2
   );
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim() || (selectedQuestions.length === 0 && selectedGroups.length === 0)) {
       toast.error("Please enter a title and select items.");
       return;
@@ -144,6 +151,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
         title,
         description,
         exam_type: examType,
+        difficulty_band: examLevel === 'MIXED' ? undefined : examLevel,
         categories: includedCategories,
         question_ids: selectedQuestions,
         group_ids: selectedGroups,
@@ -156,6 +164,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
         title,
         description,
         exam_type: examType,
+        difficulty_band: examLevel === 'MIXED' ? undefined : examLevel,
         categories: includedCategories,
         question_ids: selectedQuestions,
         group_ids: selectedGroups,
@@ -196,6 +205,22 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
                 <option value="ORG_EXAM">General Mock Test</option>
                 <option value="REAL_EXAM">Real Exam Simulator</option>
                 <option value="IELTS">IELTS Full Format</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 block text-gray-900">Exam Level Range</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500"
+                value={examLevel}
+                onChange={(e) => setExamLevel(e.target.value as any)}
+                disabled={mode === 'VIEW'}
+              >
+                <option value="MIXED">Mixed / Don't Auto-Set</option>
+                <option value="BAND_0_4">Beginner (0-4)</option>
+                <option value="BAND_5_6">Intermediate (5-6)</option>
+                <option value="BAND_7_8">Advanced (7-8)</option>
+                <option value="BAND_9">Expert (9)</option>
               </select>
             </div>
 
@@ -273,15 +298,24 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
             </div>
          </div>
 
-         {mode !== 'VIEW' && (
-           <button 
-             onClick={handleCreate}
-             disabled={!title.trim() || (selectedQuestions.length === 0 && selectedGroups.length === 0) || !isIELTSValid}
-             className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-40 disabled:shadow-none"
-           >
-             {examType === 'IELTS' ? 'Update IELTS Exam' : (mode === 'EDIT' ? 'Update Exam' : 'Create Exam')}
-           </button>
-         )}
+         <div className="space-y-3">
+             {mode !== 'VIEW' && (
+               <button 
+                 onClick={handleCreate}
+                 disabled={!title.trim() || (selectedQuestions.length === 0 && selectedGroups.length === 0) || !isIELTSValid}
+                 className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-40 disabled:shadow-none"
+               >
+                 {examType === 'IELTS' ? 'Update IELTS Exam' : (mode === 'EDIT' ? 'Update Exam' : 'Create Exam')}
+               </button>
+             )}
+             <button 
+               onClick={() => setShowExamPreview(true)}
+               disabled={selectedQuestions.length === 0 && selectedGroups.length === 0}
+               className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all disabled:opacity-40 disabled:shadow-none"
+             >
+               <Eye size={18} /> Student Preview
+             </button>
+         </div>
       </div>
 
       {/* Right Column: Resource Pool */}
@@ -308,7 +342,6 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
                   <option value="LISTENING">Listening</option>
                   <option value="READING">Reading</option>
                   <option value="WRITING">Writing</option>
-                  <option value="VOCABULARY">Vocabulary</option>
               </select>
             </div>
          </div>
@@ -375,7 +408,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
                           </h4>
                           
                           <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
-                             {isItemType === 'GROUP' ? (item as any).content : (item.data as any).template || "Standalone practice task..."}
+                             {isItemType === 'GROUP' ? (item as unknown as any).content : (item.data as any)?.template || "Standalone practice task..."}
                           </p>
                        </div>
 
@@ -533,6 +566,16 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
             </div>
           </div>
         </div>
+      )}
+
+      {/* Full Exam Preview Modal */}
+      {showExamPreview && (
+        <ExamPreviewModal 
+           examTitle={title}
+           groups={questionGroups.filter(g => selectedGroups.includes(g.id))}
+           questions={questions.filter(q => selectedQuestions.includes(q.id))}
+           onClose={() => setShowExamPreview(false)}
+        />
       )}
 
     </div>

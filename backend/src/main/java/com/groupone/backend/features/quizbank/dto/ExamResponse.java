@@ -20,6 +20,9 @@ public class ExamResponse {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    @JsonProperty("difficulty_band")
+    private com.groupone.backend.features.quizbank.enums.DifficultyBand difficultyBand;
+
     @JsonProperty("question_ids")
     private List<Long> questionIds;
 

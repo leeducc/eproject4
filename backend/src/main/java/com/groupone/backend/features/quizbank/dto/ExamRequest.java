@@ -21,6 +21,9 @@ public class ExamRequest {
     @JsonProperty("question_ids")
     private List<Long> questionIds;
 
+    @JsonProperty("difficulty_band")
+    private com.groupone.backend.features.quizbank.enums.DifficultyBand difficultyBand;
+
     @JsonProperty("group_ids")
     private List<Long> groupIds;
 }

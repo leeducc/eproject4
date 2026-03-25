@@ -11,6 +11,8 @@ import { QuizBankTestPage } from "../../admin/src/pages/QuizBankTestPage";
 import { CategoryPage } from "../../admin/src/pages/questions/CategoryPage";
 import { QuestionDetailView } from "../../admin/src/pages/questions/QuestionDetailView";
 import { QuestionEditPage } from "../../admin/src/pages/questions/QuestionEditPage";
+import { ComprehensionDetailView } from "../../admin/src/pages/questions/ComprehensionDetailView";
+import { ComprehensionEditPage } from "../../admin/src/pages/questions/ComprehensionEditPage";
 import { ExamList } from "../../admin/src/pages/questions/ExamList";
 import { TeacherLayout } from "./components/TeacherLayout";
 import NotFound from "./pages/NotFound";
@@ -38,6 +40,9 @@ function App() {
                             {/* Detail and Edit Routes */}
                             <Route path="/teacher/questions/:id" element={<QuestionDetailView basePath="/teacher" Layout={TeacherLayout} />} />
                             <Route path="/teacher/questions/:id/edit" element={<QuestionEditPage basePath="/teacher" Layout={TeacherLayout} />} />
+                            
+                            <Route path="/teacher/comprehensions/:id" element={<ComprehensionDetailView basePath="/teacher" Layout={TeacherLayout} />} />
+                            <Route path="/teacher/comprehensions/:id/edit" element={<ComprehensionEditPage basePath="/teacher" Layout={TeacherLayout} />} />
                         </Route>
 
                         {/* Public Test Route */}

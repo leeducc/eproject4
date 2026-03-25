@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import '../models/topic_model.dart';
 import '../models/essay_submission_response.dart';
 import '../models/writing_correction.dart';
@@ -25,12 +26,33 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
   String _gradingType = 'AI';
   bool _isSubmitting = false;
   EssaySubmissionResponse? _submissionResponse;
-  bool _showHint = false;
+  
+  List<EssaySubmissionResponse> _history = [];
+  bool _isLoadingHistory = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
+    _fetchHistory();
+  }
+
+  Future<void> _fetchHistory() async {
+    setState(() {
+      _isLoadingHistory = true;
+    });
+    try {
+      final allSubmissions = await _apiService.fetchMySubmissions();
+      setState(() {
+        _history = allSubmissions.where((s) => s.topic.id == widget.topic.id).toList();
+        _isLoadingHistory = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingHistory = false;
+      });
+      print('Error fetching history: $e');
+    }
   }
 
   Future<void> _submitEssay() async {
@@ -41,52 +63,27 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
     setState(() {
       _isSubmitting = true;
-      _submissionResponse = null; // reset if grading again
+      _submissionResponse = null; 
     });
 
     try {
-      final response = await _apiService.submitEssay(
+      await _apiService.submitEssay(
         widget.topic.id,
         _contentController.text.trim(),
         _gradingType,
       );
+
+      _contentController.clear();
+      await _fetchHistory();
 
       setState(() {
         _isSubmitting = false;
       });
 
       if (_gradingType == 'HUMAN') {
-        _showHumanGradingDialog();
+        _showSuccessDialog('Bài luận của bạn đã được gửi. Giáo viên sẽ chấm bài và kết quả sẽ được gửi thông báo tới email của bạn sớm nhất.');
       } else {
-        // Use data from API, fallback to defaults if not present
-        final finalResponse = EssaySubmissionResponse(
-          id: response.id,
-          topic: response.topic,
-          content: response.content,
-          gradingType: response.gradingType,
-          aiFeedback: response.aiFeedback,
-          score: response.score,
-          taskAchievement: response.taskAchievement ?? 0.0,
-          grammaticalRange: response.grammaticalRange ?? 0.0,
-          lexicalResource: response.lexicalResource ?? 0.0,
-          cohesionCoherence: response.cohesionCoherence ?? 0.0,
-          corrections: response.corrections.isNotEmpty 
-              ? response.corrections 
-              : [
-                  WritingCorrection(
-                    original: "Example: I is...",
-                    corrected: "I am...",
-                    explanation: "Note: Real AI corrections will appear here if the backend provides them.",
-                  ),
-                ],
-        );
-
-        setState(() {
-          _submissionResponse = finalResponse;
-        });
-
-        // Switch to Result tab automatically
-        _tabController.animateTo(2);
+        _showSuccessDialog('Bài luận của bạn đã được gửi và đang được AI chấm điểm. Vui lòng xem kết quả ở lịch sử.');
       }
     } catch (e) {
       setState(() {
@@ -98,20 +95,20 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
   }
 
-  void _showHumanGradingDialog() {
+  void _showSuccessDialog(String message) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E2330),
           title: const Text('Thông báo', style: TextStyle(color: Colors.white)),
-          content: const Text(
-            'Bài luận của bạn đã được gửi. Giáo viên sẽ chấm bài và kết quả sẽ được gửi thông báo tới email của bạn sớm nhất.',
-            style: TextStyle(color: Colors.white70),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white70),
           ),
           actions: [
             TextButton(
@@ -152,45 +149,222 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           _LevelBadge(level: level),
         ],
       ),
-      body: Column(
-        children: [
-          // 1. Grader Toggle
-          _buildGraderToggle(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            _buildPromptHeader(),
+            const Divider(color: Colors.white12, height: 32),
+            
+            if (_submissionResponse != null) 
+              _buildDetailView()
+            else 
+              _buildWritingArea(),
+              
+            const Divider(color: Colors.white12, height: 48),
+            _buildHistorySection(),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  
-                  // 2. Main Essay View (Input or Corrected View)
-                  _buildEssayView(),
-                  
-                  const SizedBox(height: 24),
-
-                  // 3. Submit Button (only show if not submitted or if re-editing)
-                  if (_submissionResponse == null) _buildSubmitButton(),
-
-                  const SizedBox(height: 24),
-
-                  // 4. Bottom Tab Layout (Feedback Sections)
-                  _buildFeedbackTabs(),
-                  
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
+  Widget _buildPromptHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.topic.title,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          widget.topic.prompt,
+          style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+        ),
+        if (widget.topic.imageUrl != null && widget.topic.imageUrl!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(widget.topic.imageUrl!),
           ),
         ],
-      ),
+      ],
+    );
+  }
+
+  Widget _buildWritingArea() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildGraderToggle(),
+        const SizedBox(height: 16),
+        const Text(
+          'Bài viết của bạn',
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          constraints: const BoxConstraints(minHeight: 200),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E2330),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: _buildEssayInput(),
+        ),
+        _buildWordCount(),
+        const SizedBox(height: 24),
+        _buildSubmitButton(),
+      ],
+    );
+  }
+
+  Widget _buildHistorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Lịch sử làm bài',
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        if (_isLoadingHistory)
+          const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+        else if (_history.isEmpty)
+          const Text('Bạn chưa có bài nộp nào cho chủ đề này.', style: TextStyle(color: Colors.white54))
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _history.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final item = _history[index];
+              final isAI = item.gradingType == 'AI';
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _submissionResponse = item;
+                  });
+                },
+                child: Card(
+                  color: const Color(0xFF1E2330),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: _submissionResponse?.id == item.id ? Colors.blueAccent : Colors.transparent),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isAI ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isAI ? 'AI' : 'Giáo viên',
+                            style: TextStyle(color: isAI ? Colors.purpleAccent : Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _formatDate(item.createdAt),
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.status == 'GRADED' ? 'Đã chấm' : (item.status == 'IN_PROGRESS' ? 'Đang chấm' : 'Chờ chấm'),
+                                style: TextStyle(color: item.status == 'GRADED' ? Colors.greenAccent : Colors.orangeAccent, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (item.score != null)
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white10,
+                            ),
+                            child: Text(
+                              '${item.score}',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        else
+                          const Icon(Icons.chevron_right, color: Colors.white30),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(String? isoDate) {
+    if (isoDate == null) return "Gần đây";
+    try {
+      final date = DateTime.parse(isoDate).toLocal();
+      return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  Widget _buildDetailView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Chi tiết bài làm',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _submissionResponse = null;
+                });
+              },
+              icon: const Icon(Icons.close, size: 16),
+              label: const Text('Đóng / Viết tiếp'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          constraints: const BoxConstraints(minHeight: 200),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E2330),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: _buildRichTextEssay(_submissionResponse!.content, _submissionResponse!.corrections),
+        ),
+        const SizedBox(height: 24),
+        _buildFeedbackTabs(),
+      ],
     );
   }
 
   Widget _buildGraderToggle() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       child: SegmentedButton<String>(
         segments: const <ButtonSegment<String>>[
           ButtonSegment<String>(
@@ -219,46 +393,6 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildEssayView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Bài viết của bạn',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            if (_submissionResponse != null)
-              TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _submissionResponse = null;
-                  });
-                },
-                icon: const Icon(Icons.edit, size: 16),
-                label: const Text('Viết lại'),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          constraints: const BoxConstraints(minHeight: 200),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E2330),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: _submissionResponse == null 
-            ? _buildEssayInput() 
-            : _buildRichTextEssay(_submissionResponse!.content, _submissionResponse!.corrections),
-        ),
-        _buildWordCount(),
-      ],
-    );
-  }
-
   Widget _buildEssayInput() {
     return TextField(
       controller: _contentController,
@@ -274,22 +408,17 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
   }
 
   Widget _buildRichTextEssay(String content, List<WritingCorrection> corrections) {
-    // Basic logic: highlight original parts that were corrected
     List<TextSpan> spans = [];
     String remaining = content;
 
     if (corrections.isEmpty) {
       spans.add(TextSpan(text: content, style: const TextStyle(color: Colors.white70)));
     } else {
-      // Very simplified highlighting for demo purposes
-      // In a real app, this would use character offsets from the AI response
       for (var correction in corrections) {
         int index = remaining.indexOf(correction.original);
         if (index != -1) {
-          // Add text before correction
           spans.add(TextSpan(text: remaining.substring(0, index)));
           
-          // Add original (strikethrough)
           spans.add(TextSpan(
             text: correction.original,
             style: TextStyle(
@@ -297,9 +426,9 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
               decoration: TextDecoration.lineThrough,
               backgroundColor: Colors.redAccent.withOpacity(0.1),
             ),
+            recognizer: TapGestureRecognizer()..onTap = () => _showCorrectionDetail(correction),
           ));
 
-          // Add corrected (bold, green)
           spans.add(TextSpan(
             text: ' ${correction.corrected} ',
             style: const TextStyle(
@@ -307,6 +436,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
               fontWeight: FontWeight.bold,
               backgroundColor: Color(0x2200FF00),
             ),
+            recognizer: TapGestureRecognizer()..onTap = () => _showCorrectionDetail(correction),
           ));
           
           remaining = remaining.substring(index + correction.original.length);
@@ -323,6 +453,37 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           children: spans,
         ),
       ),
+    );
+  }
+
+  void _showCorrectionDetail(WritingCorrection correction) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E2330),
+          title: const Text('Chi tiết lỗi', style: TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Original: ${correction.original}', style: const TextStyle(color: Colors.redAccent, decoration: TextDecoration.lineThrough)),
+              const SizedBox(height: 8),
+              Text('Corrected: ${correction.corrected}', style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              const Text('Explanation:', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(correction.explanation, style: const TextStyle(color: Colors.white70)),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Đóng', style: TextStyle(color: Colors.blueAccent)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -383,19 +544,17 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           indicatorColor: Colors.blueAccent,
           dividerColor: Colors.white10,
           tabs: const [
-            Tab(text: 'Đề bài'),
-            Tab(text: 'Sửa lỗi'),
+            Tab(text: 'Feedback'),
             Tab(text: 'Kết quả'),
           ],
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 400, // Fixed height for tab content
+          height: 400,
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildQuestionTab(),
-              _buildCorrectionsTab(),
+              _buildFeedbackTab(),
               _buildResultTab(),
             ],
           ),
@@ -404,96 +563,63 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildQuestionTab() {
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(), // Handled by outer scroll
-      children: [
-        Text(
-          widget.topic.title,
-          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          widget.topic.prompt,
-          style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
-        ),
-        if (widget.topic.imageUrl != null && widget.topic.imageUrl!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(widget.topic.imageUrl!),
-          ),
-        ],
-      ],
-    );
-  }
+  Widget _buildFeedbackTab() {
+    if (_submissionResponse == null) return const SizedBox();
+    
+    final aiFeedback = _submissionResponse!.aiFeedback;
+    final teacherFeedback = _submissionResponse!.teacherFeedback;
 
-  Widget _buildCorrectionsTab() {
-    if (_submissionResponse == null || _submissionResponse!.corrections.isEmpty) {
+    if ((aiFeedback == null || aiFeedback.isEmpty) && 
+        (teacherFeedback == null || teacherFeedback.isEmpty)) {
       return const Center(
         child: Text(
-          'Chưa có dữ liệu sửa lỗi.',
+          'Chưa có feedback cho bài làm này.',
           style: TextStyle(color: Colors.white30),
         ),
       );
     }
 
-    return ListView.separated(
-      itemCount: _submissionResponse!.corrections.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final correction = _submissionResponse!.corrections[index];
-        return Card(
-          color: const Color(0xFF1E2330),
-          shape: RoundedRectangleBorder(
+    return ListView(
+      padding: const EdgeInsets.only(top: 8.0),
+      children: [
+        if (teacherFeedback != null && teacherFeedback.isNotEmpty) ...[
+          const Text(
+            'Overall Feedback for Student',
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Colors.white10)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        correction.original,
-                        style: const TextStyle(
-                          color: Colors.white60,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        correction.corrected,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Divider(height: 24, color: Colors.white10),
-                Text(
-                  correction.explanation,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-              ],
+            ),
+            child: Text(
+              teacherFeedback,
+              style: const TextStyle(color: Colors.white70, height: 1.6),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 16),
+        ],
+        if (aiFeedback != null && aiFeedback.isNotEmpty) ...[
+          const Text(
+            'AI Feedback',
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              aiFeedback,
+              style: const TextStyle(color: Colors.white70, height: 1.6),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -509,7 +635,6 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
     return ListView(
       children: [
-        // Total Score
         Center(
           child: Container(
             width: 100,
@@ -533,7 +658,6 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
         
         const SizedBox(height: 32),
         
-        // Sub-scores Grid
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -542,68 +666,79 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
           children: [
-            _buildScoreItem('Task Achievement', _submissionResponse!.taskAchievement ?? 0),
-            _buildScoreItem('Cohesion & Coherence', _submissionResponse!.cohesionCoherence ?? 0),
-            _buildScoreItem('Lexical Resource', _submissionResponse!.lexicalResource ?? 0),
-            _buildScoreItem('Grammatical Range', _submissionResponse!.grammaticalRange ?? 0),
+            _buildScoreItem('Task Achievement', _submissionResponse!.taskAchievement ?? 0, reason: _submissionResponse!.taskAchievementReason),
+            _buildScoreItem('Cohesion & Coherence', _submissionResponse!.cohesionCoherence ?? 0, reason: _submissionResponse!.cohesionCoherenceReason),
+            _buildScoreItem('Lexical Resource', _submissionResponse!.lexicalResource ?? 0, reason: _submissionResponse!.lexicalResourceReason),
+            _buildScoreItem('Grammatical Range', _submissionResponse!.grammaticalRange ?? 0, reason: _submissionResponse!.grammaticalRangeReason),
           ],
-        ),
-
-        const SizedBox(height: 32),
-
-        // Feedback Text
-        const Text(
-          'Nhận xét chi tiết',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            _submissionResponse!.aiFeedback ?? "Không có nhận xét.",
-            style: const TextStyle(color: Colors.white70, height: 1.6),
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildScoreItem(String label, double score) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(color: Colors.white60, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+  Widget _buildScoreItem(String label, double score, {String? reason}) {
+    return GestureDetector(
+      onTap: () {
+        if (reason != null && reason.isNotEmpty) {
+           showDialog(
+             context: context,
+             builder: (context) => AlertDialog(
+                backgroundColor: const Color(0xFF1E2330),
+                title: Text(label, style: const TextStyle(color: Colors.white)),
+                content: SingleChildScrollView(child: Text(reason, style: const TextStyle(color: Colors.white70))),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Đóng', style: TextStyle(color: Colors.blueAccent)),
+                  ),
+                ],
+             ),
+           );
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: const TextStyle(color: Colors.white60, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (reason != null && reason.isNotEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: Icon(Icons.info_outline, color: Colors.blueAccent, size: 14),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            Text(
-              '$score',
-              style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: score / 9.0,
-            backgroundColor: Colors.white12,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-            minHeight: 6,
+              Text(
+                '$score',
+                style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: score / 9.0,
+              backgroundColor: Colors.white12,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              minHeight: 6,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

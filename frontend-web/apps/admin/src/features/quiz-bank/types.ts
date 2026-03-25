@@ -79,6 +79,7 @@ export interface Exam {
   title: string;
   description?: string;
   exam_type: ExamType;
+  difficulty_band?: DifficultyBand;
   created_at: string;
   categories: SkillType[];
   question_ids: number[]; // References to Questions stored in the Exam

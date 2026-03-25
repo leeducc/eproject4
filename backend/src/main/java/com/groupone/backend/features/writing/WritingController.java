@@ -29,4 +29,17 @@ public class WritingController {
             @AuthenticationPrincipal User student) {
         return ResponseEntity.ok(writingService.submitEssay(request, student));
     }
+
+    @GetMapping("/my-submissions")
+    public ResponseEntity<List<EssaySubmissionResponse>> getMySubmissions(
+            @AuthenticationPrincipal User student) {
+        return ResponseEntity.ok(writingService.getStudentSubmissions(student));
+    }
+
+    @GetMapping("/submissions/{id}")
+    public ResponseEntity<EssaySubmissionResponse> getSubmissionDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User student) {
+        return ResponseEntity.ok(writingService.getSubmissionDetail(id, student));
+    }
 }

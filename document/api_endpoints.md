@@ -174,13 +174,25 @@ This document lists all the backend API endpoints, their HTTP methods, descripti
 
 ## Quiz Bank (Exams & Questions)
 
-### Get All Exams
+### Quiz Bank - Exams
+```
+GET /api/v1/exams
+GET /api/v1/exams/{id}
+GET /api/v1/exams/type/{examType}
+POST /api/v1/exams
+PUT /api/v1/exams/{id}
+DELETE /api/v1/exams/{id}
+```
+
+### Mock and Real Exams API
+
+#### Get All Exams
 
 - **Endpoint**: `/api/v1/exams`
 - **Method**: `GET`
 - **Response**: `200 OK` (List of ExamResponse)
 
-### Create Exam
+#### Create Exam
 
 - **Endpoint**: `/api/v1/exams`
 - **Method**: `POST`
@@ -206,19 +218,35 @@ This document lists all the backend API endpoints, their HTTP methods, descripti
 - **Params**: `type` (words/phrases), `levelGroup`, `search`, `lastSeenId`, `limit`
 - **Response**: `200 OK` (PaginatedResponse of VocabularyItem)
 
+### Create Vocabulary Item
+
+- **Endpoint**: `/api/v1/vocabulary`
+- **Method**: `POST`
+- **Description**: Manually creates a new vocabulary item.
+- **Request Payload**: (VocabularyItem)
+- **Response**: `200 OK` (Created VocabularyItem)
+
+### Update Vocabulary Item
+
+- **Endpoint**: `/api/v1/vocabulary/{id}`
+- **Method**: `PUT`
+- **Description**: Updates an existing vocabulary item.
+- **Request Payload**: (VocabularyItem)
+- **Response**: `200 OK` (Updated VocabularyItem)
+
+### Delete Vocabulary Item
+
+- **Endpoint**: `/api/v1/vocabulary/{id}`
+- **Method**: `DELETE`
+- **Description**: Deletes a vocabulary item. (**ADMIN only**)
+- **Response**: `204 No Content`
+
 ### Generate Word Details (AI)
 
 - **Endpoint**: `/api/v1/vocabulary/{word}/details`
 - **Method**: `GET`
 - **Description**: Generates a detailed definition, example sentences, and synonyms using AI.
 - **Response**: `200 OK` (VocabularyDetail)
-
-### Generate Word Practice (AI)
-
-- **Endpoint**: `/api/v1/vocabulary/{word}/practice`
-- **Method**: `GET`
-- **Description**: Generates a random practice quiz (Multiple Choice or Fill In The Blank) using AI.
-- **Response**: `200 OK` (PracticeQuiz)
 
 ### Ensure AI Content
 
@@ -227,6 +255,43 @@ This document lists all the backend API endpoints, their HTTP methods, descripti
 - **Description**: Proactively generates AI details and a set of practice quizzes for a word.
 - **Response**: `200 OK`
 
+### Generate Word Practice (AI)
+
+- **Endpoint**: `/api/v1/vocabulary/{word}/practice`
+- **Method**: `GET`
+- **Description**: Generates a random practice quiz (Multiple Choice or Fill In The Blank) using AI.
+- **Response**: `200 OK` (PracticeQuiz)
+
+### Get All Practice for Word
+
+- **Endpoint**: `/api/v1/vocabulary/{word}/practice/all`
+- **Method**: `GET`
+- **Description**: Retrieves all existing AI-generated practice quizzes for a specific word.
+- **Response**: `200 OK` (List of VocabularyPracticeAiContentEntity)
+
+### Create Manual Practice
+
+- **Endpoint**: `/api/v1/vocabulary/practice/{word}`
+- **Method**: `POST`
+- **Description**: Manually creates a practice quiz for a word.
+- **Request Payload**: (PracticeQuiz)
+- **Response**: `200 OK` (Created Entity)
+
+### Update Practice Quiz
+
+- **Endpoint**: `/api/v1/vocabulary/practice/{id}`
+- **Method**: `PUT`
+- **Description**: Updates the content of an existing practice quiz.
+- **Request Body**: `String` (JSON content of the quiz)
+- **Response**: `200 OK`
+
+### Delete Practice Quiz
+
+- **Endpoint**: `/api/v1/vocabulary/practice/{id}`
+- **Method**: `DELETE`
+- **Description**: Deletes a practice quiz. (**ADMIN only**)
+- **Response**: `204 No Content`
+
 ### Get Vocabulary History
 
 - **Endpoint**: `/api/v1/vocabulary/{id}/history`
@@ -234,11 +299,25 @@ This document lists all the backend API endpoints, their HTTP methods, descripti
 - **Description**: Retrieves the edit history for a specific vocabulary item.
 - **Response**: `200 OK` (List of VocabularyHistoryDTO)
 
+### Get Practice History
+
+- **Endpoint**: `/api/v1/vocabulary/practice/{id}/history`
+- **Method**: `GET`
+- **Description**: Retrieves the edit history for a specific practice quiz.
+- **Response**: `200 OK` (List of VocabularyPracticeHistoryDTO)
+
 ### Rollback Vocabulary
 
 - **Endpoint**: `/api/v1/vocabulary/history/{historyId}/rollback`
 - **Method**: `POST`
-- **Description**: Rolls back a vocabulary item to a previous version.
+- **Description**: Rolls back a vocabulary item to a previous version. (**ADMIN only**)
+- **Response**: `200 OK`
+
+### Rollback Practice
+
+- **Endpoint**: `/api/v1/vocabulary/practice/history/{historyId}/rollback`
+- **Method**: `POST`
+- **Description**: Rolls back a practice quiz to a previous version. (**ADMIN only**)
 - **Response**: `200 OK`
 
 ### Import Vocabulary (Excel)
@@ -248,6 +327,13 @@ This document lists all the backend API endpoints, their HTTP methods, descripti
 - **Description**: Imports vocabulary items from an Excel file.
 - **Request**: `MultipartFile` file.
 - **Response**: `200 OK` (Import status and count)
+
+### Get Sample Excel
+
+- **Endpoint**: `/api/v1/vocabulary/sample`
+- **Method**: `GET`
+- **Description**: Downloads a sample Excel file for vocabulary import.
+- **Response**: `200 OK` (File download)
 
 ---
 

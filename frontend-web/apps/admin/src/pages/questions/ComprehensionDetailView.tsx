@@ -9,7 +9,7 @@ import { getMediaUrl } from '../../features/quiz-bank/utils';
 // @ts-ignore
 import { StudentPreview } from '../../features/quiz-bank/components/StudentPreview';
 
-export const ComprehensionDetailView: React.FC = () => {
+export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: React.ComponentType<{ children: React.ReactNode }> }> = ({ basePath = '/admin', Layout = AdminLayout }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { fetchGroupById, isLoading } = useQuizBankStore();
@@ -22,7 +22,7 @@ export const ComprehensionDetailView: React.FC = () => {
                 if (g) setGroup(g);
                 else {
                     toast.error("Comprehension not found");
-                    navigate('/admin/questions/reading');
+                    navigate(`${basePath}/questions/reading`);
                 }
             });
         }
@@ -30,11 +30,11 @@ export const ComprehensionDetailView: React.FC = () => {
 
     if (isLoading && !group) {
         return (
-            <AdminLayout>
+            <Layout>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            </AdminLayout>
+            </Layout>
         );
     }
 
@@ -43,7 +43,7 @@ export const ComprehensionDetailView: React.FC = () => {
     const childQuestions = group.questions || [];
 
     return (
-        <AdminLayout>
+        <Layout>
             <div className="max-w-6xl mx-auto py-8 px-4">
                 {/* Header */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -68,7 +68,7 @@ export const ComprehensionDetailView: React.FC = () => {
                             <Eye size={18} /> {viewMode === 'ADMIN' ? 'Student Preview' : 'Back to Admin View'}
                         </button>
                         <Link 
-                            to={`/admin/comprehensions/${group.id}/edit`}
+                            to={`${basePath}/comprehensions/${group.id}/edit`}
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-sm transition-all font-medium"
                         >
                             <Edit2 size={18} /> Edit Comprehension
@@ -128,7 +128,7 @@ export const ComprehensionDetailView: React.FC = () => {
                                                     <p className="text-gray-800 dark:text-slate-200 font-medium line-clamp-2">{q.instruction}</p>
                                                 </div>
                                                 <Link 
-                                                    to={`/admin/questions/${q.id}`}
+                                                    to={`${basePath}/questions/${q.id}`}
                                                     className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                                 >
                                                     <ChevronRight size={20} />
@@ -170,7 +170,7 @@ export const ComprehensionDetailView: React.FC = () => {
                                     Need to add more questions or change the passage text? Use the edit button to manage all content at once.
                                 </p>
                                 <Link 
-                                    to={`/admin/comprehensions/${group.id}/edit`}
+                                    to={`${basePath}/comprehensions/${group.id}/edit`}
                                     className="block w-full text-center bg-white text-blue-600 py-2 rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors"
                                 >
                                     Manage Content
@@ -180,6 +180,6 @@ export const ComprehensionDetailView: React.FC = () => {
                     </div>
                 )}
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };

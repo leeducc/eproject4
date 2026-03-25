@@ -7,7 +7,7 @@ import { AdminLayout } from '../../components/AdminLayout';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { ComprehensionBuilder } from '../../features/quiz-bank/components/ComprehensionBuilder';
 
-export const ComprehensionEditPage: React.FC = () => {
+export const ComprehensionEditPage: React.FC<{ basePath?: string, Layout?: React.ComponentType<{ children: React.ReactNode }> }> = ({ basePath = '/admin', Layout = AdminLayout }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { fetchGroupById, isLoading } = useQuizBankStore();
@@ -28,11 +28,11 @@ export const ComprehensionEditPage: React.FC = () => {
 
     if (isLoading && !group) {
         return (
-            <AdminLayout>
+            <Layout>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            </AdminLayout>
+            </Layout>
         );
     }
 
@@ -40,11 +40,11 @@ export const ComprehensionEditPage: React.FC = () => {
 
     const handleSaveComplete = () => {
         toast.success("Comprehension updated successfully");
-        navigate(`/admin/comprehensions/${id}`);
+        navigate(`${basePath}/comprehensions/${id}`);
     };
 
     return (
-        <AdminLayout>
+        <Layout>
             <div className="max-w-6xl mx-auto py-8 px-4">
                 <div className="mb-8">
                     <button 
@@ -73,6 +73,6 @@ export const ComprehensionEditPage: React.FC = () => {
                     />
                 </div>
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };

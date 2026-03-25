@@ -113,8 +113,8 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                     <div className="space-y-4">
                         <h3 className="font-semibold text-gray-700 dark:text-slate-300">Options ({data.multiple_select ? 'Multiple Answers' : 'Single Answer'}):</h3>
                         <div className="grid gap-3">
-                            {data.options.map((opt, idx) => {
-                                const isCorrect = data.correct_ids.includes(opt.id);
+                            {data.options?.map((opt, idx) => {
+                                const isCorrect = data.correct_ids?.includes(opt.id) || false;
                                 return (
                                     <div key={opt.id} className={`p-4 rounded-lg border flex items-center gap-3 transition-colors ${isCorrect ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-slate-800/40 border-gray-100 dark:border-slate-800'}`}>
                                         <span className="font-bold text-gray-400 dark:text-slate-500 w-6">{String.fromCharCode(65 + idx)}.</span>
@@ -147,9 +147,9 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                     <div className="space-y-4">
                         <h3 className="font-semibold text-gray-700 dark:text-slate-300">Matching Pairs:</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {data.left_items.map((left) => {
-                                const rightId = data.solution[left.id];
-                                const right = data.right_items.find(r => r.id.toString() === rightId.toString());
+                            {data.left_items?.map((left) => {
+                                const rightId = data.solution?.[left.id];
+                                const right = data.right_items?.find(r => r.id.toString() === rightId?.toString());
                                 return (
                                     <div key={left.id} className="flex items-center gap-4">
                                         <div className="flex-1 p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm flex items-center gap-3 shadow-sm transition-colors">
@@ -215,7 +215,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                             <div>
                                 <h4 className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-2">Blanks & Correct Answers:</h4>
                                 <div className="grid gap-2">
-                                    {Object.entries(data.blanks).map(([key, value]) => (
+                                    {Object.entries(data.blanks || {}).map(([key, value]) => (
                                         <div key={key} className="flex items-center gap-2 text-sm bg-blue-50/50 dark:bg-blue-900/10 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
                                             <span className="font-mono bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded text-blue-700 dark:text-blue-400 text-xs">{key}:</span>
                                             <span className="font-medium text-gray-800 dark:text-slate-200">{value.correct.join(' | ')}</span>

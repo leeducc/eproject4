@@ -1,0 +1,352 @@
+{
+    "items":  [
+                  {
+                      "id":  1,
+                      "word":  "a",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "indefinite article",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/a_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/a__/a__us/a__us_2_rr.ogg",
+                      "definition":  "A state of being fully aware and conscious of one\u0027s surroundings and thoughts; characterized by a clear and focused mental state.",
+                      "examples":  [
+                                       "After meditating for an hour, she achieved a state of profound mindfulness.",
+                                       "The therapist encouraged him to practice mindfulness techniques to reduce his anxiety."
+                                   ],
+                      "synonyms":  [
+                                       "awareness",
+                                       "consciousness",
+                                       "presence"
+                                   ]
+                  },
+                  {
+                      "id":  3,
+                      "word":  "ability",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/ability_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abi/abili/ability__us_4.ogg",
+                      "definition":  "The natural or acquired capacity to perform a specific task or function.",
+                      "examples":  [
+                                       "The ability to speak multiple languages has been a valuable asset in her career.",
+                                       "His exceptional ability to solve complex math problems has made him a renowned expert in the field."
+                                   ],
+                      "synonyms":  [
+                                       "talent",
+                                       "capacity",
+                                       "aptitude"
+                                   ]
+                  },
+                  {
+                      "id":  4,
+                      "word":  "able",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "adjective",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/able_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abl/able_/able__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  7,
+                      "word":  "about",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "adverb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/about_2",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abo/about/about__us_1.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  8,
+                      "word":  "about",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "preposition",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/about_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abo/about/about__us_1.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  9,
+                      "word":  "above",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "adverb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/above_2",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abo/above/above__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  10,
+                      "word":  "above",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "preposition",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/above_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abo/above/above__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  11,
+                      "word":  "abroad",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "adverb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/abroad",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/abr/abroa/abroad__us_4.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  27,
+                      "word":  "accept",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "verb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/accept",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/acc/accep/accept__us_1.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  33,
+                      "word":  "accident",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/accident",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/acc/accid/accident__us_2_rr.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  41,
+                      "word":  "according to",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "preposition",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/according-to",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/acc/accor/according_to_1_us_3.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  57,
+                      "word":  "achieve",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "verb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/achieve",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/ach/achie/achieve__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  65,
+                      "word":  "across",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "adverb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/across_2",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/acr/acros/across__us_1.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  66,
+                      "word":  "across",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "preposition",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/across_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/acr/acros/across__us_1.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  68,
+                      "word":  "act",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "verb",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/act_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/act__/act__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  69,
+                      "word":  "action",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/action_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/actio/action__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  72,
+                      "word":  "active",
+                      "type":  "word",
+                      "level":  "a2",
+                      "levelGroup":  "0-4",
+                      "pos":  "adjective",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/active_1",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/activ/active__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  74,
+                      "word":  "activity",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/activity",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/activ/activity__us_4.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  75,
+                      "word":  "actor",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/actor",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/actor/actor__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  76,
+                      "word":  "actress",
+                      "type":  "word",
+                      "level":  "a1",
+                      "levelGroup":  "0-4",
+                      "pos":  "noun",
+                      "definitionUrl":  "https://www.oxfordlearnersdictionaries.com/definition/english/actress",
+                      "voiceUrl":  "https://www.oxfordlearnersdictionaries.com/media/english/us_pron_ogg/a/act/actre/actress__us_2.ogg",
+                      "definition":  null,
+                      "examples":  [
+
+                                   ],
+                      "synonyms":  [
+
+                                   ]
+                  }
+              ],
+    "nextCursor":  76,
+    "hasMore":  true
+}

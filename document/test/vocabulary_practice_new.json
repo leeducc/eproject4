@@ -1,0 +1,13 @@
+{
+    "type":  "FILL_IN_THE_BLANK",
+    "question":  "After losing all hope, the sailors decided to _______ the burning vessel.",
+    "options":  [
+                    "maintain",
+                    "preserve",
+                    "abandon",
+                    "support"
+                ],
+    "answer":  "abandon",
+    "pairs":  null,
+    "sentence":  null
+}

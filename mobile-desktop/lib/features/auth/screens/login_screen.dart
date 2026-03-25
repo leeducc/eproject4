@@ -68,6 +68,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _handleQuickLogin() {
+    debugPrint('Quick login triggered: user1@gmail.com / User@123');
+    setState(() {
+      _emailController.text = 'user1@gmail.com';
+      _passwordController.text = 'User@123';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đã tự động điền thông tin đăng nhập!')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,6 +123,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 isLoading: _isLoading,
                 onPressed: _handleGoogleLogin,
                 // You can add a different color/style in CustomButton if it supports it
+              ),
+              const SizedBox(height: 16),
+              CustomButton(
+                text: 'Quick Login',
+                isLoading: _isLoading,
+                onPressed: _handleQuickLogin,
               ),
               const SizedBox(height: 16),
               Align(
