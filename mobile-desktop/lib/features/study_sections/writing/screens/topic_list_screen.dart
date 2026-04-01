@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../features/study_sections/writing/models/topic_model.dart';
-import '../../../../features/study_sections/writing/services/writing_api_service.dart';
-import '../../../../features/profile/screens/upgrade_pro_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../services/writing_provider.dart';
@@ -16,7 +14,6 @@ class TopicListScreen extends StatefulWidget {
 
 class _TopicListScreenState extends State<TopicListScreen> {
   bool _isLoading = true;
-  bool _isPro = false;
 
   @override
   void initState() {
@@ -27,7 +24,6 @@ class _TopicListScreenState extends State<TopicListScreen> {
   Future<void> _checkProStatus() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isPro = prefs.getBool('is_pro') ?? false;
       _isLoading = false;
     });
   }
@@ -79,11 +75,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-                          if (isProOnly && !_isPro) {
-                            _showUpgradePrompt();
-                            return;
-                          }
-                          
+
                           // Convert back to Topic for WritingScreen
                           final topic = Topic(
                             id: topicId,
@@ -126,7 +118,8 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                 ],
                               ),
                             ),
-                            if (isProOnly && !_isPro)
+                            if (isProOnly)
+                              // ignore: dead_code
                               const Positioned(
                                 top: 16,
                                 right: 16,
@@ -141,34 +134,4 @@ class _TopicListScreenState extends State<TopicListScreen> {
     );
   }
 
-  void _showUpgradePrompt() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF222834),
-        title: const Text('Nội dung PLUS', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Chủ đề này chỉ dành cho người dùng PLUS. Vui lòng nâng cấp để tiếp tục sử dụng.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UpgradeProScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            child: const Text('Nâng cấp ngay', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
 }

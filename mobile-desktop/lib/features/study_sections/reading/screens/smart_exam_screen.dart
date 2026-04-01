@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 import '../models/question_model.dart';
-import 'reading_result_screen.dart';
+import '../../widgets/unified_result_screen.dart';
+import '../../../ranking/providers/ranking_provider.dart';
 
 class SmartExamScreen extends StatefulWidget {
-
   final List<Question> questions;
   final int examId;
 
@@ -21,7 +23,6 @@ class SmartExamScreen extends StatefulWidget {
 }
 
 class _SmartExamScreenState extends State<SmartExamScreen> {
-
   int index = 0;
   int score = 0;
   int? selected;
@@ -34,28 +35,21 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   }
 
   Future<void> submitExam() async {
-
     try {
-
-      final uri = Uri.parse(
-        "http://10.0.2.2:8080/api/v1/exams/${widget.examId}",
-      );
+      final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
+      final uri = Uri.parse("$baseUrl/v1/exams/${widget.examId}");
 
       await http.put(
         uri,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "score": score
-        }),
+        body: jsonEncode({"score": score}),
       );
-
     } catch (e) {
-      print("Submit lỗi: $e");
+      debugPrint("Submit lỗi: $e");
     }
   }
 
   void nextQuestion() {
-
     Question q = widget.questions[index];
 
     if (selected == q.correctIndex) {
@@ -66,26 +60,24 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
     }
 
     if (index < widget.questions.length - 1) {
-
       setState(() {
         index++;
         selected = null;
       });
-
     } else {
-
       submitExam();
 
       int totalTime = (DateTime.now().millisecondsSinceEpoch - _startTime) ~/ 1000;
+      context.read<RankingProvider>().recordAnswers(score);
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => ReadingResultScreen(
+          builder: (_) => UnifiedResultScreen(
             score: score,
             total: widget.questions.length,
             time: totalTime,
-            image: '',
+            skill: 'READING',
           ),
         ),
       );
@@ -94,15 +86,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     Question q = widget.questions[index];
-
     double progress = (index + 1) / widget.questions.length;
 
     return Scaffold(
-
       backgroundColor: const Color(0xfff4f6fa),
-
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
@@ -115,31 +103,20 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
         ),
         backgroundColor: const Color(0xff4facfe),
       ),
-
       body: Padding(
-
         padding: const EdgeInsets.all(20),
-
         child: Column(
-
           children: [
-
-            // PROGRESS BAR
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 10,
                 backgroundColor: Colors.grey.shade300,
-                valueColor: const AlwaysStoppedAnimation(
-                  Color(0xff4facfe),
-                ),
+                valueColor: const AlwaysStoppedAnimation(Color(0xff4facfe)),
               ),
             ),
-
             const SizedBox(height: 30),
-
-            // QUESTION
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -156,15 +133,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 30),
-
-            // OPTIONS
             Expanded(
               child: ListView.builder(
                 itemCount: q.options.length,
-                itemBuilder: (_, i){
-
+                itemBuilder: (_, i) {
                   bool isSelected = selected == i;
                   bool isCorrect = i == q.correctIndex;
 
@@ -172,12 +145,10 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                   Color borderColor = Colors.grey.shade300;
 
                   if (selected != null) {
-
                     if (isCorrect) {
                       bgColor = Colors.green.withOpacity(0.2);
                       borderColor = Colors.green;
                     }
-
                     if (isSelected && !isCorrect) {
                       bgColor = Colors.red.withOpacity(0.2);
                       borderColor = Colors.red;
@@ -185,29 +156,23 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                   }
 
                   return GestureDetector(
-
-                    onTap: (){
+                    onTap: () {
                       if (selected == null) {
                         setState(() {
                           selected = i;
                         });
                       }
                     },
-
                     child: Container(
-
                       margin: const EdgeInsets.only(bottom: 15),
                       padding: const EdgeInsets.all(16),
-
                       decoration: BoxDecoration(
                         color: bgColor,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: borderColor),
                       ),
-
                       child: Row(
                         children: [
-
                           Expanded(
                             child: Text(
                               q.options[i],
@@ -218,13 +183,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                               ),
                             ),
                           ),
-
                           if (selected != null)
                             if (isCorrect)
                               const Icon(Icons.check, color: Colors.green)
                             else if (isSelected)
                               const Icon(Icons.close, color: Colors.red)
-
                         ],
                       ),
                     ),
@@ -232,8 +195,6 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                 },
               ),
             ),
-
-            // NEXT BUTTON
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -255,7 +216,6 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                 ),
               ),
             )
-
           ],
         ),
       ),

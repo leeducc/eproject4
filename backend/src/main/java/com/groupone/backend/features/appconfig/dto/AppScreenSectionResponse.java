@@ -17,4 +17,5 @@ public class AppScreenSectionResponse {
     private String guideContent;
     private Integer questionCount;
     private Double mastery;
+    private boolean isPremium;
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/exam_provider.dart';
-import '../models/exam_session_state.dart';
 import '../../../../core/models/quiz_bank_models.dart';
 
 /// Bottom sheet that displays a grid of all question numbers for the current section.

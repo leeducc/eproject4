@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_desktop/core/providers/ielts_level_provider.dart';
 import '../models/writing_prompt.dart';
-import '../models/topic_model.dart';
 import 'writing_api_service.dart';
 import 'writing_repository.dart';
 

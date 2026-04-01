@@ -143,6 +143,7 @@ public class AppScreenSectionService {
                 .guideContent(section.getGuideContent())
                 .questionCount(questionCount)
                 .mastery(mastery)
+                .isPremium(section.isPremium())
                 .build();
     }
 }

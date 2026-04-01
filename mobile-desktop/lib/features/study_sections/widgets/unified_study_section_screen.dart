@@ -64,45 +64,223 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     return "${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
   }
 
-  void _showGuide(BuildContext context, AppSectionModel section) {
+  void _showAllGuides(BuildContext context, List<AppSectionModel> sections) {
+    AppSectionModel? selectedSection;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF1E212A),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (_, controller) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "Bí kíp: ${section.sectionName}",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const Divider(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: controller,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Html(
-                      data: section.guideContent ?? "<p>No guide provided yet.</p>",
-                    ),
-                  ),
-                ),
-              ],
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.85,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (_, controller) {
+                if (selectedSection != null) {
+                  return _buildGuideDetailView(selectedSection!, () {
+                    setModalState(() => selectedSection = null);
+                  });
+                }
+                return _buildGuideMenuView(sections, controller, (section) {
+                  if (section.isPremium) {
+                    _showPremiumAlert(context);
+                  } else {
+                    setModalState(() => selectedSection = section);
+                  }
+                });
+              },
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildGuideMenuView(List<AppSectionModel> sections, ScrollController controller, Function(AppSectionModel) onSelect) {
+    return Column(
+      children: [
+        // Header Image Area (Matching Screenshot)
+        Stack(
+          children: [
+            Container(
+              height: 180,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF9A825), Color(0xFFE65100)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Center(
+                child: Opacity(
+                  opacity: 0.2,
+                  child: Icon(
+                    widget.skill == 'READING' ? Icons.menu_book : Icons.headset,
+                    size: 100,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 20,
+              bottom: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.skill == 'READING' ? "Đọc hiểu" : "Nghe hiểu",
+                      style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  const SizedBox(height: 5),
+                  Text("${widget.title} - Bí kíp",
+                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 10,
+              top: 10,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white70),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+        
+        // Menu List
+        Expanded(
+          child: Container(
+            color: const Color(0xFF1E212A),
+            child: ListView.builder(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              itemCount: sections.length,
+              itemBuilder: (context, index) {
+                final section = sections[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Part Header (e.g. Phần 1)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.blueGrey.withOpacity(0.3),
+                            Colors.blueGrey.withOpacity(0.1),
+                          ],
+                        ),
+                      ),
+                      child: Text(
+                        "Phần ${section.displayOrder}",
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                    ),
+                    
+                    // Section Item
+                    ListTile(
+                      onTap: () => onSelect(section),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      title: Text(
+                        section.sectionName,
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (section.isPremium)
+                            const Icon(Icons.lock, color: Colors.amber, size: 20),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.chevron_right, color: Colors.white24),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Colors.white10, height: 1),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGuideDetailView(AppSectionModel section, VoidCallback onBack) {
+    return Column(
+      children: [
+        // Simple Detail Header
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: Colors.white10)),
+          ),
+          child: Row(
+            children: [
+              IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: onBack),
+              Expanded(
+                child: Text(
+                  section.sectionName,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Guide Content
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Html(
+              data: section.guideContent ?? "<p>No guide provided yet.</p>",
+              style: {
+                "body": Style(color: Colors.white70, fontSize: FontSize(16)),
+                "p": Style(lineHeight: const LineHeight(1.5)),
+                "strong": Style(color: Colors.amber),
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showPremiumAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2C313D),
+        title: const Text("Tiện ích Pro", style: TextStyle(color: Colors.white)),
+        content: const Text(
+          "Bí kíp cho phần này chỉ dành cho người dùng Pro. Hãy nâng cấp để xem nội dung!",
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Đóng", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Navigate to Pro Upgrade Screen
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+            child: const Text("Nâng cấp ngay", style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -111,56 +289,62 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     debugPrint('[UnifiedStudySectionScreen] Building UI for ${widget.skill}');
     double mastery = totalAnswers == 0 ? 0 : (correctAnswers / totalAnswers);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF1E212A), // Dark Background from image
-      body: Column(
-        children: [
-          _buildHeader(context, mastery),
-          Expanded(
-            child: FutureBuilder<List<AppSectionModel>>(
-              future: _sectionsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  debugPrint('[UnifiedStudySectionScreen] Future Error: ${snapshot.error}');
-                  return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  debugPrint('[UnifiedStudySectionScreen] No data found for ${widget.skill}');
-                  return const Center(child: Text('No sections available.', style: TextStyle(color: Colors.white)));
-                }
-
-                final sections = snapshot.data!;
-                debugPrint('[UnifiedStudySectionScreen] Loaded ${sections.length} sections');
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  itemCount: sections.length,
-                  itemBuilder: (context, index) {
-                    final section = sections[index];
-                    bool showPartHeader = index == 0 || sections[index - 1].displayOrder != section.displayOrder;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (showPartHeader)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10, bottom: 8),
-                            child: Text(
-                              "Phần ${section.displayOrder}",
-                              style: const TextStyle(color: Colors.grey, fontSize: 14),
-                            ),
-                          ),
-                        _buildSectionCard(section),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
+    return FutureBuilder<List<AppSectionModel>>(
+      future: _sectionsFuture,
+      builder: (context, snapshot) {
+        final sections = snapshot.data;
+        
+        return Scaffold(
+          backgroundColor: const Color(0xFF1E212A),
+          body: Column(
+            children: [
+              _buildHeader(context, mastery),
+              Expanded(
+                child: _buildMainContent(snapshot),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomBar(context),
+          bottomNavigationBar: _buildBottomBar(context, sections),
+        );
+      },
+    );
+  }
+
+  Widget _buildMainContent(AsyncSnapshot<List<AppSectionModel>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      debugPrint('[UnifiedStudySectionScreen] Future Error: ${snapshot.error}');
+      return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      debugPrint('[UnifiedStudySectionScreen] No data found for ${widget.skill}');
+      return const Center(child: Text('No sections available.', style: TextStyle(color: Colors.white)));
+    }
+
+    final sections = snapshot.data!;
+    debugPrint('[UnifiedStudySectionScreen] Loaded ${sections.length} sections');
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      itemCount: sections.length,
+      itemBuilder: (context, index) {
+        final section = sections[index];
+        bool showPartHeader = index == 0 || sections[index - 1].displayOrder != section.displayOrder;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showPartHeader)
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 8),
+                child: Text(
+                  "Phần ${section.displayOrder}",
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ),
+            _buildSectionCard(section),
+          ],
+        );
+      },
     );
   }
 
@@ -169,7 +353,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
       padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 30),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFF9A825), Color(0xFFE65100)], // Orange Gradient
+          colors: [Color(0xFFF9A825), Color(0xFFE65100)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -244,7 +428,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C313D), // Dark Card Background
+          color: const Color(0xFF2C313D),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -287,7 +471,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
+  Widget _buildBottomBar(BuildContext context, List<AppSectionModel>? sections) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: const Color(0xFF1E212A),
@@ -295,10 +479,9 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {
-                 // Open general guide for skill? Or maybe just use it for section specific guides.
-                 // The image shows "Bi kip lam bai" at the bottom.
-              },
+              onPressed: sections == null || sections.isEmpty
+                  ? null
+                  : () => _showAllGuides(context, sections),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.white24),
                 padding: const EdgeInsets.symmetric(vertical: 15),

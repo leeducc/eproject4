@@ -43,8 +43,8 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
     
     // Calculate counts
     widget.exam.groups?.forEach((g) {
-      if (g.skill.name == 'LISTENING') listeningQs += g.questions.length as int;
-      if (g.skill.name == 'READING') readingQs += g.questions.length as int;
+      if (g.skill.name == 'LISTENING') listeningQs += g.questions.length;
+      if (g.skill.name == 'READING') readingQs += g.questions.length;
     });
     
     widget.exam.questions?.forEach((q) {

@@ -17,7 +17,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _soundEffects = true;
-  bool _nightMode = true;
 
   @override
   Widget build(BuildContext context) {

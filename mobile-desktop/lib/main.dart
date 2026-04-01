@@ -9,7 +9,6 @@ import 'core/providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/localization/app_localizations.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'features/study_sections/listening/services/mock_listening_repository.dart';
 import 'features/study_sections/listening/services/listening_provider.dart';
 import 'features/study_sections/writing/services/writing_api_service.dart';
 import 'features/study_sections/writing/services/real_writing_repository.dart';

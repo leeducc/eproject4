@@ -5,7 +5,6 @@ import '../services/vocabulary_api_service.dart';
 import 'favorite_manager.dart';
 import 'practice_screen.dart';
 
-import '../providers/vocabulary_provider.dart';
 import '../services/vocabulary_test_api_service.dart';
 
 class VocabularyDetailScreen extends StatefulWidget {

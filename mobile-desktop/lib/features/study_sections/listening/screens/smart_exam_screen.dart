@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import '../models/dialogue_question.dart';
-import '../models/dialogue_true_false_question.dart';
-import '../models/true_false_question.dart';
 import '../services/audio_service.dart';
 import '../../../ranking/providers/ranking_provider.dart';
+import '../../widgets/unified_result_screen.dart';
 
 class SmartExamScreen extends StatefulWidget {
   final List<dynamic> questions;
@@ -25,10 +23,12 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   bool? _selectedTrueFalse;
   List<bool?> _userResults = [];
   bool _isTtsSpeaking = false;
+  late int _startTime;
 
   @override
   void initState() {
     super.initState();
+    _startTime = DateTime.now().millisecondsSinceEpoch;
     _userResults = List.generate(widget.questions.length, (_) => null);
     _ttsService.init();
     _ttsService.onStart = () {
@@ -110,46 +110,21 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   }
 
   void _showResults() {
-    // Record correct answers to ranking system
     final correctCount = _userResults.where((r) => r == true).length;
+    final totalTime = (DateTime.now().millisecondsSinceEpoch - _startTime) ~/ 1000;
+    
     debugPrint('[ListeningSmartExamScreen] session ended — correctCount=$correctCount');
     context.read<RankingProvider>().recordAnswers(correctCount);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Exam Finished 🎯"),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: widget.questions.length,
-            itemBuilder: (_, i) {
-              final result = _userResults[i];
-              return ListTile(
-                leading: Icon(
-                  result == true ? Icons.check_circle : Icons.cancel,
-                  color: result == true ? Colors.green : Colors.red,
-                ),
-                title: Text("Question ${i + 1}"),
-                trailing: Icon(
-                  result == true ? Icons.check : Icons.close,
-                  color: result == true ? Colors.green : Colors.red,
-                ),
-              );
-            },
-          ),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UnifiedResultScreen(
+          score: correctCount,
+          total: widget.questions.length,
+          time: totalTime,
+          skill: 'LISTENING',
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Exit exam
-            },
-            child: const Text("CLOSE"),
-          ),
-        ],
       ),
     );
   }
@@ -158,11 +133,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
     return await showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text("Exit Exam?"),
-            content: const Text("Your progress will be lost."),
+            title: const Text("Thoát bài thi?"),
+            content: const Text("Tiến trình của bạn sẽ bị mất."),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
-              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Exit")),
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy")),
+              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Thoát")),
             ],
           ),
         ) ?? false;
@@ -219,7 +194,6 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
                 child: _buildQuestionContent(question),
               ),
             ),
-            // True/False buttons at the bottom for appropriate question types
             if (question is TrueFalseQuestion || question is DialogueTrueFalseQuestion)
               SafeArea(
                 child: Row(

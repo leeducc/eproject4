@@ -44,8 +44,8 @@ class _BreakScreenState extends State<BreakScreen> {
   }
 
   String _formatTime(int totalSeconds) {
-    int m = totalSeconds ~/ 60;
-    int s = totalSeconds % 60;
+    int _ = totalSeconds ~/ 60;
+    int _ = totalSeconds % 60;
     return "\${m.toString().padLeft(2, '0')}:\${s.toString().padLeft(2, '0')}";
   }
 

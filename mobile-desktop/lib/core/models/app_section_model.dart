@@ -8,6 +8,7 @@ class AppSectionModel {
   final String? guideContent;
   final int? questionCount;
   final double? mastery;
+  final bool isPremium;
 
   AppSectionModel({
     required this.id,
@@ -19,6 +20,7 @@ class AppSectionModel {
     this.guideContent,
     this.questionCount,
     this.mastery,
+    this.isPremium = false,
   });
 
   factory AppSectionModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class AppSectionModel {
       guideContent: json['guideContent'],
       questionCount: json['questionCount'],
       mastery: json['mastery'] != null ? (json['mastery'] as num).toDouble() : null,
+      isPremium: json['isPremium'] ?? false,
     );
   }
 }

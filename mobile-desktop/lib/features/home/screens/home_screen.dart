@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../../core/providers/ielts_level_provider.dart';
 import '../../../core/localization/app_localizations.dart';
-import '../../study_sections/listening/screens/listening_screen.dart';
-import '../../study_sections/reading/screens/reading_screen.dart' hide Colors;
+
+import '../../study_sections/widgets/unified_study_section_screen.dart';
 import '../../study_sections/writing/screens/topic_list_screen.dart';
-// import '../../study_sections/speaking/screens/speaking_screen.dart';
 import '../../study_sections/simulate_exam/screens/simulate_exam_screen.dart';
 import '../../study_sections/real_exam/screens/real_exam_screen.dart';
 import '../../study_sections/vocabulary/screens/vocabulary_screen.dart';
@@ -176,7 +175,10 @@ class HomeScreen extends StatelessWidget {
         'key': 'listening',
         'icon': Icons.headphones,
         'color': Colors.orange,
-        'screen': const ListeningScreen()
+        'screen': UnifiedStudySectionScreen(
+          skill: 'LISTENING',
+          title: l10n.translate('listening'),
+        )
       },
       // {
       //   'key': 'speaking',
@@ -188,7 +190,10 @@ class HomeScreen extends StatelessWidget {
         'key': 'reading',
         'icon': Icons.menu_book,
         'color': Colors.yellow.shade700,
-        'screen': const ReadingScreen()
+        'screen': UnifiedStudySectionScreen(
+          skill: 'READING',
+          title: l10n.translate('reading'),
+        )
       },
       {
         'key': 'writing',

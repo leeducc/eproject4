@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import 'policy_detail_screen.dart';
 

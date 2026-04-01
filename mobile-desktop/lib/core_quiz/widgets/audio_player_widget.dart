@@ -42,25 +42,33 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            StreamBuilder<Duration?>(
-              stream: _audioPlayer.durationStream,
-              builder: (context, snapshot) {
-                final duration = snapshot.data ?? Duration.zero;
-                return StreamBuilder<Duration>(
-                  stream: _audioPlayer.positionStream,
-                  builder: (context, snapshot) {
-                    var position = snapshot.data ?? Duration.zero;
-                    if (position > duration) position = duration;
-                    return Column(
-                      children: [
-                        Slider(
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C313D),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          StreamBuilder<Duration?>(
+            stream: _audioPlayer.durationStream,
+            builder: (context, snapshot) {
+              final duration = snapshot.data ?? Duration.zero;
+              return StreamBuilder<Duration>(
+                stream: _audioPlayer.positionStream,
+                builder: (context, snapshot) {
+                  var position = snapshot.data ?? Duration.zero;
+                  if (position > duration) position = duration;
+                  return Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: const Color(0xFF42A5F5),
+                          inactiveTrackColor: Colors.white10,
+                          thumbColor: const Color(0xFF42A5F5),
+                          trackHeight: 4.0,
+                        ),
+                        child: Slider(
                           value: position.inMilliseconds.toDouble(),
                           max: duration.inMilliseconds.toDouble() > 0
                               ? duration.inMilliseconds.toDouble()
@@ -69,59 +77,70 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                             _audioPlayer.seek(Duration(milliseconds: value.toInt()));
                           },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(_formatDuration(position)),
-                              Text(_formatDuration(duration)),
-                            ],
-                          ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_formatDuration(position), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                            Text(_formatDuration(duration), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                          ],
                         ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-            StreamBuilder<PlayerState>(
-              stream: _audioPlayer.playerStateStream,
-              builder: (context, snapshot) {
-                final playerState = snapshot.data;
-                final playing = playerState?.playing ?? false;
-                final processingState = playerState?.processingState;
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          StreamBuilder<PlayerState>(
+            stream: _audioPlayer.playerStateStream,
+            builder: (context, snapshot) {
+              final playerState = snapshot.data;
+              final playing = playerState?.playing ?? false;
+              final processingState = playerState?.processingState;
 
-                return Column(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        playing ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                        size: 60,
-                        color: playing ? Colors.green : Colors.blueAccent,
+              return Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (processingState == ProcessingState.completed) {
+                        _audioPlayer.seek(Duration.zero);
+                        _audioPlayer.play();
+                      } else if (playing) {
+                        _audioPlayer.pause();
+                      } else {
+                        _audioPlayer.play();
+                      }
+                    },
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF42A5F5),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      onPressed: () {
-                        if (processingState == ProcessingState.completed) {
-                          _audioPlayer.seek(Duration.zero);
-                          _audioPlayer.play();
-                        } else if (playing) {
-                          _audioPlayer.pause();
-                        } else {
-                          _audioPlayer.play();
-                        }
-                      },
+                      child: Icon(
+                        playing ? Icons.pause : Icons.volume_up,
+                        size: 40,
+                        color: Colors.white,
+                      ),
                     ),
-                    if (playing)
-                      const Text(
-                        "Listening...",
-                        style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

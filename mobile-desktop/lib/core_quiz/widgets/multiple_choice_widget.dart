@@ -25,58 +25,83 @@ class MultipleChoiceWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
           child: Text(
             questionText,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 16),
-        ...options.map((option) {
+        ...options.asMap().entries.map((entry) {
+          final index = entry.key;
+          final option = entry.value;
           final isSelected = selectedId == option.id;
           final isCorrect = correctIds.contains(option.id);
+          final prefix = String.fromCharCode(65 + index); // A, B, C...
 
-          Color? backgroundColor;
-          Color textColor = Colors.black87;
+          Color backgroundColor = const Color(0xFF2C313D);
+          Color textColor = Colors.white;
+          Color prefixColor = Colors.grey;
 
           if (isAnswered) {
             if (isCorrect) {
-              backgroundColor = Colors.green;
-              textColor = Colors.white;
+              backgroundColor = Colors.green.withOpacity(0.2);
+              textColor = Colors.greenAccent;
+              prefixColor = Colors.greenAccent;
             } else if (isSelected) {
-              backgroundColor = Colors.red;
-              textColor = Colors.white;
+              backgroundColor = Colors.red.withOpacity(0.2);
+              textColor = Colors.redAccent;
+              prefixColor = Colors.redAccent;
             } else {
-              backgroundColor = Colors.grey.withOpacity(0.1);
-              textColor = Colors.black38;
+              textColor = Colors.white38;
             }
           } else if (isSelected) {
-            backgroundColor = Colors.blueAccent;
-            textColor = Colors.white;
+            backgroundColor = const Color(0xFF42A5F5).withOpacity(0.2);
+            textColor = const Color(0xFF42A5F5);
+            prefixColor = const Color(0xFF42A5F5);
           }
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: backgroundColor,
-                foregroundColor: textColor,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                elevation: isSelected ? 4 : 0,
-                side: BorderSide(
-                  color: isAnswered && (isCorrect || isSelected)
-                      ? Colors.transparent
-                      : Colors.grey.shade300,
-                  width: isSelected ? 2 : 1,
+            child: InkWell(
+              onTap: isAnswered ? null : () => onSelect(option.id),
+              borderRadius: BorderRadius.circular(15),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: isSelected || (isAnswered && isCorrect)
+                        ? (isCorrect ? Colors.green : const Color(0xFF42A5F5))
+                        : Colors.white10,
+                    width: isSelected ? 2 : 1,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: isAnswered ? null : () => onSelect(option.id),
-              child: Text(
-                option.label,
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
+                child: Row(
+                  children: [
+                    Text(
+                      "$prefix ",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: prefixColor,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        option.label,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColor,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

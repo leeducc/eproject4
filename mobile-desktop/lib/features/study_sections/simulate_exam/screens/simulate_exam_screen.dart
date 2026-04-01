@@ -88,7 +88,7 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
   }
 
   Widget _buildExamCard(ExamModel exam) {
-    int totalQuestions = (exam.questions?.length ?? 0) + (exam.groups?.length ?? 0) * 5; // Rough estimate if groups exist
+    int _ = (exam.questions?.length ?? 0) + (exam.groups?.length ?? 0) * 5; // Rough estimate if groups exist
     
     return Card(
       color: const Color(0xFF1E2330),

@@ -32,9 +32,15 @@ public class QuestionFilterService {
 
             if (groupPredicates.isEmpty()) return null;
 
-            return "OR".equalsIgnoreCase(request.getLogic()) 
+            Predicate finalTagsPredicate = "OR".equalsIgnoreCase(request.getLogic()) 
                 ? cb.or(groupPredicates.toArray(new Predicate[0])) 
                 : cb.and(groupPredicates.toArray(new Predicate[0]));
+
+            if (request.getSkill() != null && !request.getSkill().isEmpty()) {
+                return cb.and(finalTagsPredicate, cb.equal(root.get("skill"), request.getSkill().toUpperCase()));
+            }
+
+            return finalTagsPredicate;
         };
 
         return questionRepository.findAll(spec);

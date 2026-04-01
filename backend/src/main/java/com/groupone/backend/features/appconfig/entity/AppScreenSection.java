@@ -39,4 +39,8 @@ public class AppScreenSection {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String guideContent;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isPremium = false;
 }
