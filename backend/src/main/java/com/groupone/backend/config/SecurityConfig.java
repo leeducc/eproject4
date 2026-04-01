@@ -72,6 +72,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/vocabulary/**").permitAll()
+                        .requestMatchers("/api/v1/app-sections/**").permitAll()
+                        .requestMatchers("/api/v1/questions/filter").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/ranking/leaderboard").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()

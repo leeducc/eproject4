@@ -32,6 +32,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[UnifiedStudySectionScreen] initState for ${widget.skill}');
     loadStats();
   }
 
@@ -40,7 +41,12 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     super.didChangeDependencies();
     final level = context.watch<IeltsLevelProvider>().selectedLevel.band;
     final levelStr = level.toString().split('.').last.replaceAll('_', '-').replaceAll('band', '');
-    _sectionsFuture = AppConfigApiService().getSections(widget.skill, levelStr);
+    
+    // Normalize skill to lowercase as expected by backend comments
+    final normalizedSkill = widget.skill.toLowerCase();
+    
+    debugPrint('[UnifiedStudySectionScreen] fetching sections: skill=$normalizedSkill, levelStr=$levelStr');
+    _sectionsFuture = AppConfigApiService().getSections(normalizedSkill, levelStr);
   }
 
   void loadStats() async {
@@ -102,6 +108,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[UnifiedStudySectionScreen] Building UI for ${widget.skill}');
     double mastery = totalAnswers == 0 ? 0 : (correctAnswers / totalAnswers);
 
     return Scaffold(
@@ -116,12 +123,15 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
+                  debugPrint('[UnifiedStudySectionScreen] Future Error: ${snapshot.error}');
                   return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  debugPrint('[UnifiedStudySectionScreen] No data found for ${widget.skill}');
                   return const Center(child: Text('No sections available.', style: TextStyle(color: Colors.white)));
                 }
 
                 final sections = snapshot.data!;
+                debugPrint('[UnifiedStudySectionScreen] Loaded ${sections.length} sections');
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   itemCount: sections.length,
