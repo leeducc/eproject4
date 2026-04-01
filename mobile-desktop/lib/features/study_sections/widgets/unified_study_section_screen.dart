@@ -39,14 +39,14 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final level = context.watch<IeltsLevelProvider>().selectedLevel.band;
-    final levelStr = level.toString().split('.').last.replaceAll('_', '-').replaceAll('band', '');
+    final selectedLevel = context.watch<IeltsLevelProvider>().selectedLevel;
+    final levelStr = selectedLevel.range; // Uses "0-4.0", "5.0-6.0", etc.
     
-    // Normalize skill to lowercase as expected by backend comments
-    final normalizedSkill = widget.skill.toLowerCase();
+    // Match database case (UPPERCASE) for Skill
+    final skillName = widget.skill.toUpperCase();
     
-    debugPrint('[UnifiedStudySectionScreen] fetching sections: skill=$normalizedSkill, levelStr=$levelStr');
-    _sectionsFuture = AppConfigApiService().getSections(normalizedSkill, levelStr);
+    debugPrint('[UnifiedStudySectionScreen] fetching sections: skill=$skillName, levelStr=$levelStr');
+    _sectionsFuture = AppConfigApiService().getSections(skillName, levelStr);
   }
 
   void loadStats() async {

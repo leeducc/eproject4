@@ -34,8 +34,12 @@ public class AppScreenSectionService {
     public List<AppScreenSectionResponse> getSections(String skill, String difficultyBand) {
         Long userId = getCurrentUserId();
         List<AppScreenSection> sections;
-        if (skill != null && difficultyBand != null) {
-            sections = repository.findBySkillAndDifficultyBandOrderByDisplayOrderAsc(skill, difficultyBand);
+        
+        // Normalize skill to uppercase to match DB values like "LISTENING"
+        String normalizedSkill = (skill != null) ? skill.toUpperCase() : null;
+
+        if (normalizedSkill != null && difficultyBand != null) {
+            sections = repository.findBySkillAndDifficultyBandOrderByDisplayOrderAsc(normalizedSkill, difficultyBand);
         } else {
             sections = repository.findAllByOrderBySkillAscDifficultyBandAscDisplayOrderAsc();
         }

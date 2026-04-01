@@ -28,7 +28,7 @@ const List<IeltsLevel> kIeltsLevels = [
   IeltsLevel(
     band: IeltsBand.band0_4,
     label: 'Band 0–4',
-    range: '0-4',
+    range: '0-4.0',
     description:
         'Beginner to Elementary level. Build foundational vocabulary, basic listening comprehension, and simple sentence writing.',
     primaryColor: Color(0xFF4FC3F7),
@@ -38,7 +38,7 @@ const List<IeltsLevel> kIeltsLevels = [
   IeltsLevel(
     band: IeltsBand.band5_6,
     label: 'Band 5–6',
-    range: '5-6',
+    range: '5.0-6.0',
     description:
         'Pre-Intermediate to Intermediate. Strengthen reading skills, practise listening for detail, and write structured paragraphs.',
     primaryColor: Color(0xFF81C784),
@@ -48,7 +48,7 @@ const List<IeltsLevel> kIeltsLevels = [
   IeltsLevel(
     band: IeltsBand.band7_8,
     label: 'Band 7–8',
-    range: '7-8',
+    range: '7.0-8.0',
     description:
         'Upper-Intermediate to Advanced. Master complex texts, academic vocabulary, and coherent essay writing.',
     primaryColor: Color(0xFFFFB74D),
@@ -58,7 +58,7 @@ const List<IeltsLevel> kIeltsLevels = [
   IeltsLevel(
     band: IeltsBand.band9,
     label: 'Band 9',
-    range: '9',
+    range: '9.0',
     description:
         'Expert level. Tackle the most demanding IELTS materials and produce sophisticated, nuanced responses.',
     primaryColor: Color(0xFFE57373),
