@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/providers/ielts_level_provider.dart';
+import 'core/providers/locale_provider.dart';
+import 'core/providers/font_size_provider.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/localization/app_localizations.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/study_sections/listening/services/mock_listening_repository.dart';
 import 'features/study_sections/listening/services/listening_provider.dart';
@@ -11,6 +17,9 @@ import 'features/study_sections/writing/services/writing_provider.dart';
 import 'features/study_sections/vocabulary/providers/vocabulary_provider.dart';
 import 'features/study_sections/vocabulary/repositories/real_vocabulary_repository.dart';
 import 'features/study_sections/vocabulary/services/vocabulary_api_service.dart';
+import 'features/study_sections/vocabulary/screens/favorite_manager.dart';
+import 'features/study_sections/vocabulary/providers/vocabulary_test_provider.dart';
+import 'features/ranking/providers/ranking_provider.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -20,10 +29,9 @@ Future<void> main() async {
 class EnglishStudyApp extends StatelessWidget {
   const EnglishStudyApp({Key? key}) : super(key: key);
 
-  @override
   Widget build(BuildContext context) {
     debugPrint('[EnglishStudyApp] build – setting up MultiProvider');
-    
+
     final writingApiService = WritingApiService();
 
     return MultiProvider(
@@ -33,6 +41,36 @@ class EnglishStudyApp extends StatelessWidget {
           create: (_) {
             debugPrint('[main] IeltsLevelProvider created');
             return IeltsLevelProvider();
+          },
+        ),
+
+        ChangeNotifierProvider<LocaleProvider>(
+          create: (_) => LocaleProvider(),
+        ),
+
+        ChangeNotifierProvider<FavoriteManager>(
+          create: (_) => FavoriteManager(),
+        ),
+
+        ChangeNotifierProvider<FontSizeProvider>(
+          create: (_) {
+            debugPrint('[main] FontSizeProvider created');
+            return FontSizeProvider();
+          },
+        ),
+        
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
+
+        ChangeNotifierProvider<VocabularyTestProvider>(
+          create: (_) => VocabularyTestProvider(),
+        ),
+
+        ChangeNotifierProvider<RankingProvider>(
+          create: (_) {
+            debugPrint('[main] RankingProvider created');
+            return RankingProvider();
           },
         ),
 
@@ -75,15 +113,47 @@ class EnglishStudyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'English Study App',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF161A23),
-          fontFamily: 'Roboto',
-        ),
-        home: const LoginScreen(),
+      child: Consumer3<LocaleProvider, FontSizeProvider, ThemeProvider>(
+        builder: (context, localeProvider, fontSizeProvider, themeProvider, child) {
+          return MaterialApp(
+            title: 'English Study App',
+            debugShowCheckedModeBanner: false,
+            // ── Dynamic Theme Setup ─────────────────────────────────
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaleFactor: fontSizeProvider.fontScale,
+                ),
+                child: child!,
+              );
+            },
+            locale: localeProvider.locale,
+            supportedLocales: const [
+              Locale('en', ''),
+              Locale('vi', ''),
+              Locale('zh', ''),
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            localeResolutionCallback: (locale, supportedLocales) {
+              for (var supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale?.languageCode) {
+                  return supportedLocale;
+                }
+              }
+              return supportedLocales.first;
+            },
+            home: const LoginScreen(),
+          );
+        },
       ),
     );
   }

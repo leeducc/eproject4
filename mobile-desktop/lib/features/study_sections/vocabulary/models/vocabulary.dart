@@ -10,6 +10,8 @@ class Vocabulary {
   final String definition;
   final List<String> examples;
   final List<String> synonyms;
+  final String phonetic;
+  final bool isPremium;
 
   Vocabulary({
     this.id,
@@ -23,7 +25,12 @@ class Vocabulary {
     required this.definition,
     required this.examples,
     required this.synonyms,
+    this.phonetic = '',
+    this.isPremium = false,
+    this.isFavorite = false,
   });
+
+  final bool isFavorite;
 
   factory Vocabulary.fromJson(Map<String, dynamic> json) {
     return Vocabulary(
@@ -38,6 +45,9 @@ class Vocabulary {
       definition: json['definition'] as String? ?? '',
       examples: (json['examples'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
       synonyms: (json['synonyms'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      phonetic: json['phonetic'] as String? ?? '',
+      isPremium: json['isPremium'] as bool? ?? false,
+      isFavorite: json['isFavorite'] as bool? ?? false,
     );
   }
 
@@ -49,14 +59,17 @@ class Vocabulary {
       'level': level,
       'levelGroup': levelGroup,
       'pos': pos,
-      'phonetic': '', // Optional: update backend later
-      'vi': '', // Optional: update backend later
+      'phonetic': phonetic,
+      'vi': '', 
       'meaning': definition, // Mapped for legacy UI support
+      'definition': definition,
       'meaning_vi': '',
       'examples': examples,
       'synonyms': synonyms,
       'definitionUrl': definitionUrl,
       'voiceUrl': voiceUrl,
+      'isPremium': isPremium,
+      'isFavorite': isFavorite,
     };
   }
 }

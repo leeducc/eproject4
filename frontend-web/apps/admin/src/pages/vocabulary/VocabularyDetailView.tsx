@@ -7,7 +7,7 @@ import {
   VocabularyPractice 
 } from '../../features/vocabulary/types';
 import { useVocabularyStore } from '../../features/vocabulary/store';
-import { ArrowLeft, Save, Sparkles, Plus, Trash2, Edit3, Type, List, FileText, ChevronDown, ChevronUp, History as HistoryIcon, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, Plus, Trash2, Edit3, Type, List, FileText, ChevronDown, ChevronUp, History as HistoryIcon, RefreshCw, Star } from 'lucide-react';
 import { VocabularyHistoryModal } from '../../features/vocabulary/components/VocabularyHistoryModal';
 import { PracticeHistoryModal } from '../../features/vocabulary/components/PracticeHistoryModal';
 import { AIGeneratingOverlay } from '../../features/vocabulary/components/AIGeneratingOverlay';
@@ -135,6 +135,18 @@ export const VocabularyDetailView: React.FC = () => {
       }
     }
   };
+  
+  const handleTogglePremium = async () => {
+    if (!item || !id) return;
+    try {
+      const updatedItem = { ...item, isPremium: !item.isPremium };
+      await updateWord(Number(id), updatedItem);
+      setItem(updatedItem);
+      toast.success(updatedItem.isPremium ? "Marked as premium content." : "Removed from premium content.");
+    } catch (err) {
+      toast.error("Failed to update premium status.");
+    }
+  };
 
   const handleDeletePractice = async () => {
     if (practiceToDelete) {
@@ -234,6 +246,17 @@ export const VocabularyDetailView: React.FC = () => {
               History
             </button>
             <button
+              onClick={handleTogglePremium}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium border ${
+                item.isPremium 
+                  ? 'bg-amber-400/20 text-amber-400 border-amber-400/30 shadow-lg shadow-amber-500/10' 
+                  : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'
+              }`}
+            >
+              <Star size={18} fill={item.isPremium ? "currentColor" : "none"} />
+              {item.isPremium ? 'Premium Content' : 'Mark as Premium'}
+            </button>
+            <button
               onClick={handleGenerateAI}
               disabled={isAILoading}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-xl transition-all font-medium border border-emerald-600/30 shadow-lg shadow-emerald-500/10"
@@ -313,6 +336,22 @@ export const VocabularyDetailView: React.FC = () => {
               </div>
               {details?.definition || isEditing ? (
                 <div className="space-y-6">
+                  <div>
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2 block">Phonetic</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editValues?.phonetic || ''}
+                        onChange={(e) => setEditValues(prev => prev ? {...prev, phonetic: e.target.value} : null)}
+                        className="w-full bg-[#0F172A] border border-gray-700 rounded-xl px-4 py-3 focus:border-blue-500 outline-none transition-all text-gray-300 text-sm"
+                        placeholder="/əˈdæpt/"
+                      />
+                    ) : (
+                      <div className="bg-[#0F172A] p-4 rounded-xl border border-gray-800">
+                        <p className="text-gray-300 font-serif italic text-lg">{details?.phonetic || 'N/A'}</p>
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <label className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2 block">Definition</label>
                     {isEditing ? (

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/question_model.dart';
-import 'result_screen.dart';
+import 'reading_result_screen.dart';
 
 class SmartExamScreen extends StatefulWidget {
 
@@ -25,6 +25,13 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   int index = 0;
   int score = 0;
   int? selected;
+  late int _startTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+  }
 
   Future<void> submitExam() async {
 
@@ -69,12 +76,16 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
 
       submitExam();
 
+      int totalTime = (DateTime.now().millisecondsSinceEpoch - _startTime) ~/ 1000;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => ResultScreen(
+          builder: (_) => ReadingResultScreen(
             score: score,
             total: widget.questions.length,
+            time: totalTime,
+            image: '',
           ),
         ),
       );

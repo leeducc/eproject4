@@ -15,6 +15,7 @@ import java.util.List;
 public class VocabularyDetail implements Serializable {
     private static final long serialVersionUID = 1L;
     private String definition;
+    private String phonetic;
     private List<String> examples;
     private List<String> synonyms;
 }

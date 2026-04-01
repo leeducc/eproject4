@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/services/auth_api.dart';
 import '../../main_layout/screens/main_layout.dart';
 import 'register_screen.dart';
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   void _handleLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     
     setState(() => _isLoading = true);
@@ -32,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     if (response['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập thành công!')),
+        SnackBar(content: Text(l10n.translate('login_success'))),
       );
 
       Navigator.pushReplacement(
@@ -41,12 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['error'] ?? 'Sai email hoặc mật khẩu.')),
+        SnackBar(content: Text(response['error'] ?? l10n.translate('enter_password'))), // Fallback if error not provided
       );
     }
   }
 
   void _handleGoogleLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     final response = await AuthApi.loginWithGoogle();
     setState(() => _isLoading = false);
@@ -54,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     if (response != null && !response.containsKey('error')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập Google thành công!')),
+        SnackBar(content: Text(l10n.translate('google_login_success'))),
       );
 
       Navigator.pushReplacement(
@@ -63,24 +66,26 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else if (response != null && response.containsKey('error')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${response['error']}')),
+        SnackBar(content: Text(l10n.translate('error_prefix', params: {'error': response['error']}))),
       );
     }
   }
 
   void _handleQuickLogin() {
+    final l10n = AppLocalizations.of(context)!;
     debugPrint('Quick login triggered: user1@gmail.com / User@123');
     setState(() {
       _emailController.text = 'user1@gmail.com';
       _passwordController.text = 'User@123';
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã tự động điền thông tin đăng nhập!')),
+      SnackBar(content: Text(l10n.translate('quick_login_filled'))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -92,41 +97,40 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 60),
                 CustomTextField(
-                  hintText: 'Tài khoản (Email)',
+                  hintText: l10n.translate('email_hint'),
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập Email';
-                    if (!value.contains('@')) return 'Email không hợp lệ';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_email');
+                    if (!value.contains('@')) return l10n.translate('invalid_email');
                     return null;
                   },
                 ),
                 CustomTextField(
-                  hintText: 'Vui lòng nhập mật khẩu',
+                  hintText: l10n.translate('password_placeholder'),
                   isPassword: true,
                   controller: _passwordController,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập mật khẩu';
-                    if (value.length < 6) return 'Mật khẩu phải từ 6 ký tự';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_password');
+                    if (value.length < 6) return l10n.translate('password_too_short');
                     return null;
                   },
                 ),
               const SizedBox(height: 10),
               CustomButton(
-                text: 'Đăng nhập',
+                text: l10n.translate('login_button'),
                 isLoading: _isLoading,
                 onPressed: _handleLogin,
               ),
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Đăng nhập bằng Google',
+                text: l10n.translate('login_google'),
                 isLoading: _isLoading,
                 onPressed: _handleGoogleLogin,
-                // You can add a different color/style in CustomButton if it supports it
               ),
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Quick Login',
+                text: l10n.translate('quick_login'),
                 isLoading: _isLoading,
                 onPressed: _handleQuickLogin,
               ),
@@ -140,9 +144,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
                     );
                   },
-                  child: const Text(
-                    'Quên mật khẩu',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  child: Text(
+                    l10n.translate('forgot_password'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ),
               ),
@@ -155,9 +159,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const RegisterScreen()),
                     );
                   },
-                  child: const Text(
-                    'Chưa có tài khoản , đăng kí ngay',
-                    style: TextStyle(color: Color(0xFF3A7BD5), fontSize: 15),
+                  child: Text(
+                    l10n.translate('no_account_register'),
+                    style: const TextStyle(color: Color(0xFF3A7BD5), fontSize: 15),
                   ),
                 ),
               ),

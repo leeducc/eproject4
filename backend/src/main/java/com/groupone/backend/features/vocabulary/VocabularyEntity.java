@@ -3,6 +3,8 @@ package com.groupone.backend.features.vocabulary;
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "vocabulary", indexes = {
     @Index(name = "idx_vocabulary_word", columnList = "word"),
@@ -12,11 +14,16 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLRestriction("is_active = true")
 public class VocabularyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
 
     @Column(nullable = false)
     private String word;
@@ -42,4 +49,9 @@ public class VocabularyEntity {
 
     @Column(columnDefinition = "TEXT")
     private String synonymsJson;
+
+    private String phonetic;
+
+    @Builder.Default
+    private Boolean isPremium = false;
 }

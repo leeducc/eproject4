@@ -91,6 +91,17 @@ export default function TeacherLogin() {
                     >
                         {isLoading ? "Logging In..." : "Log In Now"}
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail("teacher1@gmail.com");
+                            setPassword("Teacher@123");
+                            console.log("Teacher quick login credentials filled");
+                        }}
+                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-md transition duration-200 mt-2 border border-gray-200"
+                    >
+                        Quick Login (Teacher)
+                    </button>
                 </form>
             </div>
         </div>

@@ -35,31 +35,22 @@ public class AiContentService {
     public VocabularyDetail generateDetails(String word) {
         log.info("Requesting details for word: {}", word);
 
-        Optional<VocabularyEntity> existing = vocabularyRepository.findByWord(word);
-        if (existing.isPresent() && existing.get().getDefinition() != null) {
-            String synonymsJson = existing.get().getSynonymsJson();
-            // If synonyms are missing, we don't return from DB/Cache, we proceed to AI generation
-            if (synonymsJson != null && !synonymsJson.equals("[]") && !synonymsJson.isEmpty()) {
-                log.info("Found details for '{}' in database storage.", word);
-                try {
-                    return VocabularyDetail.builder()
-                            .definition(existing.get().getDefinition())
-                            .examples(safeReadList(existing.get().getExamplesJson()))
-                            .synonyms(safeReadList(synonymsJson))
-                            .build();
-                } catch (Exception e) {
-                    log.error("Error building details from database: {}", e.getMessage());
-                }
-            } else {
-                log.info("Details for '{}' exist but synonyms are missing. Re-generating...", word);
-            }
+        Optional<VocabularyEntity> existing = vocabularyRepository.findFirstByWordIgnoreCase(word);
+        if (existing.isPresent() && existing.get().getDefinition() != null && !existing.get().getDefinition().isEmpty()) {
+            log.info("Found details for '{}' in database storage.", word);
+            return VocabularyDetail.builder()
+                    .definition(existing.get().getDefinition())
+                    .phonetic(existing.get().getPhonetic())
+                    .examples(safeReadList(existing.get().getExamplesJson()))
+                    .synonyms(safeReadList(existing.get().getSynonymsJson()))
+                    .build();
         }
 
         log.info("Details not found for '{}'. Calling local AI...", word);
         BeanOutputConverter<VocabularyDetail> converter = new BeanOutputConverter<>(VocabularyDetail.class);
 
         String promptString = """
-                Generate a detailed definition, exactly 2 example sentences, and exactly 3 synonyms for the English word or phrase: {word}.
+                Generate a detailed definition, a phonetic representation (IPA), exactly 2 example sentences, and exactly 3 synonyms for the English word or phrase: {word}.
                 {format}
                 """;
 
@@ -160,6 +151,7 @@ public class AiContentService {
     private void updateEntityWithDetails(VocabularyEntity entity, VocabularyDetail content) {
         try {
             entity.setDefinition(content.getDefinition());
+            entity.setPhonetic(content.getPhonetic());
             entity.setExamplesJson(objectMapper.writeValueAsString(content.getExamples()));
             entity.setSynonymsJson(objectMapper.writeValueAsString(content.getSynonyms()));
             vocabularyRepository.save(entity);
@@ -176,6 +168,7 @@ public class AiContentService {
                     .word(word)
                     .type("word")
                     .definition(content.getDefinition())
+                    .phonetic(content.getPhonetic())
                     .examplesJson(objectMapper.writeValueAsString(content.getExamples()))
                     .synonymsJson(objectMapper.writeValueAsString(content.getSynonyms()))
                     .build();

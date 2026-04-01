@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface VocabularyRepository extends JpaRepository<VocabularyEntity, Long> {
     
     Optional<VocabularyEntity> findByWord(String word);
+
+    Optional<VocabularyEntity> findFirstByWordIgnoreCase(String word);
     
     Optional<VocabularyEntity> findByWordAndTypeAndPos(String word, String type, String pos);
     

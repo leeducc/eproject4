@@ -36,7 +36,15 @@ class VocabularyProvider extends ChangeNotifier {
 
     try {
       final levelGroup = _mapBandToLevelGroup(band);
-      _vocabularies = await repository.getVocabularyForLevel(levelGroup);
+      final list = await repository.getVocabularyForLevel(levelGroup);
+      
+      // Sort: non-premium first, then premium
+      list.sort((a, b) {
+        if (a.isPremium == b.isPremium) return 0;
+        return a.isPremium ? 1 : -1;
+      });
+      
+      _vocabularies = list;
     } catch (e) {
       _error = 'Failed to load vocabulary: $e';
       _vocabularies = [];

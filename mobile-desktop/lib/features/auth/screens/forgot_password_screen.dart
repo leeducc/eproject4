@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/services/auth_api.dart';
 import '../widgets/captcha_dialog.dart';
 import 'change_password_screen.dart';
@@ -50,10 +51,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> _requestOtp() async {
+    final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập E-mail hợp lệ trước')),
+        SnackBar(content: Text(l10n.translate('enter_valid_email_first'))),
       );
       return;
     }
@@ -75,7 +77,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _hasRequestedOtp = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mã xác thực đã được gửi! (Kiểm tra email của bạn)')),
+        SnackBar(content: Text(l10n.translate('verification_code_sent'))),
       );
     }
   }
@@ -96,6 +98,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -113,44 +116,44 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Quên mật khẩu',
-                  style: TextStyle(
+                Text(
+                  l10n.translate('forgot_password'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Nhập email đã đăng ký để nhận mã xác thực',
-                  style: TextStyle(color: Colors.white54, fontSize: 14),
+                Text(
+                  l10n.translate('enter_registered_email_for_otp'),
+                  style: const TextStyle(color: Colors.white54, fontSize: 14),
                 ),
                 const SizedBox(height: 24),
                 CustomTextField(
-                  hintText: 'Vui lòng nhập E-mail',
+                  hintText: l10n.translate('email_hint'),
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập Email';
-                    if (!value.contains('@')) return 'Email không hợp lệ';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_email');
+                    if (!value.contains('@')) return l10n.translate('invalid_email');
                     return null;
                   },
                 ),
                 CustomTextField(
-                  hintText: 'Vui lòng nhập mã xác thực',
+                  hintText: l10n.translate('get_verification_code'), // Reusing key for hint
                   controller: _codeController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập mã xác thực';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('invalid_info_or_code');
                     return null;
                   },
                   suffixWidget: !_hasRequestedOtp
                       ? GestureDetector(
                           onTap: _requestOtp,
-                          child: const Text(
-                            'Nhận mã xác thực',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          child: Text(
+                            l10n.translate('get_verification_code'),
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         )
                       : (_secondsLeft > 0
@@ -167,9 +170,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: _requestOtp,
-                        child: const Text(
-                          'Nhận lại mã xác thực',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.translate('resend_verification_code'),
+                          style: const TextStyle(
                             color: Colors.blueAccent,
                             fontSize: 14,
                             decoration: TextDecoration.underline,
@@ -181,7 +184,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 const SizedBox(height: 10),
                 CustomButton(
-                  text: 'Đổi mật khẩu',
+                  text: l10n.translate('change_password_button'),
                   isLoading: _isLoading,
                   onPressed: _handleChangePassword,
                 ),

@@ -77,8 +77,24 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
             }
 
             const updatedTags = [...currentTagStrings, tagToAdd];
-            const updatedQuestion = await updateQuestion(question.id, { tags: updatedTags } as any);
+            console.log(`[QuestionDetailView] Adding tag "${tagToAdd}" to question ${question.id}`);
+            
+            const updatedQuestion = await updateQuestion(question.id, { 
+                skill: question.skill,
+                type: question.type,
+                difficultyBand: question.difficultyBand,
+                isPremiumContent: question.isPremiumContent,
+                instruction: question.instruction,
+                explanation: question.explanation,
+                data: question.data,
+                groupId: question.groupId,
+                authorId: question.authorId,
+                retainedMediaUrls: question.mediaUrls || [],
+                tags: updatedTags 
+            } as any);
+
             if (updatedQuestion) {
+                console.log(`[QuestionDetailView] Tag successfully added`);
                 setQuestion(updatedQuestion);
                 setNewTagStr('');
                 setIsAddingTag(false);
@@ -95,8 +111,24 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                 .filter(t => t.id !== tagId)
                 .map(t => `${t.namespace}:${t.name}`);
             
-            const updatedQuestion = await updateQuestion(question.id, { tags: updatedTags } as any);
+            console.log(`[QuestionDetailView] Removing tag ID ${tagId} from question ${question.id}`);
+
+            const updatedQuestion = await updateQuestion(question.id, { 
+                skill: question.skill,
+                type: question.type,
+                difficultyBand: question.difficultyBand,
+                isPremiumContent: question.isPremiumContent,
+                instruction: question.instruction,
+                explanation: question.explanation,
+                data: question.data,
+                groupId: question.groupId,
+                authorId: question.authorId,
+                retainedMediaUrls: question.mediaUrls || [],
+                tags: updatedTags 
+            } as any);
+
             if (updatedQuestion) {
+                console.log(`[QuestionDetailView] Tag successfully removed`);
                 setQuestion(updatedQuestion);
                 toast.success("Tag removed");
             }

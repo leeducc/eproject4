@@ -24,6 +24,10 @@ public class VocabularyItem {
     private java.util.List<String> examples;
     private java.util.List<String> synonyms;
 
+    private String phonetic;
+    private Boolean isPremium;
+    private Boolean isFavorite;
+
     // Assuming VocabularyEntity exists and has corresponding getters
     public static VocabularyItem mapToItem(VocabularyEntity entity) {
         return VocabularyItem.builder()

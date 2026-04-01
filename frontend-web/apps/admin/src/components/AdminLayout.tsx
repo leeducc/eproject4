@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout, NavItem, toast } from "@english-learning/ui";
-import { Home, Database, Users, Settings, Briefcase } from "lucide-react";
+import { Home, Database, Users, Settings, Briefcase, AlertCircle } from "lucide-react";
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -33,6 +33,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
     const sidebarItems: NavItem[] = [
         { title: "Dashboard Overview", href: "/admin/dashboard", icon: <Home size={20} /> },
+        { 
+            title: "Moderation", 
+            href: "/admin/moderation", 
+            icon: <AlertCircle size={20} />,
+            isNew: true 
+        },
         {
             title: "Questions Bank",
             icon: <Database size={20} />,
@@ -64,7 +70,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 { title: "iCoin Transactions", href: "/admin/customers/icoin" },
             ],
         },
-        { title: "App Management", href: "/admin/settings", icon: <Settings size={20} /> },
+        { 
+            title: "App Management", 
+            icon: <Settings size={20} />,
+            children: [
+                { title: "Sections Configuration", href: "/admin/settings" },
+                { title: "FAQ Management", href: "/admin/faq" },
+                { title: "Legal & Policies", href: "/admin/legal" },
+            ],
+        },
     ];
 
     const theme = useThemeStore((state) => state.theme);

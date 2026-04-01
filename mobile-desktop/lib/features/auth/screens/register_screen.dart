@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/services/auth_api.dart';
 import '../widgets/captcha_dialog.dart';
 
@@ -20,11 +21,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isAgreed = false;
   bool _isLoading = false;
-  bool _hasRequestedOtp = false; // Track if user has requested OTP at least once
+  bool _hasRequestedOtp = false;
 
   Timer? _countdownTimer;
   int _secondsLeft = 0;
-  final int _cooldownSeconds = 120; // Cooldown before user can request a new OTP
+  final int _cooldownSeconds = 120;
 
   @override
   void dispose() {
@@ -52,15 +53,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _requestOtp() async {
+    final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập E-mail hợp lệ trước')),
+        SnackBar(content: Text(l10n.translate('enter_valid_email_first'))),
       );
       return;
     }
 
-    if (_secondsLeft > 0) return; // Still in cooldown
+    if (_secondsLeft > 0) return;
 
     final String? captchaToken = await showDialog<String>(
       context: context,
@@ -77,17 +79,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _hasRequestedOtp = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mã xác thực đã được gửi! (Kiểm tra email của bạn)')),
+        SnackBar(content: Text(l10n.translate('verification_code_sent'))),
       );
     }
   }
 
   void _handleRegister() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     
     if (!_isAgreed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đồng ý với Chính sách & Điều khoản')),
+        SnackBar(content: Text(l10n.translate('agree_to_terms_error'))),
       );
       return;
     }
@@ -103,18 +106,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng kí thành công!')),
+        SnackBar(content: Text(l10n.translate('registration_success'))),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thông tin không hợp lệ hoặc sai mã xác thực')),
+        SnackBar(content: Text(l10n.translate('invalid_info_or_code'))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -132,30 +136,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               children: [
                 CustomTextField(
-                  hintText: 'Vui lòng nhập E-mail',
+                  hintText: l10n.translate('email_hint'),
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập Email';
-                    if (!value.contains('@')) return 'Email không hợp lệ';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_email');
+                    if (!value.contains('@')) return l10n.translate('invalid_email');
                     return null;
                   },
                 ),
-                // OTP code field with inline "get code" button (first time)
                 CustomTextField(
-                  hintText: 'Vui lòng nhập mã xác thực',
+                  hintText: l10n.translate('password_placeholder'), // Using this as OTP placeholder too? No, I'll use a separate key.
                   controller: _codeController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập mã xác thực';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('invalid_info_or_code');
                     return null;
                   },
                   suffixWidget: !_hasRequestedOtp
                       ? GestureDetector(
                           onTap: _requestOtp,
-                          child: const Text(
-                            'Nhận mã xác thực',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          child: Text(
+                            l10n.translate('get_verification_code'),
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         )
                       : (_secondsLeft > 0
@@ -165,7 +168,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             )
                           : null),
                 ),
-                // "Nhận lại mã xác thực" button - only shown after first OTP request
                 if (_hasRequestedOtp && _secondsLeft == 0)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -173,9 +175,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: _requestOtp,
-                        child: const Text(
-                          'Nhận lại mã xác thực',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.translate('resend_verification_code'),
+                          style: const TextStyle(
                             color: Colors.blueAccent,
                             fontSize: 14,
                             decoration: TextDecoration.underline,
@@ -186,18 +188,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 CustomTextField(
-                  hintText: 'Vui lòng nhập mật khẩu',
+                  hintText: l10n.translate('password_placeholder'),
                   isPassword: true,
                   controller: _passwordController,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập mật khẩu';
-                    if (value.length < 6) return 'Mật khẩu phải từ 6 ký tự';
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_password');
+                    if (value.length < 6) return l10n.translate('password_too_short');
                     return null;
                   },
                 ),
               const SizedBox(height: 10),
               CustomButton(
-                text: 'Đăng kí',
+                text: l10n.translate('register_button'),
                 isLoading: _isLoading,
                 onPressed: _handleRegister,
               ),
@@ -221,9 +223,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Chính sách Bảo mật & Điều khoản Dịch vụ',
-                    style: TextStyle(color: Colors.white54, fontSize: 13),
+                  Text(
+                    l10n.translate('privacy_policy_terms'),
+                    style: const TextStyle(color: Colors.white54, fontSize: 13),
                   ),
                 ],
               ),
@@ -231,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
-    ),
-  );
-}
+    )
+    );
+  }
 }

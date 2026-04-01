@@ -52,6 +52,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           >
             Sign In
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setUsername('user1@gmail.com');
+              setPassword('User@123');
+              console.log('Quick login credentials filled');
+            }}
+            className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 rounded transition-all border border-gray-600 mt-2"
+          >
+            Quick Login (Demo)
+          </button>
         </form>
       </div>
     </div>

@@ -72,9 +72,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/vocabulary/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ranking/leaderboard").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/questions/seed").permitAll()
+                        .requestMatchers("/api/v1/moderation/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         .anyRequest().authenticated());

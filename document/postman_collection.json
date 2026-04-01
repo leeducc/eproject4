@@ -1,0 +1,436 @@
+{
+  "info": {
+    "name": "EProject4 API Collection",
+    "description": "Comprehensive Postman collection for the EProject4 backend APIs, including Auth, Quiz Bank, Vocabulary, Writing, and Subscription.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8123",
+      "type": "string"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email and password to receive a JWT token."
+          }
+        },
+        {
+          "name": "Login Google",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"google-id-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login", "google"]
+            },
+            "description": "Login using Google OAuth2 ID Token."
+          }
+        },
+        {
+          "name": "Register - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"captchaToken\": \"test-token\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register/send-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register", "send-otp"]
+            },
+            "description": "Request an OTP verification code for registration."
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Complete registration using email, password, and OTP code."
+          }
+        },
+        {
+          "name": "Forgot Password - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"captchaToken\": \"test-token\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password/send-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password", "send-otp"]
+            },
+            "description": "Request an OTP code for password reset."
+          }
+        },
+        {
+          "name": "Forgot Password - Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"123456\",\n  \"newPassword\": \"newPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password", "reset"]
+            },
+            "description": "Reset password using the OTP code."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Identity (Admin)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?role=CUSTOMER&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                { "key": "role", "value": "CUSTOMER" },
+                { "key": "search", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", ":id"],
+              "variable": [
+                { "key": "id", "value": "1" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Upload Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "context", "value": "PROFILE_PICTURE", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "upload"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quiz & Exams",
+      "item": [
+        {
+          "name": "Get All Exams",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exams"]
+            }
+          }
+        },
+        {
+          "name": "Get Exam Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exams/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exams", ":id"],
+              "variable": [
+                { "key": "id", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Exam",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examId\": 1,\n  \"answers\": {\n    \"q1\": \"A\",\n    \"q2\": \"B\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exams/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exams", "submit"]
+            }
+          }
+        },
+        {
+          "name": "My Submissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exams/my-submissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exams", "my-submissions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Question Bank",
+      "item": [
+        {
+          "name": "Paginated Questions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/questions/paginated?limit=10&skill=READING",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "questions", "paginated"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "skill", "value": "READING" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter Questions",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skill\": \"READING\",\n  \"difficultyBands\": [\"BAND_5_6\", \"BAND_7_8\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/questions/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "questions", "filter"]
+            }
+          }
+        },
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/quizbank/groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "quizbank", "groups"]
+            }
+          }
+        },
+        {
+          "name": "List Tags",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/quizbank/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "quizbank", "tags"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vocabulary",
+      "item": [
+        {
+          "name": "Paginated Vocabulary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vocabulary?type=words&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vocabulary"],
+              "query": [
+                { "key": "type", "value": "words" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Word Details (AI Generated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vocabulary/:word/details",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vocabulary", ":word", "details"],
+              "variable": [
+                { "key": "word", "value": "ethereal" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Daily Test",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vocabulary/test/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vocabulary", "test", "generate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Writing",
+      "item": [
+        {
+          "name": "List Topics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/writing/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "writing", "topics"]
+            }
+          }
+        },
+        {
+          "name": "Submit Essay",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topicId\": 1,\n  \"content\": \"Write your essay here...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/writing/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "writing", "submit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscription",
+      "item": [
+        {
+          "name": "Purchase Pro",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"PRO_MONTHLY\",\n  \"paymentMethod\": \"STRIPE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "purchase"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

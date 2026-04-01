@@ -163,4 +163,16 @@ public class VocabularyController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(data);
     }
+
+    @PostMapping("/{id}/favorite")
+    public ResponseEntity<Boolean> toggleFavorite(@PathVariable Long id) {
+        log.info("Request: POST toggle favorite for vocabulary id={}", id);
+        return ResponseEntity.ok(vocabularyService.toggleFavorite(id));
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<VocabularyItem>> getFavorites() {
+        log.info("Request: GET all favorites for current user");
+        return ResponseEntity.ok(vocabularyService.getFavorites());
+    }
 }

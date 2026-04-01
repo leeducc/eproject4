@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import '../models/dialogue_question.dart';
 import '../models/dialogue_true_false_question.dart';
 import '../models/true_false_question.dart';
 import '../services/audio_service.dart';
+import '../../../ranking/providers/ranking_provider.dart';
 
 class SmartExamScreen extends StatefulWidget {
   final List<dynamic> questions;
@@ -108,6 +110,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
   }
 
   void _showResults() {
+    // Record correct answers to ranking system
+    final correctCount = _userResults.where((r) => r == true).length;
+    debugPrint('[ListeningSmartExamScreen] session ended — correctCount=$correctCount');
+    context.read<RankingProvider>().recordAnswers(correctCount);
+
     showDialog(
       context: context,
       barrierDismissible: false,

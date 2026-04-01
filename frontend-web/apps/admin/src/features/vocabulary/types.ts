@@ -12,12 +12,15 @@ export interface VocabularyItem {
   definition?: string;
   examples?: string[];
   synonyms?: string[];
+  phonetic?: string;
+  isPremium?: boolean;
 }
 
 export interface VocabularyDetail {
   definition: string;
   examples: string[];
   synonyms: string[];
+  phonetic?: string;
 }
 
 export interface VocabularyPractice {

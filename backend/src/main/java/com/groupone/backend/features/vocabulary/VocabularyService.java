@@ -34,6 +34,7 @@ public class VocabularyService {
     private final VocabularyHistoryRepository vocabularyHistoryRepository;
     private final VocabularyPracticeAiContentRepository practiceRepository;
     private final VocabularyPracticeHistoryRepository practiceHistoryRepository;
+    private final VocabularyFavoriteRepository favoriteRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
@@ -131,6 +132,20 @@ public class VocabularyService {
                 .map(this::mapToItem)
                 .collect(Collectors.toList());
 
+        // Fill isFavorite if user is logged in
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof User) {
+                Long userId = ((User) principal).getId();
+                Set<Long> favoriteIds = favoriteRepository.findAllByUserId(userId).stream()
+                        .map(f -> f.getVocabulary().getId())
+                        .collect(Collectors.toSet());
+                items.forEach(item -> item.setIsFavorite(favoriteIds.contains(item.getId())));
+            }
+        } catch (Exception e) {
+            // Context might not be available or no user
+        }
+
         Long nextCursor = null;
         boolean hasMore = entities.size() >= limit;
         if (!entities.isEmpty()) {
@@ -153,6 +168,8 @@ public class VocabularyService {
                 .pos(item.getPos())
                 .definitionUrl(item.getDefinitionUrl())
                 .voiceUrl(item.getVoiceUrl())
+                .phonetic(item.getPhonetic())
+                .isPremium(item.getIsPremium() != null ? item.getIsPremium() : false)
                 .build();
         
         VocabularyEntity saved = vocabularyRepository.save(entity);
@@ -171,6 +188,8 @@ public class VocabularyService {
         entity.setPos(item.getPos());
         entity.setDefinitionUrl(item.getDefinitionUrl());
         entity.setVoiceUrl(item.getVoiceUrl());
+        entity.setPhonetic(item.getPhonetic());
+        entity.setIsPremium(item.getIsPremium() != null ? item.getIsPremium() : false);
 
         // Update AI contents if provided
         if (item.getDefinition() != null) entity.setDefinition(item.getDefinition());
@@ -228,6 +247,8 @@ public class VocabularyService {
         if (!Objects.equals(oldVer.getWord(), newVer.getWord())) changes.put("word", Map.of("from", oldVer.getWord(), "to", newVer.getWord()));
         if (!Objects.equals(oldVer.getLevel(), newVer.getLevel())) changes.put("level", Map.of("from", oldVer.getLevel(), "to", newVer.getLevel()));
         if (!Objects.equals(oldVer.getPos(), newVer.getPos())) changes.put("pos", Map.of("from", oldVer.getPos(), "to", newVer.getPos()));
+        if (!Objects.equals(oldVer.getPhonetic(), newVer.getPhonetic())) changes.put("phonetic", Map.of("from", oldVer.getPhonetic(), "to", newVer.getPhonetic()));
+        if (!Objects.equals(oldVer.getIsPremium(), newVer.getIsPremium())) changes.put("isPremium", Map.of("from", oldVer.getIsPremium(), "to", newVer.getIsPremium()));
         return changes;
     }
 
@@ -245,6 +266,8 @@ public class VocabularyService {
             entity.setPos(snapshot.getPos());
             entity.setDefinitionUrl(snapshot.getDefinitionUrl());
             entity.setVoiceUrl(snapshot.getVoiceUrl());
+            entity.setPhonetic(snapshot.getPhonetic());
+            entity.setIsPremium(snapshot.getIsPremium() != null ? snapshot.getIsPremium() : false);
 
             vocabularyRepository.save(entity);
             recordHistory(entity, "ROLLBACK");
@@ -325,7 +348,7 @@ public class VocabularyService {
     }
 
     private VocabularyItem mapToItem(VocabularyEntity entity) {
-        return VocabularyItem.builder()
+        VocabularyItem item = VocabularyItem.builder()
                 .id(entity.getId())
                 .word(entity.getWord())
                 .type(entity.getType())
@@ -337,7 +360,54 @@ public class VocabularyService {
                 .definition(entity.getDefinition())
                 .examples(safeReadList(entity.getExamplesJson()))
                 .synonyms(safeReadList(entity.getSynonymsJson()))
+                .phonetic(entity.getPhonetic())
+                .isPremium(entity.getIsPremium())
                 .build();
+        
+        // Individual check for single item mapping (could be optimized if needed)
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof User) {
+                item.setIsFavorite(favoriteRepository.existsByUserIdAndVocabularyId(((User) principal).getId(), entity.getId()));
+            }
+        } catch (Exception e) {}
+        
+        return item;
+    }
+
+    @jakarta.transaction.Transactional
+    public boolean toggleFavorite(Long vocabularyId) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof User)) throw new RuntimeException("User not authenticated");
+        User user = (User) principal;
+
+        Optional<VocabularyFavoriteEntity> existing = favoriteRepository.findByUserIdAndVocabularyId(user.getId(), vocabularyId);
+        if (existing.isPresent()) {
+            favoriteRepository.delete(existing.get());
+            return false;
+        } else {
+            VocabularyEntity vocabulary = vocabularyRepository.findById(vocabularyId)
+                    .orElseThrow(() -> new RuntimeException("Vocabulary not found"));
+            favoriteRepository.save(VocabularyFavoriteEntity.builder()
+                    .user(user)
+                    .vocabulary(vocabulary)
+                    .build());
+            return true;
+        }
+    }
+
+    public List<VocabularyItem> getFavorites() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof User)) return Collections.emptyList();
+        Long userId = ((User) principal).getId();
+
+        return favoriteRepository.findAllByUserId(userId).stream()
+                .map(f -> {
+                    VocabularyItem item = mapToItem(f.getVocabulary());
+                    item.setIsFavorite(true);
+                    return item;
+                })
+                .collect(Collectors.toList());
     }
 
     public byte[] generateSampleExcel() {

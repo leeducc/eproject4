@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/ielts_level_provider.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../study_sections/listening/screens/listening_screen.dart';
-import '../../study_sections/reading/screens/reading_screen.dart';
+import '../../study_sections/reading/screens/reading_screen.dart' hide Colors;
 import '../../study_sections/writing/screens/topic_list_screen.dart';
-import '../../study_sections/speaking/screens/speaking_screen.dart';
+// import '../../study_sections/speaking/screens/speaking_screen.dart';
 import '../../study_sections/simulate_exam/screens/simulate_exam_screen.dart';
 import '../../study_sections/real_exam/screens/real_exam_screen.dart';
 import '../../study_sections/vocabulary/screens/vocabulary_screen.dart';
 import '../../study_sections/wrong_answers/screens/wrong_answers_screen.dart';
 import 'choose_level_screen.dart';
+import '../widgets/notification_bell.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider so the AppBar title re-renders on level change
     final levelProvider = context.watch<IeltsLevelProvider>();
     final currentLevel = levelProvider.selectedLevel;
     debugPrint('[HomeScreen] build – level: ${currentLevel.label}');
@@ -30,11 +31,11 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildBanner(currentLevel),
+            _buildBanner(context, currentLevel),
             const SizedBox(height: 24),
             _buildSectionsGrid(context),
             const SizedBox(height: 24),
-            _buildProgressCard(currentLevel),
+            _buildProgressCard(context, currentLevel),
           ],
         ),
       ),
@@ -42,12 +43,12 @@ class HomeScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context, IeltsLevel currentLevel) {
+    final l10n = AppLocalizations.of(context)!;
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       title: Row(
         children: [
-          // ── Tappable level dropdown ──────────────────────────────
           GestureDetector(
             onTap: () {
               debugPrint('[HomeScreen] Level dropdown tapped');
@@ -78,6 +79,7 @@ class HomeScreen extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                   // IELTS is a specific term, keeping it as is
                   Text(
                     'IELTS ${currentLevel.range}',
                     style: TextStyle(
@@ -100,12 +102,12 @@ class HomeScreen extends StatelessWidget {
               color: Colors.white10,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 16),
-                SizedBox(width: 4),
-                Text('PLUS',
-                    style: TextStyle(
+                const Icon(Icons.star, color: Colors.amber, size: 16),
+                const SizedBox(width: 4),
+                Text(l10n.translate('plus'),
+                    style: const TextStyle(
                         color: Colors.amber,
                         fontWeight: FontWeight.bold,
                         fontSize: 12)),
@@ -113,13 +115,14 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Icon(Icons.notifications_none, color: Colors.white),
+          const NotificationBell(),
         ],
       ),
     );
   }
 
-  Widget _buildBanner(IeltsLevel currentLevel) {
+  Widget _buildBanner(BuildContext context, IeltsLevel currentLevel) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       height: 120,
@@ -139,9 +142,9 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'New Vocabulary',
-                  style: TextStyle(
+                Text(
+                  l10n.translate('new_vocabulary'),
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -149,7 +152,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'IELTS ${currentLevel.range} – Start learning now!',
+                  l10n.translate('start_learning_now', params: {'range': currentLevel.range}),
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ],
@@ -167,51 +170,52 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildSectionsGrid(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final List<Map<String, dynamic>> sections = [
       {
-        'title': 'Listening',
+        'key': 'listening',
         'icon': Icons.headphones,
         'color': Colors.orange,
         'screen': const ListeningScreen()
       },
+      // {
+      //   'key': 'speaking',
+      //   'icon': Icons.mic_none,
+      //   'color': Colors.purple,
+      //   'screen': const SpeakingScreen()
+      // },
       {
-        'title': 'Speaking',
-        'icon': Icons.mic_none,
-        'color': Colors.purple,
-        'screen': const SpeakingScreen()
-      },
-      {
-        'title': 'Reading',
+        'key': 'reading',
         'icon': Icons.menu_book,
         'color': Colors.yellow.shade700,
         'screen': const ReadingScreen()
       },
       {
-        'title': 'Writing',
+        'key': 'writing',
         'icon': Icons.edit_document,
         'color': Colors.green,
         'screen': const TopicListScreen()
       },
       {
-        'title': 'Mock Exam',
+        'key': 'mock_exam',
         'icon': Icons.insert_drive_file,
         'color': Colors.lightBlue,
         'screen': const SimulateExamScreen()
       },
       {
-        'title': 'Real Exam',
+        'key': 'real_exam',
         'icon': Icons.assignment,
         'color': Colors.indigo,
         'screen': const RealExamScreen()
       },
       {
-        'title': 'Vocabulary',
+        'key': 'vocabulary_section',
         'icon': Icons.abc,
         'color': Colors.blueAccent,
         'screen': const VocabularyScreen()
       },
       {
-        'title': 'Wrong Answers',
+        'key': 'wrong_answers',
         'icon': Icons.fact_check,
         'color': Colors.redAccent,
         'screen': const WrongAnswersScreen()
@@ -230,9 +234,10 @@ class HomeScreen extends StatelessWidget {
       itemCount: sections.length,
       itemBuilder: (context, index) {
         final item = sections[index];
+        final title = l10n.translate(item['key']);
         return GestureDetector(
           onTap: () {
-            debugPrint('[HomeScreen] Section tapped: ${item['title']}');
+            debugPrint('[HomeScreen] Section tapped: $title');
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => item['screen']),
@@ -252,7 +257,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                item['title'],
+                title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 12),
                 maxLines: 2,
@@ -265,7 +270,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressCard(IeltsLevel currentLevel) {
+  Widget _buildProgressCard(BuildContext context, IeltsLevel currentLevel) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -279,21 +285,21 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Guarantee IELTS Pass',
-                  style: TextStyle(
+              Text(l10n.translate('guarantee_ielts_pass'),
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold)),
-              Icon(Icons.info_outline, color: Colors.white54, size: 20),
+              const Icon(Icons.info_outline, color: Colors.white54, size: 20),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'A course designed by experienced teachers to help you reach your target band.',
-            style: TextStyle(color: Colors.white, fontSize: 13),
+          Text(
+            l10n.translate('course_description'),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
           ),
           const SizedBox(height: 20),
           Row(
@@ -319,7 +325,7 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Target ${currentLevel.range}',
+                  l10n.translate('target_band', params: {'range': currentLevel.range}),
                   style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,

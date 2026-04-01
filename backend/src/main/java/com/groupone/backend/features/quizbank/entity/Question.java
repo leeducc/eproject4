@@ -6,6 +6,8 @@ import com.groupone.backend.features.quizbank.enums.SkillType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +17,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("is_active = true")
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")

@@ -1,6 +1,8 @@
 package com.groupone.backend.config;
 
 import com.groupone.backend.shared.exception.AccountSuspendedException;
+import com.groupone.backend.shared.exception.AppException;
+import com.groupone.backend.shared.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,6 +15,15 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<Map<String, Object>> handleAppException(AppException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        Map<String, Object> error = new HashMap<>();
+        error.put("code", errorCode.getCode());
+        error.put("message", ex.getMessage());
+        return new ResponseEntity<>(error, errorCode.getHttpStatus());
+    }
 
     @ExceptionHandler(AccountSuspendedException.class)
     public ResponseEntity<Map<String, String>> handleAccountSuspendedException(AccountSuspendedException ex) {

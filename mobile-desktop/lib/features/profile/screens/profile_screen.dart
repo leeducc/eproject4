@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/services/icoin_service.dart';
 import 'settings_screen.dart';
 import 'upgrade_pro_screen.dart';
@@ -9,18 +10,19 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
               _buildHeader(context),
               _buildPlusBanner(context),
-              _buildStatsSection(),
+              _buildStatsSection(context),
               const SizedBox(height: 10),
-              _buildDivider(),
-              _buildMenuSection(),
+              _buildDivider(context),
+              _buildMenuSection(context),
             ],
           ),
         ),
@@ -36,17 +38,33 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 28,
-                backgroundImage: NetworkImage('https://i.imgur.com/BoN9kdC.png'), // Placeholder cat image
+                backgroundColor: Colors.blue.withOpacity(0.1),
+                child: ClipOval(
+                  child: Image.network(
+                    'https://i.imgur.com/BoN9kdC.png',
+                    fit: BoxFit.cover,
+                    width: 56,
+                    height: 56,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 56,
+                        height: 56,
+                        color: Colors.blue.withOpacity(0.1),
+                        child: const Icon(Icons.person, color: Colors.blue, size: 30),
+                      );
+                    },
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: const [
-                      Text('Đức Lê', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    children: [
+                      Text('Đức Lê', style: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(width: 8),
                       Icon(Icons.workspace_premium, color: Colors.grey, size: 20),
                     ],
@@ -80,11 +98,11 @@ class ProfileScreen extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).colorScheme.onBackground),
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white),
+                icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onBackground),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -100,10 +118,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildPlusBanner(BuildContext context) {
-    print('Building Plus Banner');
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () {
-        print('Tapped Plus Banner, navigating to UpgradeProScreen...');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const UpgradeProScreen()),
@@ -113,38 +130,39 @@ class ProfileScreen extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.workspace_premium, color: Colors.white, size: 32),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('Ưu đãi kết thúc trong: 00:59:14', style: TextStyle(color: Colors.white, fontSize: 10)),
-                  SizedBox(height: 4),
-                  Text('Nâng cấp PLUS, học không\ngiới hạn thời gian', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                ],
-              ),
-            ],
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-          const Icon(Icons.chevron_right, color: Colors.white54),
-        ],
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.workspace_premium, color: Colors.white, size: 32),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.translate('offer_ends_in', params: {'time': '00:59:14'}), style: const TextStyle(color: Colors.white, fontSize: 10)),
+                    const SizedBox(height: 4),
+                    Text(l10n.translate('upgrade_plus_unlimited'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                  ],
+                ),
+              ],
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white54),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
@@ -152,12 +170,12 @@ class ProfileScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Trình độ hiện tại', style: TextStyle(color: Colors.white, fontSize: 15)),
+              Text(l10n.translate('current_level'), style: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 15)),
               Row(
-                children: const [
-                  Text('IELTS 6.0', style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold, fontSize: 15)),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right, color: Colors.white54, size: 18),
+                children: [
+                  Text('IELTS 6.0', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 15)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5), size: 18),
                 ],
               ),
             ],
@@ -166,9 +184,9 @@ class ProfileScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem('1', 'Câu'),
-              _buildStatItem('0', 'Từ', icon: Icons.star, iconColor: Colors.orange),
-              _buildStatItem('00:29', 'Thời gian học'),
+              _buildStatItem(context, '1', l10n.translate('questions')),
+              _buildStatItem(context, '0', l10n.translate('vocabulary'), icon: Icons.star, iconColor: Colors.orange),
+              _buildStatItem(context, '00:29', l10n.translate('learning_time')),
             ],
           ),
         ],
@@ -176,7 +194,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label, {IconData? icon, Color? iconColor}) {
+  Widget _buildStatItem(BuildContext context, String value, String label, {IconData? icon, Color? iconColor}) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -186,42 +205,44 @@ class ProfileScreen extends StatelessWidget {
               Icon(icon, color: iconColor, size: 16),
               const SizedBox(width: 4),
             ],
-            Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(value, style: TextStyle(color: theme.colorScheme.onBackground, fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 13)),
+        Text(label, style: TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.5), fontSize: 13)),
       ],
     );
   }
 
-  Widget _buildMenuSection() {
+  Widget _buildMenuSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        _buildMenuItem(Icons.smart_toy, Colors.blueAccent, 'Max'),
-        _buildMenuItem(Icons.bar_chart, Colors.orange, 'Test trình độ tiếng Anh', trailingText: 'Chưa test'),
-        _buildMenuItem(Icons.calculate, Colors.redAccent, 'Tập hợp trả lời sai'),
-        _buildMenuItem(Icons.article, Colors.lightBlue, 'Bài viết của tôi'),
-        _buildDivider(),
-        _buildMenuItem(Icons.star, Colors.orangeAccent, 'Lưu giữ'),
-        _buildMenuItem(Icons.edit, Colors.blue, 'Ghi chép của tôi'),
-        _buildDivider(),
-        _buildMenuItem(Icons.download, Colors.cyan, 'Đề thi ngoại tuyến'),
+        _buildMenuItem(context, Icons.smart_toy, Colors.blueAccent, 'Max'),
+        _buildMenuItem(context, Icons.bar_chart, Colors.orange, l10n.translate('english_proficiency_test'), trailingText: l10n.translate('not_tested')),
+        _buildMenuItem(context, Icons.calculate, Colors.redAccent, l10n.translate('wrong_answer_collection')),
+        _buildMenuItem(context, Icons.article, Colors.lightBlue, l10n.translate('my_essays')),
+        _buildDivider(context),
+        _buildMenuItem(context, Icons.star, Colors.orangeAccent, l10n.translate('saved_items')),
+        _buildMenuItem(context, Icons.edit, Colors.blue, l10n.translate('my_notes')),
+        _buildDivider(context),
+        _buildMenuItem(context, Icons.download, Colors.cyan, l10n.translate('offline_exams')),
       ],
     );
   }
 
-  Widget _buildMenuItem(IconData icon, Color iconColor, String title, {String? trailingText}) {
+  Widget _buildMenuItem(BuildContext context, IconData icon, Color iconColor, String title, {String? trailingText}) {
+    final theme = Theme.of(context);
     return ListTile(
       leading: Icon(icon, color: iconColor),
-      title: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 15)),
+      title: Text(title, style: TextStyle(color: theme.colorScheme.onBackground, fontSize: 15)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (trailingText != null)
-            Text(trailingText, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+            Text(trailingText, style: TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.5), fontSize: 14)),
           if (trailingText != null) const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
+          Icon(Icons.chevron_right, color: theme.colorScheme.onBackground.withOpacity(0.5), size: 20),
         ],
       ),
       onTap: () {},
@@ -229,7 +250,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(color: Colors.white.withOpacity(0.05), height: 16, thickness: 8);
+  Widget _buildDivider(BuildContext context) {
+    return Divider(color: Theme.of(context).dividerTheme.color, height: 16, thickness: 8);
   }
 }

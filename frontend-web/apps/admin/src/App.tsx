@@ -14,6 +14,10 @@ import { VocabularyCreateView } from "./pages/vocabulary/VocabularyCreateView";
 import { CustomerList as UserManagementPage } from "./pages/customers/CustomerList";
 import TransactionPage from "./pages/ICoinManagement";
 import SettingsPage from "./pages/UnderConstruction";
+import AppManagementPage from "./pages/appconfig/AppManagementPage";
+import FAQManagementPage from "./pages/appconfig/FAQManagementPage";
+import LegalManagementPage from "./pages/appconfig/LegalManagementPage";
+import { ModerationDashboard } from "./pages/moderation/ModerationDashboard";
 import { PrivateRoute, Toaster } from "@english-learning/ui";
 
 export const App: React.FC = () => {
@@ -27,6 +31,9 @@ export const App: React.FC = () => {
           {/* Protected Admin Routes */}
           <Route element={<PrivateRoute allowedRole="ADMIN" />}>
             <Route path="/admin" element={<DashboardPage />} />
+            
+            {/* Moderation */}
+            <Route path="/admin/moderation" element={<ModerationDashboard />} />
             
             {/* Question Bank Routes */}
             <Route path="/admin/questions/reading" element={<CategoryPage skill="READING" title="Reading" />} />
@@ -58,8 +65,10 @@ export const App: React.FC = () => {
             {/* Finance/Transactions */}
             <Route path="/admin/transactions" element={<TransactionPage />} />
 
-            {/* Settings */}
-            <Route path="/admin/settings" element={<SettingsPage title="Settings" />} />
+            {/* Settings / App Management */}
+            <Route path="/admin/settings" element={<AppManagementPage />} />
+            <Route path="/admin/faq" element={<FAQManagementPage />} />
+            <Route path="/admin/legal" element={<LegalManagementPage />} />
           </Route>
 
           {/* Default Redirect */}
