@@ -5,7 +5,7 @@ import '../../../core/models/policy_model.dart';
 import '../../../data/services/policy_service.dart';
 
 class PolicyDetailScreen extends StatefulWidget {
-  final String type; // "TERMS" or "PRIVACY"
+  final String type; 
 
   const PolicyDetailScreen({Key? key, required this.type}) : super(key: key);
 
@@ -34,10 +34,10 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(defaultTitle, style: TextStyle(color: colorScheme.onBackground, fontSize: 16)),
+        title: Text(defaultTitle, style: TextStyle(color: colorScheme.onSurface, fontSize: 16)),
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: FutureBuilder<PolicyModel?>(
         future: _policyFuture,
@@ -56,7 +56,7 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
                     Text(
                       l10n.translate('data_load_error'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: colorScheme.onBackground),
+                      style: TextStyle(color: colorScheme.onSurface),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
@@ -72,11 +72,11 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.info_outline, color: colorScheme.onBackground.withOpacity(0.5), size: 48),
+                  Icon(Icons.info_outline, color: colorScheme.onSurface.withOpacity(0.5), size: 48),
                   const SizedBox(height: 16),
                   Text(
                     l10n.translate('no_data'),
-                    style: TextStyle(color: colorScheme.onBackground.withOpacity(0.5)),
+                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -97,7 +97,7 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
                 Text(
                   policy.getLocalizedTitle(context),
                   style: TextStyle(
-                    color: colorScheme.onBackground,
+                    color: colorScheme.onSurface,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -107,18 +107,18 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
                   data: policy.getLocalizedContent(context),
                   style: {
                     "body": Style(
-                      color: colorScheme.onBackground.withOpacity(0.9),
+                      color: colorScheme.onSurface.withOpacity(0.9),
                       fontSize: FontSize(16.0),
                       lineHeight: LineHeight.em(1.6),
                       margin: Margins.zero,
                       padding: HtmlPaddings.zero,
                     ),
-                    "h1": Style(color: colorScheme.onBackground, fontWeight: FontWeight.bold, margin: Margins.only(top: 20, bottom: 10)),
-                    "h2": Style(color: colorScheme.onBackground, fontWeight: FontWeight.bold, margin: Margins.only(top: 15, bottom: 8)),
+                    "h1": Style(color: colorScheme.onSurface, fontWeight: FontWeight.bold, margin: Margins.only(top: 20, bottom: 10)),
+                    "h2": Style(color: colorScheme.onSurface, fontWeight: FontWeight.bold, margin: Margins.only(top: 15, bottom: 8)),
                     "p": Style(margin: Margins.only(bottom: 12)),
                     "li": Style(margin: Margins.only(bottom: 6)),
-                    "b": Style(fontWeight: FontWeight.bold, color: colorScheme.onBackground),
-                    "strong": Style(fontWeight: FontWeight.bold, color: colorScheme.onBackground),
+                    "b": Style(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                    "strong": Style(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                     "a": Style(color: colorScheme.primary, textDecoration: TextDecoration.underline),
                   },
                 ),

@@ -32,6 +32,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   void _handleResetPassword() async {
+    debugPrint('[ChangePasswordScreen] _handleResetPassword triggered');
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
@@ -45,11 +46,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     if (!mounted) return;
     if (success) {
+      debugPrint('[ChangePasswordScreen] password reset success');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('change_password_success'))),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
+      debugPrint('[ChangePasswordScreen] password reset failed');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('invalid_or_expired_code'))),
       );
@@ -58,13 +61,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[ChangePasswordScreen] build triggered');
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -74,34 +81,37 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 20),
                 Text(
-                  l10n.translate('set_new_password'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  l10n.translate('set_new_password_title'),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   l10n.translate('enter_new_password_for_account'),
-                  style: const TextStyle(color: Colors.white54, fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    height: 1.5,
+                  ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 48),
                 CustomTextField(
-                  hintText: l10n.translate('new_password'),
+                  hintText: l10n.translate('new_password_placeholder'),
                   isPassword: true,
                   controller: _newPasswordController,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return l10n.translate('please_enter_new_password');
-                    if (value.length < 6) return l10n.translate('password_too_short');
+                    if (value.length < 8) return l10n.translate('password_too_short');
                     return null;
                   },
                 ),
                 CustomTextField(
-                  hintText: l10n.translate('re_enter_password'),
+                  hintText: l10n.translate('confirm_password_placeholder'),
                   isPassword: true,
                   controller: _confirmPasswordController,
                   validator: (value) {
@@ -110,7 +120,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 32),
                 CustomButton(
                   text: l10n.translate('confirm_button'),
                   isLoading: _isLoading,

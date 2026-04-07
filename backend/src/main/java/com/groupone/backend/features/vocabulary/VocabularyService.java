@@ -59,7 +59,7 @@ public class VocabularyService {
         log.info("Loading {} from CSV: {}", type, path);
         try (CSVReader reader = new CSVReader(new FileReader(path.toFile()))) {
             String[] line;
-            String[] header = reader.readNext(); // Skip header
+            String[] header = reader.readNext(); 
             
             if (header == null) {
                 log.warn("CSV file at {} is empty.", path);
@@ -132,7 +132,7 @@ public class VocabularyService {
                 .map(this::mapToItem)
                 .collect(Collectors.toList());
 
-        // Fill isFavorite if user is logged in
+        
         try {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (principal instanceof User) {
@@ -143,7 +143,7 @@ public class VocabularyService {
                 items.forEach(item -> item.setIsFavorite(favoriteIds.contains(item.getId())));
             }
         } catch (Exception e) {
-            // Context might not be available or no user
+            
         }
 
         Long nextCursor = null;
@@ -191,7 +191,7 @@ public class VocabularyService {
         entity.setPhonetic(item.getPhonetic());
         entity.setIsPremium(item.getIsPremium() != null ? item.getIsPremium() : false);
 
-        // Update AI contents if provided
+        
         if (item.getDefinition() != null) entity.setDefinition(item.getDefinition());
         try {
             if (item.getExamples() != null) entity.setExamplesJson(objectMapper.writeValueAsString(item.getExamples()));
@@ -364,7 +364,7 @@ public class VocabularyService {
                 .isPremium(entity.getIsPremium())
                 .build();
         
-        // Individual check for single item mapping (could be optimized if needed)
+        
         try {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (principal instanceof User) {
@@ -414,7 +414,7 @@ public class VocabularyService {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Vocabulary Sample");
             
-            // Header Row
+            
             Row headerRow = sheet.createRow(0);
             String[] columns = {"word", "type", "level", "pos", "definitionUrl", "voiceUrl"};
             for (int i = 0; i < columns.length; i++) {
@@ -427,7 +427,7 @@ public class VocabularyService {
                 cell.setCellStyle(style);
             }
 
-            // Sample Row
+            
             Row sampleRow = sheet.createRow(1);
             sampleRow.createCell(0).setCellValue("ubiquitous");
             sampleRow.createCell(1).setCellValue("word");
@@ -451,7 +451,7 @@ public class VocabularyService {
             Iterator<Row> rows = sheet.iterator();
             
             if (!rows.hasNext()) return 0;
-            Row headerRow = rows.next(); // Skip header
+            Row headerRow = rows.next(); 
             
             List<VocabularyEntity> batch = new ArrayList<>();
             while (rows.hasNext()) {

@@ -41,7 +41,7 @@ class SmartTestSummaryScreen extends StatelessWidget {
                ElevatedButton(
                  style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                  onPressed: () {
-                   Navigator.pop(context); // Return to home/study section
+                   Navigator.pop(context); 
                  },
                  child: const Text("Back to Study Menu"),
                )

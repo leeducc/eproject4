@@ -25,7 +25,7 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
     const [overallBand, setOverallBand] = useState(essay.overallBand || 0);
     const [corrections, setCorrections] = useState<Correction[]>(essay.corrections || []);
     
-    // UI State for highlighting
+    
     const [selection, setSelection] = useState<{ start: number; end: number; text: string } | null>(null);
     const [showCorrectionModal, setShowCorrectionModal] = useState(false);
     const [newCorrection, setNewCorrection] = useState({ suggestion: "", note: "" });
@@ -56,9 +56,9 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
         const text = selectionObj.toString().trim();
         
         if (text && essayRef.current && essayRef.current.contains(range.commonAncestorContainer)) {
-            // In a real app, we'd calculate absolute character offsets based on the full text
-            // For this layout/demo, we'll simulate the offset since the essay is a single block
-            const start = essay.content.indexOf(text); // Simple heuristic for demo
+            
+            
+            const start = essay.content.indexOf(text); 
             if (start !== -1) {
                 setSelection({ start, end: start + text.length, text });
             }
@@ -93,7 +93,7 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
         { key: "grammaticalRange", reasonKey: "grammaticalRangeReason", label: "Grammatical Range & Accuracy" },
     ];
 
-    // Helper to render essay with highlights
+    
     const renderEssayWithHighlights = () => {
         if (corrections.length === 0) return essay.content;
 
@@ -124,16 +124,16 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-120px)] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-            {/* Toolbar */}
-            <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between z-10">
+        <div className="flex flex-col h-[calc(100vh-120px)] bg-gray-50 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm transition-colors duration-300">
+            {}
+            <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between z-10">
                 <div className="flex items-center gap-4">
-                    <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500">
+                    <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-gray-500 dark:text-slate-400">
                         <ChevronLeft size={20} />
                     </button>
                     <div>
-                        <h2 className="text-lg font-bold text-gray-800">Grading: {essay.studentName}</h2>
-                        <p className="text-xs text-gray-500">{essay.taskType === 'TASK_1' ? 'Academic Task 1' : 'General/Academic Task 2'}</p>
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">Grading: {essay.studentName}</h2>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{essay.taskType === 'TASK_1' ? 'Academic Task 1' : 'General/Academic Task 2'}</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -147,12 +147,12 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
             </div>
 
             <div className="flex flex-1 overflow-hidden relative">
-                {/* Selection Floating Button */}
+                {}
                 {selection && (
                     <div 
                         className="absolute z-50 bg-white shadow-2xl border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2 transform -translate-x-1/2 animate-in fade-in zoom-in duration-200"
                         style={{ 
-                            top: '20%', // Rough estimate, ideally based on selection coords
+                            top: '20%', 
                             left: '30%' 
                         }}
                     >
@@ -167,26 +167,26 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
                     </div>
                 )}
 
-                {/* Left Panel: Essay Content */}
-                <div className="flex-[0.6] overflow-y-auto bg-white p-10 border-r border-gray-100" onMouseUp={handleTextSelection}>
+                {}
+                <div className="flex-[0.6] overflow-y-auto bg-white dark:bg-slate-900 p-10 border-r border-gray-100 dark:border-slate-800 transition-colors" onMouseUp={handleTextSelection}>
                     <div className="max-w-2xl mx-auto">
-                        <div className="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-100">
-                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 mb-8 border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
                                 <Info size={16} className="text-indigo-500" /> Topic / Question
                             </h3>
-                            <p className="text-gray-700 leading-relaxed italic">"{essay.prompt}"</p>
+                            <p className="text-gray-700 dark:text-slate-300 leading-relaxed italic">"{essay.prompt}"</p>
                         </div>
 
-                        <div ref={essayRef} className="essay-content text-gray-800 leading-loose text-lg whitespace-pre-wrap select-text selection:bg-indigo-100">
+                        <div ref={essayRef} className="essay-content text-gray-800 dark:text-slate-200 leading-loose text-lg whitespace-pre-wrap select-text selection:bg-indigo-100 dark:selection:bg-indigo-900/50">
                             {renderEssayWithHighlights()}
                         </div>
                     </div>
                 </div>
 
-                {/* Right Panel: Grading Form */}
-                <div className="flex-[0.4] overflow-y-auto p-8 bg-gray-50/50">
+                {}
+                <div className="flex-[0.4] overflow-y-auto p-8 bg-gray-50/50 dark:bg-slate-950/50 transition-colors">
                     <div className="space-y-8">
-                        {/* Overall Score Card */}
+                        {}
                         <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-100 flex items-center justify-between">
                             <div>
                                 <h4 className="text-indigo-100 text-sm font-medium uppercase tracking-widest">Overall Band Score</h4>
@@ -200,40 +200,40 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
                             </div>
                         </div>
 
-                        {/* Inline Corrections List */}
+                        {}
                         {corrections.length > 0 && (
-                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-                                <h4 className="font-bold text-gray-800 flex items-center gap-2">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
+                                <h4 className="font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                                     <Highlighter size={18} className="text-amber-500" /> Inline Corrections ({corrections.length})
                                 </h4>
                                 <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                                     {corrections.map((c) => (
-                                        <div key={c.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 group">
+                                        <div key={c.id} className="p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 group">
                                             <div className="flex justify-between items-start gap-4">
-                                                <div className="text-xs text-gray-400 font-medium">Original: <span className="text-gray-600 underline">"{c.text}"</span></div>
+                                                <div className="text-xs text-gray-400 dark:text-slate-500 font-medium">Original: <span className="text-gray-600 dark:text-slate-300 underline">"{c.text}"</span></div>
                                                 <button onClick={() => removeCorrection(c.id)} className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                                                     <X size={14} />
                                                 </button>
                                             </div>
-                                            {c.suggestion && <div className="text-xs font-bold text-emerald-600 mt-1">Suggest: {c.suggestion}</div>}
-                                            <p className="text-xs text-gray-600 mt-2 bg-white px-2 py-1.5 rounded border border-gray-50">{c.note}</p>
+                                            {c.suggestion && <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">Suggest: {c.suggestion}</div>}
+                                            <p className="text-xs text-gray-600 dark:text-slate-400 mt-2 bg-white dark:bg-slate-900 px-2 py-1.5 rounded border border-gray-50 dark:border-slate-800">{c.note}</p>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Criteria Inputs */}
+                        {}
                         <div className="space-y-6">
-                            <h4 className="font-bold text-gray-800 flex items-center gap-2 px-1">
+                            <h4 className="font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2 px-1">
                                 <AlertCircle size={18} className="text-amber-500" /> IELTS Assessment Criteria
                             </h4>
                             
                             {numericCriteria.map((item) => (
-                                <div key={item.key} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4 transition-all hover:shadow-md">
+                                <div key={item.key} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm space-y-4 transition-all hover:shadow-md">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-sm font-bold text-gray-700">{item.label}</label>
-                                        <span className="text-lg font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg min-w-[44px] text-center">
+                                        <label className="text-sm font-bold text-gray-700 dark:text-slate-300">{item.label}</label>
+                                        <span className="text-lg font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg min-w-[44px] text-center">
                                             {(scores[item.key] as number).toFixed(1)}
                                         </span>
                                     </div>
@@ -242,71 +242,71 @@ export const GradingWorkspaceView: React.FC<GradingWorkspaceViewProps> = ({ essa
                                         min="0" max="9" step="0.5" 
                                         value={scores[item.key] as number}
                                         onChange={(e) => handleScoreChange(item.key, parseFloat(e.target.value))}
-                                        className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                        className="w-full h-2 bg-gray-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                     />
                                     <div className="space-y-2">
-                                        <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Reasoning</div>
+                                        <div className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Reasoning</div>
                                         <textarea 
                                             value={scores[item.reasonKey] as string}
                                             onChange={(e) => handleScoreChange(item.reasonKey, e.target.value)}
                                             placeholder={`Why did you give this score for ${item.label}?`}
-                                            className="w-full h-24 p-3 text-xs bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-indigo-500 transition-all resize-none"
+                                            className="w-full h-24 p-3 text-xs bg-gray-50 dark:bg-slate-800 rounded-xl border border-transparent focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 transition-all resize-none text-gray-700 dark:text-slate-300"
                                         />
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Overall Feedback */}
-                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                            <h4 className="font-bold text-gray-800 mb-4">Overall Feedback for Student</h4>
+                        {}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
+                            <h4 className="font-bold text-gray-800 dark:text-slate-100 mb-4">Overall Feedback for Student</h4>
                             <textarea 
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
                                 placeholder="Summary of strengths and path to improvement..."
-                                className="w-full h-40 p-4 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-sm leading-relaxed"
+                                className="w-full h-40 p-4 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-sm leading-relaxed text-gray-700 dark:text-slate-300"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Correction Modal Overlay */}
+            {}
             {showCorrectionModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-amber-50/50">
-                            <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border dark:border-slate-800">
+                        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-amber-50/50 dark:bg-amber-900/10">
+                            <h3 className="font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                                 <Highlighter size={18} className="text-amber-500" /> Add Inline Feedback
                             </h3>
-                            <button onClick={() => setShowCorrectionModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+                            <button onClick={() => setShowCorrectionModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"><X size={20}/></button>
                         </div>
                         <div className="p-6 space-y-4">
                             <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-gray-400 uppercase">Selected Text</label>
-                                <p className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 font-medium italic">"{selection?.text}"</p>
+                                <label className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase">Selected Text</label>
+                                <p className="p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-sm text-gray-700 dark:text-slate-300 font-medium italic">"{selection?.text}"</p>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-gray-400 uppercase">Suggestion (Optional)</label>
+                                <label className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase">Suggestion (Optional)</label>
                                 <input 
-                                    className="w-full p-3 bg-gray-50 rounded-lg text-sm border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                    className="w-full p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-sm border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-indigo-500 outline-none transition-all text-gray-700 dark:text-slate-200"
                                     placeholder="e.g. 'however' instead of 'but'"
                                     value={newCorrection.suggestion}
                                     onChange={(e) => setNewCorrection({...newCorrection, suggestion: e.target.value})}
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[11px] font-bold text-gray-400 uppercase">Note / Explanation</label>
+                                <label className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase">Note / Explanation</label>
                                 <textarea 
-                                    className="w-full h-24 p-3 bg-gray-50 rounded-lg text-sm border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none"
+                                    className="w-full h-24 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-sm border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-indigo-500 outline-none transition-all resize-none text-gray-700 dark:text-slate-200"
                                     placeholder="Explain why this is an error or how to improve it..."
                                     value={newCorrection.note}
                                     onChange={(e) => setNewCorrection({...newCorrection, note: e.target.value})}
                                 />
                             </div>
                         </div>
-                        <div className="p-4 bg-gray-50 flex gap-3">
-                            <Button variant="outline" className="flex-1" onClick={() => setShowCorrectionModal(false)}>Cancel</Button>
+                        <div className="p-4 bg-gray-50 dark:bg-slate-800/50 flex gap-3">
+                            <Button variant="outline" className="flex-1 dark:border-slate-700 dark:hover:bg-slate-700" onClick={() => setShowCorrectionModal(false)}>Cancel</Button>
                             <Button className="flex-1 gap-2" onClick={addCorrection} disabled={!newCorrection.note && !newCorrection.suggestion}>
                                 <Check size={18} /> Apply Feedback
                             </Button>

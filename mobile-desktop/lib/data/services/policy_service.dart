@@ -19,7 +19,7 @@ class PolicyService {
         final Map<String, dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
         final policy = PolicyModel.fromJson(data);
         
-        // Update cache
+        
         await _cachePolicy(type, jsonEncode(data));
         
         return policy;

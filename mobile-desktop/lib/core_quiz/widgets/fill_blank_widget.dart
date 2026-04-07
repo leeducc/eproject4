@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FillBlankWidget extends StatefulWidget {
   final String questionText;
   final bool isAnswered;
-  final void Function(String answer) onSubmit;
+  final void Function(String? answer) onSubmit;
 
   const FillBlankWidget({
     super.key,

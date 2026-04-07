@@ -32,7 +32,7 @@ public class ExcelService {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Questions_and_Passages");
 
-            // Header row
+            
             Row headerRow = sheet.createRow(0);
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
@@ -45,10 +45,10 @@ public class ExcelService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Data rows
+            
             int rowIdx = 1;
             
-            // First, export passages
+            
             if (groups != null) {
                 for (QuestionGroup g : groups) {
                     Row row = sheet.createRow(rowIdx++);
@@ -57,7 +57,7 @@ public class ExcelService {
                 }
             }
 
-            // Then, export questions
+            
             if (questions != null) {
                 for (Question q : questions) {
                     Row row = sheet.createRow(rowIdx++);
@@ -128,7 +128,7 @@ public class ExcelService {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
                 }
-                // Handle numeric ID or premium content (1/0)
+                
                 double numericValue = cell.getNumericCellValue();
                 if (numericValue == (long) numericValue) {
                     return String.valueOf((long) numericValue);

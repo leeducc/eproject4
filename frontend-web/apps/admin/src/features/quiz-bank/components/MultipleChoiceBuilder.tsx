@@ -21,14 +21,14 @@ export interface MultipleChoiceBuilderProps {
 export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
   const { currentUser, createQuestion, updateQuestion, uploadMedia } = useQuizBankStore();
   
-  // Local state for the builder form
+  
   const [difficultyBand, setDifficultyBand] = useState<DifficultyBand>(initialQuestion?.difficultyBand || 'BAND_0_4');
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || '');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
   const [isPremium, setIsPremium] = useState<boolean>(initialQuestion?.isPremiumContent || false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
-  // existing media state
+  
   const existingData = initialQuestion?.data as MultipleChoiceData | undefined;
   const optionImageUrls = existingData?.options?.map(opt => opt.image).filter(Boolean) || [];
   
@@ -51,7 +51,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
   const [isMultipleAnswer, setIsMultipleAnswer] = useState(existingData?.multiple_select || false);
   const [isAnswerWithImage, setIsAnswerWithImage] = useState(existingData?.answer_with_image || false);
   
-  // Local state for option-specific images (File for new, string URL for existing)
+  
   const [optionImages, setOptionImages] = useState<Record<string, File | string>>(
     existingData?.options?.reduce((acc, opt) => {
       if (opt.image) acc[opt.id] = opt.image;
@@ -69,7 +69,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
   };
 
   const handleRemoveOption = (id: string) => {
-    if (isTeacher) return; // Role check
+    if (isTeacher) return; 
     console.log(`[MultipleChoiceBuilder] Removing option ${id}`);
     setOptions(options.filter(opt => opt.id !== id));
     setCorrectIds(correctIds.filter(cId => cId !== id));
@@ -80,10 +80,12 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
   };
 
   const handleOptionImageChange = async (id: string, file: File) => {
+    console.log('[MultipleChoiceBuilder] Option image changed', { id, fileName: file.name });
     try {
       const url = await uploadMedia(file, 'answers');
       setOptionImages(prev => ({ ...prev, [id]: url }));
     } catch (err) {
+      console.error('[MultipleChoiceBuilder] Option image upload failed', err);
       toast.error("Failed to upload image");
     }
   };
@@ -127,7 +129,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       return;
     }
 
-    // Prepare final options
+    
     const finalOptions = options.map(opt => {
       const imageUrl = typeof optionImages[opt.id] === 'string' ? optionImages[opt.id] as string : undefined;
       return {
@@ -155,17 +157,18 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       explanation,
       data,
       isPremiumContent: isPremium,
-      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...optionMediaUrls]
+      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...optionMediaUrls],
+      tags: initialQuestion?.tags || []
     };
 
     if (initialQuestion?.id) {
-      console.log('[MultipleChoiceBuilder] Updating question', { instruction, data });
+      console.log('[MultipleChoiceBuilder] Updating question', { id: initialQuestion.id, payload });
       await updateQuestion(initialQuestion.id, payload);
     } else if (!initialQuestion) {
-      console.log('[MultipleChoiceBuilder] Saving question', { instruction, data });
+      console.log('[MultipleChoiceBuilder] Creating new question', { payload });
       await createQuestion(payload);
     } else {
-      console.log('[MultipleChoiceBuilder] Draft saved locally');
+      console.log('[MultipleChoiceBuilder] Draft state updated');
     }
 
     if (onSave) onSave(payload);
@@ -175,10 +178,10 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
     if (!e.target.files?.length) return;
     const newFiles = Array.from(e.target.files);
     
-    // Constraints check
+    
     const countImages = retainedMedia.filter(m => m.type.startsWith('image/')).length + 
                         newFiles.filter(f => f.type.startsWith('image/')).length;
-                        
+                         
     const countAV = retainedMedia.filter(m => !m.type.startsWith('image/')).length + 
                     newFiles.filter(f => !f.type.startsWith('image/')).length;
 
@@ -198,13 +201,16 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
       return;
     }
 
+    console.log('[MultipleChoiceBuilder] Files selected', { count: newFiles.length });
     try {
       for (const file of newFiles) {
+        console.log('[MultipleChoiceBuilder] Uploading file', { name: file.name, type: file.type });
         const url = await uploadMedia(file, 'questions');
         setRetainedMedia(prev => [...prev, { url, type: file.type }]);
       }
       toast.success("Files uploaded successfully");
     } catch (err) {
+      console.error('[MultipleChoiceBuilder] Upload failed', err);
       toast.error("Failed to upload some files");
     }
     e.target.value = '';
@@ -229,7 +235,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
 
   return (
     <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans transition-colors">
-      {/* Header */}
+      
       <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
           className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
@@ -253,9 +259,9 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
         </div>
       </div>
 
-      {/* Main Content */}
+      
       <div className="p-6 space-y-6">
-        {/* Question Input */}
+        
         <div className="space-y-2">
           <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-800 transition-colors">
             <textarea
@@ -272,11 +278,20 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="text-sm text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors"
+                  className="hidden"
+                  id="mc-question-media"
                 />
+                <label 
+                  htmlFor="mc-question-media"
+                  className="cursor-pointer bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium border dark:border-slate-700 transition-colors"
+                >
+                  Select Media
+                </label>
               </div>
 
-                    {/* Retained Media previews (includes newly uploaded) */}
+              {retainedMedia.length > 0 && (
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-800 transition-colors">
+                  <div className="flex flex-wrap gap-4">
                     {retainedMedia.map((media, idx) => (
                       <div key={`retained-${idx}`} className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
                         {media.type?.startsWith('image/') ? (
@@ -308,11 +323,14 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                         </button>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Settings Row */}
+        
         <div className="flex items-center gap-6">
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300 cursor-pointer">
             <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
@@ -322,7 +340,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                 checked={isMultipleAnswer}
                 onChange={(e) => {
                   setIsMultipleAnswer(e.target.checked);
-                  setCorrectIds([]); // Reset on type change
+                  setCorrectIds([]); 
                 }}
                 className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white dark:bg-slate-200 border-4 appearance-none cursor-pointer transition-transform duration-200 ${isMultipleAnswer ? 'translate-x-5 border-blue-500 dark:border-blue-400' : 'translate-x-0 border-gray-300 dark:border-slate-700'}`}
               />
@@ -346,7 +364,7 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
           </label>
         </div>
 
-        {/* Options List */}
+        
         <div className="space-y-3">
           {options.map((opt, index) => (
             <div key={opt.id} className="flex items-center gap-3 group">
@@ -368,75 +386,67 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
                    onChange={(e) => handleOptionChange(opt.id, e.target.value)}
                    placeholder="Type an exact answer..."
                  />
-                   {isAnswerWithImage && (
+                 {isAnswerWithImage && (
                     <div className="flex items-center gap-2 ml-2">
                        {optionImages[opt.id] ? (
-                         <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
-                            <button
-                              onClick={() => {
-                                const img = optionImages[opt.id];
-                                if (typeof img === 'string') {
-                                  setPreviewImageUrl(getMediaUrl(img));
-                                } else {
-                                  setPreviewImageUrl(URL.createObjectURL(img));
-                                }
-                              }}
-                              className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 uppercase tracking-tighter"
-                            >
-                              <Eye size={12} /> View file
-                            </button>
-                            <button 
-                              onClick={() => handleRemoveOptionImage(opt.id)}
-                              className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded p-0.5 transition-colors"
-                              title="Remove image"
-                            >
-                              <X size={14} />
-                            </button>
-                         </div>
+                          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 pr-1 transition-colors">
+                             <button
+                               onClick={() => {
+                                 const img = optionImages[opt.id];
+                                 if (typeof img === 'string') {
+                                   setPreviewImageUrl(getMediaUrl(img));
+                                 } else {
+                                   setPreviewImageUrl(URL.createObjectURL(img));
+                                 }
+                               }}
+                               className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 uppercase tracking-tighter"
+                             >
+                               <Eye size={12} /> View file
+                             </button>
+                             <button 
+                               onClick={() => handleRemoveOptionImage(opt.id)}
+                               className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded p-0.5 transition-colors"
+                               title="Remove image"
+                             >
+                               <X size={14} />
+                             </button>
+                          </div>
                        ) : (
-                         <label className="text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
-                           <ImageIcon size={18} />
-                           <input 
-                             type="file" 
-                             accept="image/*" 
-                             className="hidden" 
-                             onChange={(e) => {
-                               console.log(`[MultipleChoiceBuilder] Image selected for option ${opt.id}`);
-                               e.target.files?.[0] && handleOptionImageChange(opt.id, e.target.files[0]);
-                             }}
-                           />
-                         </label>
+                          <label className="text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
+                            <ImageIcon size={18} />
+                            <input 
+                              type="file" 
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleOptionImageChange(opt.id, file);
+                              }}
+                            />
+                          </label>
                        )}
                     </div>
-                  )}
+                 )}
               </div>
-
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-1 text-gray-400 hover:text-gray-600 cursor-grab">
-                  <GripVertical size={20} />
-                </button>
-                {!isTeacher && (
-                  <button 
-                    className="p-1 text-gray-400 hover:text-red-500"
-                    onClick={() => handleRemoveOption(opt.id)}
-                    title="Delete option"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                )}
-              </div>
+              <button 
+                onClick={() => handleRemoveOption(opt.id)}
+                className="text-gray-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                title="Remove option"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           ))}
-          
-          <button 
-            onClick={handleAddOption}
-            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium mt-4 disabled:opacity-50 transition-colors"
-          >
-            <Plus size={16} /> Add answers
-          </button>
+          {!isTeacher && (
+            <button 
+              onClick={handleAddOption}
+              className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 mt-2 pl-9 transition-colors"
+            >
+              <Plus size={16} /> Add Option
+            </button>
+          )}
         </div>
 
-        {/* Explanation Input */}
         <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation (Optional)</label>
           <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-800 transition-colors">
@@ -450,7 +460,6 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
         </div>
       </div>
 
-      {/* Footer Settings */}
       <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex items-center justify-end transition-colors">
         <div>
            <button 
@@ -472,7 +481,6 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
         variant="danger"
       />
 
-      {/* Full Size Image Preview Modal */}
       {previewImageUrl && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"
@@ -489,11 +497,6 @@ export const MultipleChoiceBuilder: React.FC<MultipleChoiceBuilderProps> = ({ sk
               src={previewImageUrl} 
               alt="Full Size Preview" 
               className="max-w-full max-h-[85vh] object-contain rounded-lg"
-              onLoad={() => {
-                if (previewImageUrl.startsWith('blob:')) {
-                  // Keep it for now, logic to revoke would go here if we didn't need it multiple times
-                }
-              }}
             />
           </div>
         </div>

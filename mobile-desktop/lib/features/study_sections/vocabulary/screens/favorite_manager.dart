@@ -39,7 +39,7 @@ class FavoriteManager extends ChangeNotifier {
     final String word = vocab['word'] ?? '';
     final bool currentlyFavorite = isFavorite(word);
 
-    // Optimistic update
+    
     if (currentlyFavorite) {
       _favorites.removeWhere((e) => e["word"] == word);
     } else {
@@ -49,7 +49,7 @@ class FavoriteManager extends ChangeNotifier {
 
     try {
       final bool result = await _apiService.toggleFavorite(id);
-      // Ensure local state matches server result
+      
       final bool isNowFavorite = _favorites.any((e) => e["word"] == word);
       if (isNowFavorite != result) {
         if (result) {
@@ -61,7 +61,7 @@ class FavoriteManager extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error toggling favorite on backend: $e');
-      // Rollback optimistic update on error if needed, but for now we trust the next sync
+      
     }
   }
 }

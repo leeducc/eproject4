@@ -18,7 +18,7 @@ public class Tag {
     private String name;
 
     @Column(nullable = false)
-    private String namespace; // e.g., "UI", "Topic", "Skill"
+    private String namespace; 
 
-    private String color; // Hex code
+    private String color; 
 }

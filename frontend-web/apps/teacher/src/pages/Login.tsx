@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "@english-learning/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function TeacherLogin() {
     const [email, setEmail] = useState("");
@@ -8,12 +9,13 @@ export default function TeacherLogin() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
-        // Basic Validation
+        
         if (!email || !password) {
             setError("Email and Password are required.");
             return;
@@ -32,9 +34,8 @@ export default function TeacherLogin() {
                 role: "TEACHER"
             });
 
-            const { token, id, role, fullName } = response.data;
-            localStorage.setItem("teacher_token", token);
-            localStorage.setItem("teacher_user", JSON.stringify({ id, role, name: fullName || "Teacher User" }));
+            const { token, id, role, fullName, email: userEmail } = response.data;
+            login(token, { id, role, name: fullName || "Teacher User", email: userEmail || email });
             navigate("/teacher/dashboard");
         } catch (err: any) {
             setError(err.response?.data?.error || err.response?.data?.message || "Invalid credentials. Please try again.");

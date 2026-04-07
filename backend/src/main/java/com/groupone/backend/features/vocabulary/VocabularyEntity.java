@@ -29,11 +29,11 @@ public class VocabularyEntity {
     private String word;
 
     @Column(nullable = false)
-    private String type; // "word" or "phrase"
+    private String type; 
 
-    private String level; // a1, a2, b1, b2, c1, c2
-    private String levelGroup; // 0-4, 5-6, 7-8, 9
-    private String pos; // part of speech
+    private String level; 
+    private String levelGroup; 
+    private String pos; 
     
     @Column(length = 500)
     private String definitionUrl;

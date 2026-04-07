@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,7 @@ class VocabularyTestApiService {
       }
       return 0;
     } catch (e) {
-      print('Error fetching due count: $e');
+      debugPrint('Error fetching due count: $e');
       return 0;
     }
   }
@@ -47,7 +48,7 @@ class VocabularyTestApiService {
       }
       return null;
     } catch (e) {
-      print('Error generating test: $e');
+      debugPrint('Error generating test: $e');
       return null;
     }
   }
@@ -68,7 +69,7 @@ class VocabularyTestApiService {
         }),
       );
     } catch (e) {
-      print('Error submitting test results: $e');
+      debugPrint('Error submitting test results: $e');
     }
   }
 
@@ -85,7 +86,7 @@ class VocabularyTestApiService {
         },
       );
     } catch (e) {
-      print('Error logging word view: $e');
+      debugPrint('Error logging word view: $e');
     }
   }
 }

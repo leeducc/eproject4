@@ -21,7 +21,7 @@ export const TFNGRenderer: React.FC<RendererProps> = ({ question, userAnswer, se
 
   const handleToggle = (id: string) => {
     if (showFeedback) return;
-    setUserAnswer([id]); // TFNG is always single select
+    setUserAnswer([id]); 
   };
 
   return (
@@ -75,12 +75,12 @@ export const QuestionRenderer: React.FC<RendererProps> = (props) => {
   const hasTag = (tagStr: string) => 
     question.tags?.some(t => `${t.namespace}:${t.name}`.toUpperCase() === tagStr.toUpperCase());
 
-  // Abstraction mapping
+  
   if (hasTag('UI:TFNG')) {
     return <TFNGRenderer {...props} />;
   }
   
-  // Add more mappings here as implemented (e.g., UI:YNNG, UI:MatchHeadings)
   
-  return null; // Fallback to handle manually in StudentPreview or here
+  
+  return null; 
 };

@@ -45,7 +45,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C313D),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -130,7 +130,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         ],
                       ),
                       child: Icon(
-                        playing ? Icons.pause : Icons.volume_up,
+                        playing ? Icons.pause : Icons.play_arrow,
                         size: 40,
                         color: Colors.white,
                       ),

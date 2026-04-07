@@ -41,9 +41,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft > 0) {
-        setState(() {
-          _secondsLeft--;
-        });
+        if (mounted) setState(() => _secondsLeft--);
       } else {
         timer.cancel();
       }
@@ -51,6 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> _requestOtp() async {
+    debugPrint('[ForgotPasswordScreen] _requestOtp triggered');
     final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
@@ -69,6 +68,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
 
     if (captchaToken != null && captchaToken.isNotEmpty) {
+      debugPrint('[ForgotPasswordScreen] sending code');
       _startCooldown();
       await AuthApi.sendForgotPasswordOtp(email, captchaToken);
 
@@ -83,6 +83,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _handleChangePassword() {
+    debugPrint('[ForgotPasswordScreen] _handleChangePassword triggered');
     if (!_formKey.currentState!.validate()) return;
 
     final email = _emailController.text.trim();
@@ -98,13 +99,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[ForgotPasswordScreen] build triggered');
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -114,22 +119,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 20),
                 Text(
-                  l10n.translate('forgot_password'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  l10n.translate('forgot_password_title'),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   l10n.translate('enter_registered_email_for_otp'),
-                  style: const TextStyle(color: Colors.white54, fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    height: 1.5,
+                  ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 48),
                 CustomTextField(
                   hintText: l10n.translate('email_hint'),
                   controller: _emailController,
@@ -141,7 +149,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   },
                 ),
                 CustomTextField(
-                  hintText: l10n.translate('get_verification_code'), // Reusing key for hint
+                  hintText: l10n.translate('verification_code_placeholder'),
                   controller: _codeController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -152,37 +160,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ? GestureDetector(
                           onTap: _requestOtp,
                           child: Text(
-                            l10n.translate('get_verification_code'),
-                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            l10n.translate('get_code'),
+                            style: TextStyle(
+                              color: theme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                         )
                       : (_secondsLeft > 0
                           ? Text(
                               '${_secondsLeft}s',
-                              style: const TextStyle(color: Colors.white54, fontSize: 14),
+                              style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.4), fontSize: 13),
                             )
-                          : null),
+                          : GestureDetector(
+                              onTap: _requestOtp,
+                              child: Text(
+                                l10n.translate('resend'),
+                                style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            )),
                 ),
-                if (_hasRequestedOtp && _secondsLeft == 0)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: _requestOtp,
-                        child: Text(
-                          l10n.translate('resend_verification_code'),
-                          style: const TextStyle(
-                            color: Colors.blueAccent,
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 32),
                 CustomButton(
                   text: l10n.translate('change_password_button'),
                   isLoading: _isLoading,

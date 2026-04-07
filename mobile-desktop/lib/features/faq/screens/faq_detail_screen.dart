@@ -15,10 +15,10 @@ class FAQDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(faq.getLocalizedQuestion(context), style: TextStyle(color: colorScheme.onBackground, fontSize: 16)),
+        title: Text(faq.getLocalizedQuestion(context), style: TextStyle(color: colorScheme.onSurface, fontSize: 16)),
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -28,7 +28,7 @@ class FAQDetailScreen extends StatelessWidget {
             Text(
               faq.getLocalizedQuestion(context),
               style: TextStyle(
-                color: colorScheme.onBackground,
+                color: colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -38,18 +38,18 @@ class FAQDetailScreen extends StatelessWidget {
               data: faq.getLocalizedAnswer(context),
               style: {
                 "body": Style(
-                  color: colorScheme.onBackground.withOpacity(0.9),
+                  color: colorScheme.onSurface.withOpacity(0.9),
                   fontSize: FontSize(16.0),
                   lineHeight: LineHeight.em(1.5),
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,
                 ),
-                "h1": Style(color: colorScheme.onBackground, fontWeight: FontWeight.bold),
-                "h2": Style(color: colorScheme.onBackground, fontWeight: FontWeight.bold),
+                "h1": Style(color: colorScheme.onSurface, fontWeight: FontWeight.bold),
+                "h2": Style(color: colorScheme.onSurface, fontWeight: FontWeight.bold),
                 "p": Style(margin: Margins.only(bottom: 10)),
                 "li": Style(margin: Margins.only(bottom: 5)),
-                "b": Style(fontWeight: FontWeight.bold, color: colorScheme.onBackground),
-                "strong": Style(fontWeight: FontWeight.bold, color: colorScheme.onBackground),
+                "b": Style(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                "strong": Style(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
               },
             ),
           ],

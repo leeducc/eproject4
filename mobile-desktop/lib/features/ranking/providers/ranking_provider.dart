@@ -17,7 +17,7 @@ class RankingProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // ── Load leaderboard ─────────────────────────────────────────────────────
+  
 
   Future<void> loadLeaderboard(LeaderboardType type) async {
     debugPrint('[RankingProvider] loadLeaderboard type=$type');
@@ -44,7 +44,7 @@ class RankingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Record stats (fire-and-forget, no UI update needed) ──────────────────
+  
 
   void recordAnswers(int count) {
     if (count <= 0) return;

@@ -35,7 +35,7 @@ export const VocabularyCreateView: React.FC = () => {
   return (
     <AdminLayout>
       <div className="p-8 space-y-8 bg-[#0B0F1A] min-h-screen text-white">
-        {/* Header */}
+        {}
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/admin/questions/vocabulary')}

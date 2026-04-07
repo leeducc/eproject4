@@ -19,8 +19,8 @@ public class VocabularyTestDTO {
 @NoArgsConstructor
 @AllArgsConstructor
 class TestQuestionDTO {
-    private Long id; // Vocabulary ID
+    private Long id; 
     private String word;
-    private String quizType; // MULTIPLE_CHOICE, FILL_IN_THE_BLANK, etc.
-    private String questionJson; // The specific quiz JSON
+    private String quizType; 
+    private String questionJson; 
 }

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../features/user-management/store';
 import { AdminLayout } from '../../components/AdminLayout';
-import { Search, RefreshCcw, User as UserIcon, Mail, Coins, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Search, RefreshCcw, User as UserIcon, Mail, Coins, ShieldCheck, ShieldAlert, Trash2 } from 'lucide-react';
+import { toast } from '@english-learning/ui';
 
 export const CustomerList: React.FC = () => {
   const navigate = useNavigate();
@@ -12,7 +13,8 @@ export const CustomerList: React.FC = () => {
     fetchUsers, 
     searchQuery, 
     setSearchQuery, 
-    setRoleFilter 
+    setRoleFilter,
+    deleteUser
   } = useUserStore();
 
   const [searchTerm, setSearchTerm] = useState(searchQuery);
@@ -32,10 +34,21 @@ export const CustomerList: React.FC = () => {
     fetchUsers();
   }, [searchQuery]);
 
+  const handleDelete = async (userId: number, name: string) => {
+    if (window.confirm(`Are you sure you want to delete customer "${name}"? This action cannot be undone.`)) {
+      const success = await deleteUser(userId);
+      if (success) {
+        toast.success('Customer deleted successfully');
+      } else {
+        toast.error('Failed to delete customer');
+      }
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {/* Header */}
+        {}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Customer Management</h1>
@@ -43,7 +56,7 @@ export const CustomerList: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters */}
+        {}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 transition-all mt-6">
           <div className="flex flex-col md:flex-row items-end gap-6">
             <div className="flex-1 w-full space-y-1.5">
@@ -75,7 +88,7 @@ export const CustomerList: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
+        {}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden mt-6">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -144,6 +157,13 @@ export const CustomerList: React.FC = () => {
                             className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all"
                           >
                             View Details
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(user.id, user.fullName || user.email)}
+                            className="p-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-all"
+                            title="Delete Customer"
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>

@@ -1,4 +1,5 @@
 import '../../core/models/quiz_bank_models.dart';
+import '../../core/utils/url_helper.dart';
 import 'quiz_option.dart';
 
 class QuizQuestion extends Question {
@@ -10,6 +11,7 @@ class QuizQuestion extends Question {
     required super.instruction,
     super.explanation,
     required super.mediaUrls,
+    required super.mediaTypes,
     required super.data,
   });
 
@@ -22,6 +24,7 @@ class QuizQuestion extends Question {
       instruction: q.instruction,
       explanation: q.explanation,
       mediaUrls: q.mediaUrls,
+      mediaTypes: q.mediaTypes,
       data: q.data,
     );
   }
@@ -42,11 +45,37 @@ class QuizQuestion extends Question {
     return data['multiple_select'] ?? false;
   }
 
-  bool get isTrueFalse => options.length == 2;
-
-  String? get mediaUrl => data['media_url'] ?? (mediaUrls.isNotEmpty ? mediaUrls.first : null);
   
-  String? get mediaType => data['media_type'];
+  List<dynamic> get leftItems => data['left_items'] ?? [];
+  List<dynamic> get rightItems => data['right_items'] ?? [];
+  Map<String, dynamic> get matchingSolution => data['solution'] ?? {};
+
+  
+  bool isCorrectChoice(String answerId) {
+    if (type == QuestionType.matching) {
+      return answerId == "__MATCHING_CORRECT__";
+    }
+    return correctIds.contains(answerId);
+  }
+
+
+  String? get mediaUrl {
+    final rawUrl = data['media_url'] ?? (mediaUrls.isNotEmpty ? mediaUrls.first : null);
+    return UrlHelper.fixMediaUrl(rawUrl);
+  }
+  
+  String? get mediaType {
+    final fromData = data['media_type']?.toString();
+    if (fromData != null) return fromData;
+
+    if (mediaTypes.isNotEmpty) {
+      final mt = mediaTypes.first.toLowerCase();
+      if (mt.contains('audio')) return 'audio';
+      if (mt.contains('image')) return 'image';
+      if (mt.contains('video')) return 'video';
+    }
+    return null;
+  }
 
   bool get hasAudio => mediaType == 'audio' && mediaUrl != null;
 

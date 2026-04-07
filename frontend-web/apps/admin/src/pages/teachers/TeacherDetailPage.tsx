@@ -11,31 +11,33 @@ import {
   Phone, 
   Shield, 
   Clock,
-  Circle
+  Circle,
+  Trash2,
+  CheckCircle2,
+  AlertTriangle,
+  Zap,
+  ZapOff
 } from 'lucide-react';
+import { useUserStore, UserStatus } from '../../features/user-management/store';
+import { toast } from '@english-learning/ui';
+
+
+import { apiClient } from '@english-learning/api';
 
 export const TeacherDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { updateUserStatus, updateUserPro, deleteUser } = useUserStore();
   const [teacher, setTeacher] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const fetchTeacherDetail = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('admin_token');
-        const response = await fetch(`http://localhost:8123/api/admin/users/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setTeacher(data);
-        } else {
-          console.error('Failed to fetch teacher details');
-        }
+        const response = await apiClient.get(`/admin/users/${id}`);
+        setTeacher(response.data);
       } catch (err) {
         console.error('Error fetching teacher details:', err);
       } finally {
@@ -45,6 +47,52 @@ export const TeacherDetailPage: React.FC = () => {
 
     if (id) fetchTeacherDetail();
   }, [id]);
+
+  const handleStatusToggle = async () => {
+    if (!teacher) return;
+    const newStatus: UserStatus = teacher.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    
+    setIsUpdating(true);
+    const updated = await updateUserStatus(teacher.id, newStatus);
+    setIsUpdating(false);
+    
+    if (updated) {
+      setTeacher(updated);
+      toast.success(`Teacher status updated to ${newStatus}`);
+    } else {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleProToggle = async () => {
+    if (!teacher) return;
+    setIsUpdating(true);
+    const updated = await updateUserPro(teacher.id, !teacher.isPro);
+    setIsUpdating(false);
+    
+    if (updated) {
+      setTeacher(updated);
+      toast.success(`Teacher PRO status ${!teacher.isPro ? 'activated' : 'deactivated'}`);
+    } else {
+      toast.error('Failed to update PRO status');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!teacher) return;
+    if (window.confirm(`Are you sure you want to delete teacher "${teacher.fullName || teacher.email}"? This cannot be undone.`)) {
+      setIsUpdating(true);
+      const success = await deleteUser(teacher.id);
+      setIsUpdating(false);
+      
+      if (success) {
+        toast.success('Teacher deleted successfully');
+        navigate('/admin/teachers/list');
+      } else {
+        toast.error('Failed to delete teacher');
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -75,7 +123,7 @@ export const TeacherDetailPage: React.FC = () => {
   return (
     <AdminLayout>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {/* Breadcrumbs & Actions */}
+        {}
         <div className="flex items-center justify-between">
           <button 
             onClick={() => navigate('/admin/teachers/list')}
@@ -86,9 +134,45 @@ export const TeacherDetailPage: React.FC = () => {
             </div>
             <span className="font-medium">Back to Teachers</span>
           </button>
+
+          <div className="flex items-center gap-3">
+             <button 
+              onClick={handleStatusToggle}
+              disabled={isUpdating}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all disabled:opacity-50 ${
+                teacher.status === 'ACTIVE' 
+                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white' 
+                  : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white'
+              }`}
+            >
+              {teacher.status === 'ACTIVE' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+              {teacher.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+            </button>
+
+            <button 
+              onClick={handleProToggle}
+              disabled={isUpdating}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all disabled:opacity-50 ${
+                teacher.isPro 
+                  ? 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white' 
+                  : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'
+              }`}
+            >
+              {teacher.isPro ? <ZapOff size={18} /> : <Zap size={18} />}
+              {teacher.isPro ? 'Revoke PRO' : 'Grant PRO'}
+            </button>
+
+             <button 
+              onClick={handleDelete}
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl font-bold transition-all disabled:opacity-50"
+            >
+              <Trash2 size={18} /> Delete Account
+            </button>
+          </div>
         </div>
 
-        {/* Profile Header Card */}
+        {}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8">
             <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase ${
@@ -131,10 +215,10 @@ export const TeacherDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Details Grid */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Info */}
-          <div className="lg:col-span-2 space-y-8">
+          {}
+          <div className="lg:col-span-3 space-y-8">
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-800 space-y-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Circle size={8} className="fill-primary text-primary" />
@@ -179,22 +263,21 @@ export const TeacherDetailPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Side Info */}
-          <div className="space-y-8">
-            <div className="bg-gradient-to-br from-primary to-indigo-600 rounded-3xl p-8 text-white shadow-xl shadow-primary/20">
-              <h3 className="text-xl font-bold mb-6">Account Status</h3>
-              <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                  <span className="text-white/70">Verified Email</span>
-                  <span className={`px-2 py-1 rounded-lg text-xs font-bold ${teacher.isEmailConfirmed ? 'bg-white/20' : 'bg-red-500/20'}`}>
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 space-y-4">
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-widest text-center border-b border-gray-100 dark:border-slate-800 pb-3">
+                Account Metadata
+              </h4>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Verified Email</span>
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${teacher.isEmailConfirmed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {teacher.isEmailConfirmed ? 'YES' : 'NO'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                  <span className="text-white/70">Account ID</span>
-                  <span className="font-mono font-bold text-sm bg-black/10 px-2 py-1 rounded">#{teacher.id}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Account ID</span>
+                  <span className="font-mono font-bold text-xs bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">#{teacher.id}</span>
                 </div>
               </div>
             </div>

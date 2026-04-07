@@ -31,7 +31,7 @@ public class ModerationService {
 
     @Transactional
     public Report submitReport(User reporter, ReportedItemType itemType, Long itemId, String reason) {
-        // 1. Rate Limiting
+        
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime oneMinuteAgo = now.minusMinutes(1);
         LocalDateTime oneHourAgo = now.minusHours(1);
@@ -46,13 +46,13 @@ public class ModerationService {
             throw new RuntimeException("Hourly report limit reached.");
         }
 
-        // 2. Duplicate Detection
+        
         reportRepository.findByReporterIdAndItemTypeAndItemIdAndStatus(reporter.getId(), itemType, itemId, ReportStatus.NEW)
                 .ifPresent(r -> {
                     throw new RuntimeException("You have already reported this item. Our team is reviewing it.");
                 });
 
-        // 3. Keyword Check
+        
         ReportStatus status = ReportStatus.NEW;
         if (SPAM_PATTERN.matcher(reason).find()) {
             status = ReportStatus.SPAM;
@@ -95,7 +95,7 @@ public class ModerationService {
             }
         }
 
-        // Create notification for user
+        
         ReportNotification notification = ReportNotification.builder()
                 .user(report.getReporter())
                 .report(report)

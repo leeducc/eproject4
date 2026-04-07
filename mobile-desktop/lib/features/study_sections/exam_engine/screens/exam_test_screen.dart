@@ -56,7 +56,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Re-attach listener whenever the provider changes
+    
     final newProvider = Provider.of<ExamProvider>(context, listen: false);
     if (_provider != newProvider) {
       _provider?.removeListener(_onProviderUpdate);
@@ -69,7 +69,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
     final result = _provider?.submittedResult;
     if (result != null && mounted) {
       print('[ExamTestBody] submittedResult detected — navigating to ExamResultScreen');
-      // Navigate from this stable context, not from WritingSectionView
+      
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => ExamResultScreen(result: result)),
@@ -84,7 +84,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
   }
 
 
-  // ─── Confirm Give Up ────────────────────────────────────────────────────────
+  
 
   void _confirmGiveUp() {
     showDialog(
@@ -119,7 +119,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
     );
   }
 
-  // ─── Confirm Move to Next Section ───────────────────────────────────────────
+  
 
   void _confirmNextSection(ExamSection current) {
     final nextName = current == ExamSection.LISTENING ? 'Reading' : 'Writing';
@@ -182,9 +182,9 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
           );
         }
 
-        // Auto-navigate to break screen when timer hits 0 mid-section
+        
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          // No break screen needed for now — section transitions are manual
+          
         });
 
         final bool isLowTime = state.remainingSeconds < 300;
@@ -232,7 +232,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
               ],
             ),
             actions: [
-              // Timer
+              
               Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -253,7 +253,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
                   ),
                 ),
               ),
-              // Next Section button
+              
               if (hasNextSection)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),

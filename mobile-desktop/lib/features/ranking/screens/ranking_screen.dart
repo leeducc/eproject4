@@ -87,7 +87,7 @@ class _RankingScreenState extends State<RankingScreen>
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ────────────────────────────────────────────────────
+            
             Container(
               color: colorScheme.surface,
               child: TabBar(
@@ -101,10 +101,10 @@ class _RankingScreenState extends State<RankingScreen>
               ),
             ),
 
-            // ── Delay notice ──────────────────────────────────────────────
+            
             Container(
               width: double.infinity,
-              color: colorScheme.surfaceVariant.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
               child: Text(
                 l10n.translate('ranking_update_delay'),
@@ -115,7 +115,7 @@ class _RankingScreenState extends State<RankingScreen>
               ),
             ),
 
-            // ── Body ──────────────────────────────────────────────────────
+            
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -129,7 +129,7 @@ class _RankingScreenState extends State<RankingScreen>
   }
 }
 
-// ── Per-tab leaderboard widget ───────────────────────────────────────────────
+
 
 class _LeaderboardTab extends StatelessWidget {
   final _TabInfo tabInfo;
@@ -141,7 +141,7 @@ class _LeaderboardTab extends StatelessWidget {
       builder: (context, provider, child) {
         debugPrint('[_LeaderboardTab] build type=${tabInfo.type} loading=${provider.isLoading}');
 
-        // Show skeleton while loading
+        
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -197,7 +197,7 @@ class _LeaderboardTab extends StatelessWidget {
                         ),
                       ),
               ),
-              // ── Pinned "my rank" row at bottom ───────────────────────
+              
               _MyRankRow(myRank: myRank, unit: tabInfo.unit),
             ],
           ),
@@ -207,7 +207,7 @@ class _LeaderboardTab extends StatelessWidget {
   }
 }
 
-// ── Leaderboard row ──────────────────────────────────────────────────────────
+
 
 class _RankRow extends StatelessWidget {
   final LeaderboardEntry entry;
@@ -280,7 +280,7 @@ class _RankRow extends StatelessWidget {
   }
 }
 
-// ── My rank pinned bottom row ────────────────────────────────────────────────
+
 
 class _MyRankRow extends StatelessWidget {
   final MyRankInfo? myRank;
@@ -333,7 +333,7 @@ class _MyRankRow extends StatelessWidget {
   }
 }
 
-// ── Sub-widgets ──────────────────────────────────────────────────────────────
+
 
 class _RankBadge extends StatelessWidget {
   final int rank;
@@ -413,7 +413,7 @@ class _ProBadge extends StatelessWidget {
   }
 }
 
-// ── Tab metadata ─────────────────────────────────────────────────────────────
+
 
 class _TabInfo {
   final LeaderboardType type;

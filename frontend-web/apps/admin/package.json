@@ -20,6 +20,8 @@
         "react-dom": "^18.2.0",
         "react-quill": "^2.0.0",
         "react-router-dom": "^7.13.1",
+        "sockjs-client": "^1.6.1",
+        "stompjs": "^2.3.3",
         "tailwind-merge": "^3.5.0",
         "zustand": "^5.0.11"
     },
@@ -27,6 +29,8 @@
         "@english-learning/config-tailwind": "*",
         "@types/react": "^18.2.0",
         "@types/react-dom": "^18.2.0",
+        "@types/sockjs-client": "^1.5.4",
+        "@types/stompjs": "^2.3.10",
         "@vitejs/plugin-react": "^4.2.1",
         "autoprefixer": "^10.4.17",
         "postcss": "^8.4.35",

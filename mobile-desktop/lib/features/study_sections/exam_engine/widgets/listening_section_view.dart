@@ -38,7 +38,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
     });
     _audioPlayer.onPlayerComplete.listen((_) {
       if (_currentGroupId != null) {
-        // Mark audio as played — cannot play again
+        
         final provider = Provider.of<ExamProvider>(context, listen: false);
         provider.markAudioPlayed(_currentGroupId!);
         print('[ListeningSectionView] Audio complete for group $_currentGroupId — locked');
@@ -78,14 +78,14 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
         final state = provider.state;
         if (state == null) return const SizedBox.shrink();
 
-        // Flatten ALL listening questions in order (preserving group membership)
+        
         final List<_QuestionWithGroup> flatQuestions = [];
-        for (var group in (state.exam.groups ?? []).where((g) => g.skill == SkillType.LISTENING)) {
+        for (var group in (state.exam.groups ?? []).where((g) => g.skill == SkillType.listening)) {
           for (var q in group.questions) {
             flatQuestions.add(_QuestionWithGroup(q, group));
           }
         }
-        for (var q in (state.exam.questions ?? []).where((q) => q.skill == SkillType.LISTENING)) {
+        for (var q in (state.exam.questions ?? []).where((q) => q.skill == SkillType.listening)) {
           flatQuestions.add(_QuestionWithGroup(q, null));
         }
 
@@ -93,7 +93,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
           return const Center(child: Text('No listening questions.', style: TextStyle(color: Colors.white70)));
         }
 
-        // Sync PageController to provider index
+        
         final targetIndex = state.currentQuestionIndex.clamp(0, flatQuestions.length - 1);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_pageController.hasClients && _pageController.page?.round() != targetIndex) {
@@ -109,7 +109,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
 
         return Column(
           children: [
-            // ─── Persistent Audio Player ────────────────────────────────────
+            
             if (group != null && group.mediaUrl != null)
               _AudioPlayerBar(
                 group: group,
@@ -122,7 +122,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
                 formatTime: _fmt,
               ),
 
-            // ─── Header + Action Bar ────────────────────────────────────────
+            
             ExamSectionHeader(
               title: group?.title ?? 'Listening',
               current: targetIndex,
@@ -136,7 +136,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
               ),
             ),
 
-            // ─── Swipeable Single-Question Page ────────────────────────────
+            
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -158,7 +158,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
               ),
             ),
 
-            // ─── Prev / Next Navigation Controls ───────────────────────────
+            
             ExamPageNavBar(
               currentIndex: targetIndex,
               total: flatQuestions.length,
@@ -178,7 +178,7 @@ class _QuestionWithGroup {
   _QuestionWithGroup(this.question, this.group);
 }
 
-// ─── Widgets ────────────────────────────────────────────────────────────────
+
 
 class _AudioPlayerBar extends StatelessWidget {
   final QuestionGroup group;
@@ -328,7 +328,7 @@ class _SectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          // Flag button
+          
           GestureDetector(
             onTap: onFlag,
             child: AnimatedContainer(
@@ -351,7 +351,7 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Question map button
+          
           GestureDetector(
             onTap: onMap,
             child: Container(

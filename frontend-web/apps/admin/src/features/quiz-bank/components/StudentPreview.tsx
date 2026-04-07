@@ -104,7 +104,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
     const answers = (userAnswer as Record<string, string>) || {};
     const [focusedBlank, setFocusedBlank] = useState<string | null>(Object.keys(data.blanks)[0] || null);
 
-    // Combine all correct answers (first one) and distractors for the pool
+    
     const correctPool = Object.values(data.blanks).map(b => b.correct[0]);
     const distractorPool = data.answer_pool || [];
     const fullPool = Array.from(new Set([...correctPool, ...distractorPool])).sort(() => Math.random() - 0.5);
@@ -113,7 +113,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
       if (showFeedback || !focusedBlank) return;
       setUserAnswer({ ...answers, [focusedBlank]: word });
       
-      // Auto-focus next empty blank
+      
       const blankKeys = Object.keys(data.blanks);
       const nextEmpty = blankKeys.find(k => !answers[k] && k !== focusedBlank);
       if (nextEmpty) setFocusedBlank(nextEmpty);
@@ -124,7 +124,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
 
     return (
       <div className="space-y-8">
-        {/* Sentence Area */}
+        {}
         <div className="p-8 bg-white border border-gray-100 rounded-2xl leading-[3] text-xl text-gray-800 shadow-sm">
           {parts.map((part, i) => {
             if (part.startsWith('[blank')) {
@@ -162,7 +162,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
           })}
         </div>
 
-        {/* Word Bank Area */}
+        {}
         <div className="bg-gray-100/50 p-6 rounded-2xl border border-dashed border-gray-200">
            <div className="flex items-center justify-between mb-4">
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -417,7 +417,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
           </div>
         </div>
 
-        {/* Media simulation */}
+        {}
         {question.mediaUrls && question.mediaUrls.length > 0 && (
           <div className="flex flex-wrap gap-4 py-4 border-y border-gray-100">
              {question.mediaUrls
@@ -504,7 +504,7 @@ export const StudentPreview: React.FC<StudentPreviewProps> = ({ question }) => {
          </p>
       </div>
 
-      {/* Full Size Image Preview Modal */}
+      {}
       {previewImageUrl && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"

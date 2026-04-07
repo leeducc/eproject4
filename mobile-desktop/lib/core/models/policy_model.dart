@@ -28,14 +28,14 @@ class PolicyModel {
       if (date == null) return DateTime.now();
       if (date is String) return DateTime.parse(date);
       if (date is List && date.length >= 3) {
-        // Handle Jackson LocalDateTime array format: [year, month, day, hour, minute, second, nano]
+        
         return DateTime(
-          date[0], // year
-          date[1], // month
-          date[2], // day
-          date.length > 3 ? date[3] : 0, // hour
-          date.length > 4 ? date[4] : 0, // minute
-          date.length > 5 ? date[5] : 0, // second
+          date[0], 
+          date[1], 
+          date[2], 
+          date.length > 3 ? date[3] : 0, 
+          date.length > 4 ? date[4] : 0, 
+          date.length > 5 ? date[5] : 0, 
         );
       }
       return DateTime.now();

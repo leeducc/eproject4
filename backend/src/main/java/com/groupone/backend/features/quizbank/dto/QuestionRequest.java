@@ -20,10 +20,10 @@ public class QuestionRequest {
     @NotNull
     private DifficultyBand difficultyBand;
 
-    // The question text / prompt
+    
     private String instruction;
     
-    // Optional explanation for the answer
+    
     private String explanation;
 
     private Map<String, Object> data;
@@ -42,5 +42,5 @@ public class QuestionRequest {
 
     private Long authorId;
 
-    private List<String> tags; // List of tags in format "namespace:name" or just "name"
+    private List<String> tags; 
 }

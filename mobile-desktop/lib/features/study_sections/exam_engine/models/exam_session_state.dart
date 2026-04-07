@@ -8,19 +8,19 @@ class ExamSessionState {
   final ExamSection currentSection;
   final int remainingSeconds;
 
-  /// Maps question ID → user's answer (String, List<String>, or Map)
+  
   final Map<int, dynamic> userAnswers;
 
-  /// Set of question IDs the user has flagged for review
+  
   final Set<int> flaggedQuestions;
 
-  /// Set of group IDs whose audio has already been played (play-once rule)
+  
   final Set<int> audioPlayedGroups;
 
-  /// Current question index within the current section (0-based)
+  
   final int currentQuestionIndex;
 
-  // Timer totals from pre-flight screen
+  
   final int listeningTotalSecs;
   final int readingTotalSecs;
   final int writingTotalSecs;
@@ -79,7 +79,7 @@ class ExamSessionState {
     }
 
     for (var q in (exam.questions ?? <Question>[])) {
-      if (q.skill == skill && q.type != QuestionType.ESSAY) {
+      if (q.skill == skill && q.type != QuestionType.essay) {
         totalCount++;
         correctCount += _isCorrect(q.id, q.data) ? 1 : 0;
       }

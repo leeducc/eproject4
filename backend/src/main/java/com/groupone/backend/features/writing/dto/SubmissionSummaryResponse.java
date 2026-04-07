@@ -96,7 +96,7 @@ public class SubmissionSummaryResponse {
                 .grammaticalRangeReason(submission.getGrammaticalRangeReason())
                 .build();
 
-        // Attempt to parse corrections JSON if present
+        
         List<CorrectionDto> correctionsList = new ArrayList<>();
         if (submission.getCorrectionsJson() != null && !submission.getCorrectionsJson().isEmpty()) {
             try {

@@ -16,13 +16,13 @@ public class AppScreenSection {
     private Long id;
 
     @Column(nullable = false)
-    private String skill; // listening or reading
+    private String skill; 
 
     @Column(nullable = false)
     private String sectionName;
 
     @Column(nullable = false)
-    private String difficultyBand; // "0-4", "4.5-5.0", etc
+    private String difficultyBand; 
 
     @Column(nullable = false)
     private Integer displayOrder;

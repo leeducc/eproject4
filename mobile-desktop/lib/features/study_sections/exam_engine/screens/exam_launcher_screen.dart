@@ -15,7 +15,7 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
   bool _isQuickMode = false;
 
   void _startExam(BuildContext context) {
-    // Default config: 40m, 60m, 60m  |  Quick config: 5m, 10m, 10m
+    
     final listenSecs = _isQuickMode ? 5 * 60 : 40 * 60;
     final readSecs = _isQuickMode ? 10 * 60 : 60 * 60;
     final writeSecs = _isQuickMode ? 10 * 60 : 60 * 60;
@@ -41,7 +41,7 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
     int readingQs = 0;
     int writingTasks = 0;
     
-    // Calculate counts
+    
     widget.exam.groups?.forEach((g) {
       if (g.skill.name == 'LISTENING') listeningQs += g.questions.length;
       if (g.skill.name == 'READING') readingQs += g.questions.length;
@@ -54,7 +54,7 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23), // Dark background matching existing app style
+      backgroundColor: const Color(0xFF161A23), 
       appBar: AppBar(
         title: const Text('Exam Preparation', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,

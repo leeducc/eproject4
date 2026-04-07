@@ -17,7 +17,7 @@ import java.util.UUID;
 @Service
 public class MediaService {
 
-    // Inject from application.properties, default to the Windows local path
+    
     @Value("${media.upload.dir:d:/project/eproject4/backend/uploads}")
     private String uploadDir;
 
@@ -35,18 +35,18 @@ public class MediaService {
 
         String storedFilename = UUID.randomUUID().toString() + extension;
 
-        // Determine sub-directory based on file type and context
+        
         String subDir = getSubDir(extension, context);
         Path targetLocation = Paths.get(uploadDir, subDir).toAbsolutePath().normalize();
 
         Files.createDirectories(targetLocation);
         Path targetFile = targetLocation.resolve(storedFilename);
 
-        // Copy file to the disk
+        
         Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
 
-        // Calculate the URL path that Nginx will use to serve it
-        // e.g. /media/videos/abc.mp4
+        
+        
         String servedUrl = "/media/" + subDir + "/" + storedFilename;
 
         MediaFile mediaFile = MediaFile.builder()
@@ -70,6 +70,9 @@ public class MediaService {
             throw new IllegalArgumentException("MP4 file size exceeds 100MB limit.");
         } else if (extension.equalsIgnoreCase(".mp3") && sizeMb > 20) {
             throw new IllegalArgumentException("MP3 file size exceeds 20MB limit.");
+        } else if ((extension.matches("(?i)\\.(jpg|jpeg|png|gif|webp|pdf)")) && sizeMb <= 10) {
+            
+            return;
         } else if (!extension.equalsIgnoreCase(".mp4") && !extension.equalsIgnoreCase(".mp3") && sizeMb > 5) {
             throw new IllegalArgumentException("File size exceeds 5MB limit for this type.");
         }
@@ -81,8 +84,11 @@ public class MediaService {
         if (extension.matches("(?i)\\.(mp3|wav|ogg)"))
             return "audio";
         if (extension.matches("(?i)\\.(jpg|jpeg|png|gif|webp)")) {
-            // If context is provided and valid, use it; otherwise default to "answers"
-            if (StringUtils.hasText(context) && (context.equalsIgnoreCase("questions") || context.equalsIgnoreCase("answers"))) {
+            
+            if (StringUtils.hasText(context) && (
+                    context.equalsIgnoreCase("questions") || 
+                    context.equalsIgnoreCase("answers") ||
+                    context.equalsIgnoreCase("avatars"))) {
                 return context.toLowerCase();
             }
             return "answers";

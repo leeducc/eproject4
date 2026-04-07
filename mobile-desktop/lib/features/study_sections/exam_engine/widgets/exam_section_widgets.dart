@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Reusable header bar shown above each section's question list.
-/// Shows group title, current question number, flag toggle, and question map button.
+
+
 class ExamSectionHeader extends StatelessWidget {
   final String title;
   final int current;
@@ -43,7 +43,7 @@ class ExamSectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          // Flag button
+          
           GestureDetector(
             onTap: onFlag,
             child: AnimatedContainer(
@@ -71,7 +71,7 @@ class ExamSectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Question map button
+          
           GestureDetector(
             onTap: onMap,
             child: Container(
@@ -94,7 +94,7 @@ class ExamSectionHeader extends StatelessWidget {
   }
 }
 
-/// Reusable Previous / Next navigation bar at the bottom of each section view.
+
 class ExamPageNavBar extends StatelessWidget {
   final int currentIndex;
   final int total;

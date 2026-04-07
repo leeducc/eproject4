@@ -39,16 +39,16 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                 if (q) setQuestion(q);
                 else {
                     toast.error("Question not found");
-                    navigate(`${basePath}/questions/vocabulary`); // Fallback
+                    navigate(`${basePath}/questions/vocabulary`); 
                 }
             });
 
-            // Fetch history
+            
             fetchQuestionHistory(questionId).then(h => {
                 setHistories(h);
             });
 
-            // Fetch all tags for suggestions
+            
             fetchTags().then(tags => setAllTags(tags));
         }
     }, [id, fetchQuestionById, fetchQuestionHistory, fetchTags, navigate]);
@@ -230,7 +230,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
             }
             case 'FILL_BLANK': {
                 const data = question.data as FillBlankData;
-                // Simple highlighter for blanks in template
+                
                 const highlightedTemplate = data.template.replace(/\[blank(\d+)\]/g, (match) => {
                     const blank = data.blanks[match];
                     return `<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800 font-medium" title="Correct: ${blank?.correct.join(', ')}">${blank?.correct[0] || '___'}</span>`;
@@ -290,7 +290,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
     return (
         <Layout>
             <div className="max-w-5xl mx-auto py-8 px-4">
-                {/* Header / Breadcrumbs */}
+                {}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <button 
@@ -324,16 +324,16 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                     <StudentPreview question={question} />
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Main Content */}
+                        {}
                         <div className="lg:col-span-2 space-y-8">
-                            {/* Instruction Section */}
+                            {}
                             <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-colors">
                                 <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mb-4">Prompt / Instruction</h2>
                                 <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-slate-200 text-lg">
                                     {question.instruction || "No instruction provided."}
                                 </div>
 
-                                 {/* Media Display */}
+                                 {}
                                 {question.mediaUrls && question.mediaUrls.length > 0 && (
                                     <div className="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
                                         <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mb-4">Attachments</h2>
@@ -392,13 +392,13 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                                 )}
                             </section>
 
-                            {/* Interactive Content Section */}
+                            {}
                             <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-colors">
                                 <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mb-6">Structured Content</h2>
                                 {renderData()}
                             </section>
 
-                            {/* Explanation Section */}
+                            {}
                             {question.explanation && (
                                 <section className="bg-blue-50/50 dark:bg-blue-900/10 p-8 rounded-2xl border border-blue-100 dark:border-blue-800/50 transition-colors">
                                     <h2 className="text-xs uppercase tracking-widest font-bold text-blue-400 dark:text-blue-500 mb-4">Explanation</h2>
@@ -409,7 +409,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                             )}
                         </div>
 
-                        {/* Sidebar / Meta Info */}
+                        {}
                         <div className="space-y-6">
                             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-colors">
                                 <h3 className="text-sm font-bold text-gray-800 dark:text-slate-200 mb-4 border-b dark:border-slate-800 pb-2">Properties</h3>
@@ -433,7 +433,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                                         </span>
                                     </div>
 
-                                    {/* Tag Section */}
+                                    {}
                                     <div className="pt-2 border-t dark:border-slate-800">
                                         <div className="flex items-center justify-between mb-2">
                                             <label className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
@@ -519,7 +519,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                                  </p>
                             </div>
 
-                            {/* History Section */}
+                            {}
                             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
                                 <div className="flex items-center justify-between mb-4 border-b dark:border-slate-800 pb-2">
                                     <h3 className="text-sm font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2">
@@ -584,7 +584,7 @@ export const QuestionDetailView: React.FC<QuestionDetailViewProps> = ({
                 questionId={question.id}
             />
 
-            {/* Full Size Image Preview Modal */}
+            {}
             {previewImageUrl && (
                 <div 
                     className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"

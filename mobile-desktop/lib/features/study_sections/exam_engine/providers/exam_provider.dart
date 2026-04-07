@@ -10,7 +10,7 @@ class ExamProvider extends ChangeNotifier {
   ExamSessionState? _state;
   ExamSessionState? get state => _state;
 
-  /// Set when submitExam completes — ExamTestScreen watches this to navigate.
+  
   ExamResult? _submittedResult;
   ExamResult? get submittedResult => _submittedResult;
 
@@ -20,7 +20,7 @@ class ExamProvider extends ChangeNotifier {
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
 
-  // ─── Start Exam ────────────────────────────────────────────────────────────
+  
 
   void startExam({
     required ExamModel exam,
@@ -45,7 +45,7 @@ class ExamProvider extends ChangeNotifier {
     _startTimer();
   }
 
-  // ─── Timer ─────────────────────────────────────────────────────────────────
+  
 
   void _startTimer() {
     _timer?.cancel();
@@ -69,7 +69,7 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Answer Recording ──────────────────────────────────────────────────────
+  
 
   void recordAnswer(int questionId, dynamic answer) {
     if (_state == null) return;
@@ -79,7 +79,7 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Flagging ──────────────────────────────────────────────────────────────
+  
 
   void toggleFlag(int questionId) {
     if (_state == null) return;
@@ -97,7 +97,7 @@ class ExamProvider extends ChangeNotifier {
 
   bool isFlagged(int questionId) => _state?.flaggedQuestions.contains(questionId) ?? false;
 
-  // ─── Audio Play-Once Rule ──────────────────────────────────────────────────
+  
 
   void markAudioPlayed(int groupId) {
     if (_state == null) return;
@@ -110,7 +110,7 @@ class ExamProvider extends ChangeNotifier {
 
   bool isAudioPlayed(int groupId) => _state?.audioPlayedGroups.contains(groupId) ?? false;
 
-  // ─── Question Navigation ───────────────────────────────────────────────────
+  
 
   void jumpToQuestion(int index) {
     if (_state == null) return;
@@ -133,7 +133,7 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Section Transition ────────────────────────────────────────────────────
+  
 
   void nextSection() {
     if (_state == null) return;
@@ -158,7 +158,7 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Submission ────────────────────────────────────────────────────────────
+  
 
   Future<ExamResult?> submitExam({
     required String gradingType,
@@ -171,11 +171,11 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      double listeningScore = _state!.calculateScore(SkillType.LISTENING);
-      double readingScore = _state!.calculateScore(SkillType.READING);
+      double listeningScore = _state!.calculateScore(SkillType.listening);
+      double readingScore = _state!.calculateScore(SkillType.reading);
 
-      // For AI grading: use a simple placeholder score (0 = no essay written yet)
-      // In a real app, the backend would call an AI grading API
+      
+      
       double? writingScore = gradingType == 'AI' ? 0.0 : null;
       String writingStatus = gradingType == 'AI' ? 'AI_GRADED' : 'PENDING';
       int? writingSubmissionId = gradingType == 'HUMAN' ? 123 : null;
@@ -200,7 +200,7 @@ class ExamProvider extends ChangeNotifier {
 
       print('[ExamProvider] Exam submitted. L=${listeningScore.toStringAsFixed(1)} R=${readingScore.toStringAsFixed(1)} W=$writingStatus');
       _isSubmitting = false;
-      _submittedResult = result; // ExamTestScreen will detect this and navigate
+      _submittedResult = result; 
       notifyListeners();
       return result;
     } catch (e) {
@@ -211,7 +211,7 @@ class ExamProvider extends ChangeNotifier {
     }
   }
 
-  // ─── Clear Session (call AFTER navigation is complete) ───────────────────
+  
 
   void clearSession() {
     print('[ExamProvider] Clearing session state');
@@ -220,7 +220,7 @@ class ExamProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Give Up ───────────────────────────────────────────────────────────────
+  
 
   void giveUp() {
     print('[ExamProvider] User gave up');

@@ -27,7 +27,7 @@ export default function ICoinManagement() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // ── Admin form state ───────────────────────────────────────────────────────
+    
     const [userId, setUserId] = useState("");
     const [amount, setAmount] = useState("");
     const [action, setAction] = useState("ADD");
@@ -73,7 +73,7 @@ export default function ICoinManagement() {
             console.log("[iCoin] Submit response:", res.status);
             setMessage({ type: "success", text: `${action} of ${amount} iCoins applied to user #${userId}.` });
             setUserId(""); setAmount("");
-            fetchTransactions(); // refresh the list
+            fetchTransactions(); 
         } catch (err: any) {
             console.error("[iCoin] Submit error:", err);
             const errText = err.response?.data?.message || err.message || String(err);
@@ -89,7 +89,7 @@ export default function ICoinManagement() {
     return (
         <AdminLayout>
             <div className="space-y-6">
-                {/* ── Adjust Balance Form ─────────────────────────────────────── */}
+                {}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
                     <h3 className="font-semibold text-gray-800 dark:text-slate-100 text-xl mb-5">Adjust User iCoin Balance</h3>
 
@@ -126,7 +126,7 @@ export default function ICoinManagement() {
                     </div>
                 </div>
 
-                {/* ── Transaction History ─────────────────────────────────────── */}
+                {}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
                     <div className="flex justify-between items-center mb-5">
                         <h3 className="font-semibold text-gray-800 dark:text-slate-100 text-xl">iCoin Transaction History</h3>

@@ -21,7 +21,7 @@ public class DataSeeder implements CommandLineRunner {
 
         @Override
         public void run(String... args) throws Exception {
-                // Seed Admin
+                
                 if (userRepository.findByEmail("admin@englishhub.com").isEmpty()) {
                         User admin = User.builder()
                                         .email("admin@englishhub.com")
@@ -39,7 +39,7 @@ public class DataSeeder implements CommandLineRunner {
                         profileRepository.save(profile);
                 }
 
-                // Seed Teacher
+                
                 if (userRepository.findByEmail("teacher@englishhub.com").isEmpty()) {
                         User teacher = User.builder()
                                         .email("teacher@englishhub.com")
@@ -59,12 +59,12 @@ public class DataSeeder implements CommandLineRunner {
                         System.out.println("Sample teacher created: teacher@englishhub.com / Teacher@123");
                 }
 
-                // Seed Student
+                
                 if (userRepository.findByEmail("student@englishhub.com").isEmpty()) {
                         User student = User.builder()
                                         .email("student@englishhub.com")
                                         .passwordHash(passwordEncoder.encode("Student@123"))
-                                        .role(UserRole.CUSTOMER)
+                                        .role(UserRole.STUDENT)
                                         .status(UserStatus.ACTIVE)
                                         .isEmailConfirmed(true)
                                         .build();

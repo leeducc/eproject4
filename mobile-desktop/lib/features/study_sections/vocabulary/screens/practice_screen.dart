@@ -72,17 +72,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   Future<void> speakNormal(String text) async {
     await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.5); // tốc độ bình thường
+    await tts.setSpeechRate(0.5); 
     await tts.speak(text);
   }
 
   Future<void> speakSlow(String text) async {
     await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.1); // đọc chậm
+    await tts.setSpeechRate(0.1); 
     await tts.speak(text);
   }
 
-  /// ✔ tăng lên 20 câu
+  
   int totalQuestion = 20;
 
   int questionType = 0;
@@ -191,12 +191,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void handleSwipe(DragEndDetails details) {
     if (details.primaryVelocity == null) return;
 
-    // vuốt sang trái -> câu tiếp
+    
     if (details.primaryVelocity! < 0) {
       nextQuestion();
     }
 
-    // vuốt sang phải -> câu trước
+    
     if (details.primaryVelocity! > 0) {
       if (questionIndex > 0) {
         questionIndex--;
@@ -297,7 +297,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     );
   }
 
-  /// ✔ progress giống VocabularyDetailScreen
+  
   Widget progressBar() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -466,7 +466,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
 
-        /// ❌ nút đóng
+        
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -474,7 +474,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
           },
         ),
 
-        /// ⭐ favorite
+        
         actions: [
           IconButton(
             icon: Icon(
@@ -504,7 +504,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
               const SizedBox(height: 30),
 
-              /// TYPE 0 — Chọn nghĩa của từ
+              
               if (questionType == 0) ...[
                 const Text(
                   "Choose meaning",
@@ -530,7 +530,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 }),
               ],
 
-              /// TYPE 1 — Nghe chọn nghĩa
+              
               if (questionType == 1) ...[
                 const Text(
                   "Listen and choose meaning",
@@ -542,7 +542,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    /// loa thường
+                    
                     IconButton(
                       iconSize: 70,
                       icon: const Icon(Icons.volume_up, color: Colors.blue),
@@ -553,7 +553,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                     const SizedBox(width: 20),
 
-                    /// loa đọc chậm
+                    
                     IconButton(
                       iconSize: 40,
                       icon: const Icon(
@@ -575,7 +575,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 }),
               ],
 
-              /// TYPE 2 — Nghe điền từ
+              
               if (questionType == 2) ...[
                 const Text(
                   "Listen and fill the blank",
@@ -587,7 +587,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    /// loa thường
+                    
                     IconButton(
                       iconSize: 70,
                       icon: const Icon(Icons.volume_up, color: Colors.blue),
@@ -598,7 +598,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                     const SizedBox(width: 20),
 
-                    /// loa đọc chậm
+                    
                     IconButton(
                       iconSize: 40,
                       icon: const Icon(
@@ -627,7 +627,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 }),
               ],
 
-              /// TYPE 3 — Ghép cặp từ
+              
               if (questionType == 3) ...[
                 const Text(
                   "Match word with meaning",
@@ -639,7 +639,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      /// CỘT WORD
+                      
                       Expanded(
                         child: ListView.builder(
                           itemCount: leftList.length,
@@ -664,12 +664,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                                       selectedPairs.remove(index);
 
-                                      /// swap
+                                      
                                       var temp = rightList[index];
                                       rightList[index] = rightList[rightIndex];
                                       rightList[rightIndex] = temp;
 
-                                      /// pair mới
+                                      
                                       selectedPairs[index] = index;
 
                                       selectedRight = null;
@@ -691,7 +691,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
                       const SizedBox(width: 12),
 
-                      /// CỘT MEANING
+                      
                       Expanded(
                         child: ListView.builder(
                           itemCount: rightList.length,
@@ -713,15 +713,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
                                     if (selectedLeft != null) {
                                       int leftIndex = selectedLeft!;
 
-                                      /// nếu vị trí này đã có pair thì xóa
+                                      
                                       selectedPairs.remove(leftIndex);
 
-                                      /// swap để thẳng hàng
+                                      
                                       var temp = rightList[leftIndex];
                                       rightList[leftIndex] = rightList[index];
                                       rightList[index] = temp;
 
-                                      /// cập nhật lại pair đúng index
+                                      
                                       selectedPairs[leftIndex] = leftIndex;
 
                                       selectedLeft = null;

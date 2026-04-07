@@ -46,7 +46,7 @@ public class VocabularyTestController {
         if (principal instanceof User) {
             return ((User) principal).getId();
         }
-        // Fallback or throw exception
+        
         throw new RuntimeException("User not authenticated");
     }
 }

@@ -17,7 +17,7 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   int _currentIndex = 0;
 
-  // ── 120-second heartbeat for time tracking ────────────────────────────────
+  
   static const int _heartbeatSeconds = 120;
   Timer? _heartbeatTimer;
 
@@ -26,7 +26,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     super.initState();
     debugPrint('[MainLayout] initState — registering WidgetsBindingObserver');
     WidgetsBinding.instance.addObserver(this);
-    _startHeartbeat(); // Start immediately when user enters MainLayout
+    _startHeartbeat(); 
   }
 
   @override

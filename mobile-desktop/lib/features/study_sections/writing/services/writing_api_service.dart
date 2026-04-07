@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/topic_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,9 +16,9 @@ class WritingApiService {
       final token = prefs.getString('auth_token');
       
       if (token == null) {
-        print('No auth token found for fetchTopics');
+        debugPrint('No auth token found for fetchTopics');
       } else {
-        print('Found auth token for fetchTopics');
+        debugPrint('Found auth token for fetchTopics');
       }
 
       final response = await http.get(
@@ -30,14 +31,14 @@ class WritingApiService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
-        print('Successfully fetched topics, count: ${jsonList.length}');
+        debugPrint('Successfully fetched topics, count: ${jsonList.length}');
         return jsonList.map((json) => Topic.fromJson(json)).toList();
       } else {
-        print('Failed to load topics: ${response.statusCode} - ${response.body}');
+        debugPrint('Failed to load topics: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to load topics: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching topics: $e');
+      debugPrint('Error fetching topics: $e');
       throw Exception('Failed to load topics: $e');
     }
   }
@@ -47,7 +48,7 @@ class WritingApiService {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
       
-      print('Submitting essay for topicId: $topicId, gradingType: $gradingType');
+      debugPrint('Submitting essay for topicId: $topicId, gradingType: $gradingType');
 
       final response = await http.post(
         Uri.parse('$baseUrl/submit'),
@@ -58,19 +59,19 @@ class WritingApiService {
         body: jsonEncode({
           'topicId': topicId,
           'content': content,
-          'gradingType': gradingType, // "HUMAN" or "AI"
+          'gradingType': gradingType, 
         }),
       );
 
       if (response.statusCode == 200) {
-        print('Successfully submitted essay: ${response.body}');
+        debugPrint('Successfully submitted essay: ${response.body}');
         return EssaySubmissionResponse.fromJson(jsonDecode(response.body));
       } else {
-        print('Failed to submit essay: ${response.statusCode} - ${response.body}');
+        debugPrint('Failed to submit essay: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to submit essay: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error submitting essay: $e');
+      debugPrint('Error submitting essay: $e');
       throw Exception('Failed to submit essay: $e');
     }
   }
@@ -92,11 +93,11 @@ class WritingApiService {
         final List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((json) => EssaySubmissionResponse.fromJson(json)).toList();
       } else {
-        print('Failed to fetch submissions: ${response.statusCode} - ${response.body}');
+        debugPrint('Failed to fetch submissions: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to fetch submissions');
       }
     } catch (e) {
-      print('Error fetching submissions: $e');
+      debugPrint('Error fetching submissions: $e');
       throw Exception('Failed to fetch submissions: $e');
     }
   }

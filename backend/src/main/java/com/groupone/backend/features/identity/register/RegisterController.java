@@ -8,12 +8,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/api/auth/register")
 @RequiredArgsConstructor
 public class RegisterController {
 
     private final AuthService authService;
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        boolean available = authService.checkEmailAvailability(email);
+        return ResponseEntity.ok().body(Collections.singletonMap("available", available));
+    }
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest request) {

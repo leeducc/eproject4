@@ -16,7 +16,7 @@ export interface MatchingBuilderProps {
 export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READING', initialQuestion, onSave }) => {
   const { currentUser, createQuestion, updateQuestion, uploadMedia } = useQuizBankStore();
   
-  // Local state for the form
+  
   const [difficultyBand, setDifficultyBand] = useState<DifficultyBand>(initialQuestion?.difficultyBand || 'BAND_5_6');
   const [instruction, setInstruction] = useState(initialQuestion?.instruction || 'Match the following items.');
   const [explanation, setExplanation] = useState(initialQuestion?.explanation || '');
@@ -25,7 +25,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
   
   const existingData = initialQuestion?.data as MatchingData | undefined;
 
-  // Local state for item-specific images
+  
   const initialItemImagesObj: Record<string, File | string> = {};
   if (existingData) {
     existingData.left_items.forEach((item, idx) => { if (item.image) initialItemImagesObj[`left-${idx}`] = item.image; });
@@ -54,11 +54,13 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
   const isTeacher = currentUser.role === 'TEACHER';
 
   const handleAddPair = () => {
+    console.log('[MatchingBuilder] Adding new pair');
     setPairs([...pairs, { left: '', right: '' }]);
   };
 
   const handleRemovePair = (index: number) => {
     if (isTeacher) return;
+    console.log(`[MatchingBuilder] Removing pair at index ${index}`);
     const newPairs = pairs.filter((_, i) => i !== index);
     setPairs(newPairs);
     
@@ -88,10 +90,12 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
   };
 
   const handleItemImageChange = async (index: number, side: 'left' | 'right', file: File) => {
+    console.log('[MatchingBuilder] Item image changed', { index, side, fileName: file.name });
     try {
       const url = await uploadMedia(file, 'answers');
       setItemImages(prev => ({ ...prev, [`${side}-${index}`]: url }));
     } catch (err) {
+      console.error('[MatchingBuilder] Item image upload failed', err);
       toast.error("Failed to upload image");
     }
   };
@@ -163,15 +167,18 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
       explanation,
       data,
       isPremiumContent: isPremium,
-      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...itemMediaUrls]
+      retainedMediaUrls: [...retainedMedia.map(m => m.url), ...itemMediaUrls],
+      tags: initialQuestion?.tags || []
     };
     
     if (initialQuestion?.id) {
+       console.log('[MatchingBuilder] Updating question', { id: initialQuestion.id, payload });
        await updateQuestion(initialQuestion.id, payload);
     } else if (!initialQuestion) {
+       console.log('[MatchingBuilder] Creating new question', { payload });
        await createQuestion(payload);
     } else {
-       console.log('[MatchingBuilder] Draft saved locally');
+       console.log('[MatchingBuilder] Draft state updated');
     }
 
     if (onSave) onSave(payload);
@@ -181,13 +188,16 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
     if (!e.target.files?.length) return;
     const newFiles = Array.from(e.target.files);
     
+    console.log('[MatchingBuilder] Files selected', { count: newFiles.length });
     try {
       for (const file of newFiles) {
+        console.log('[MatchingBuilder] Uploading file', { name: file.name, type: file.type });
         const url = await uploadMedia(file, 'questions');
         setRetainedMedia(prev => [...prev, { url, type: file.type }]);
       }
       toast.success("Files uploaded successfully");
     } catch (err) {
+      console.error('[MatchingBuilder] Upload failed', err);
       toast.error("Failed to upload files");
     }
     e.target.value = ''; 
@@ -207,7 +217,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
 
   return (
     <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8 transition-colors">
-      {/* Header */}
+      
       <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
           className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
@@ -231,9 +241,9 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
         </div>
       </div>
 
-      {/* Main Content */}
+      
       <div className="p-6 space-y-6">
-        {/* Question Input */}
+        
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 w-max px-2 py-1 rounded transition-colors">
              <span className="bg-gray-800 dark:bg-slate-700 text-white rounded w-4 h-4 flex items-center justify-center text-[10px]">?</span>
@@ -256,11 +266,16 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="outline-none text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors"
+                  className="hidden"
+                  id="matching-question-media"
                 />
+                <label 
+                  htmlFor="matching-question-media"
+                  className="cursor-pointer bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium border dark:border-slate-700 transition-colors"
+                >
+                  Select Media
+                </label>
               </div>
-              
-              {/* Media Previews */}
               {retainedMedia.length > 0 && (
                 <div className="flex flex-wrap gap-4 mt-2">
                   {retainedMedia
@@ -293,7 +308,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
           </div>
         </div>
 
-        {/* Pairs List */}
+        
         <div className="space-y-3">
           <div className="flex items-center gap-4 mb-2 pl-8 text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
             <div className="flex-1">Column A (Item)</div>
@@ -310,7 +325,7 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                  {index + 1}
               </div>
               
-              {/* Left Item */}
+              
               <div className="flex-1 border dark:border-slate-800 rounded-lg p-2 bg-gray-50 dark:bg-slate-800/40 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all">
                 <div className="flex items-center gap-2">
                   <input 
@@ -347,16 +362,22 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                     ) : (
                       <label className="text-gray-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer p-1 transition-colors">
                         <ImageIcon size={18} />
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'left', e.target.files[0])} />
+                        <input 
+                          type="file" 
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleItemImageChange(index, 'left', file);
+                          }}
+                        />
                       </label>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="text-gray-300 dark:text-slate-700">→</div>
-
-              {/* Right Item */}
+              
               <div className="flex-1 border rounded-lg p-2 bg-blue-50/30 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all">
                 <div className="flex items-center gap-2">
                   <input 
@@ -393,28 +414,43 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
                     ) : (
                       <label className="text-gray-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer p-1 transition-colors">
                         <ImageIcon size={18} />
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleItemImageChange(index, 'right', e.target.files[0])} />
+                        <input 
+                          type="file" 
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleItemImageChange(index, 'right', file);
+                          }}
+                        />
                       </label>
                     )}
                   </div>
                 </div>
               </div>
 
-              {!isTeacher && pairs.length > 1 && (
-                <button onClick={() => handleRemovePair(index)} className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 size={16}/></button>
+              {!isTeacher && (
+                <button 
+                  onClick={() => handleRemovePair(index)}
+                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                  title="Remove pair"
+                >
+                  <Trash2 size={16} />
+                </button>
               )}
             </div>
           ))}
-          
-          <button 
-            onClick={handleAddPair}
-            className="flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-4 pl-8 transition-colors"
-          >
-            <Plus size={16} /> Add Matching Pair
-          </button>
+
+          {!isTeacher && (
+            <button 
+              onClick={handleAddPair}
+              className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 mt-2 pl-8 transition-colors"
+            >
+              <Plus size={16} /> Add Pair
+            </button>
+          )}
         </div>
 
-        {/* Explanation */}
         <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800 transition-colors">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation (Optional)</label>
           <textarea
@@ -440,7 +476,6 @@ export const MatchingBuilder: React.FC<MatchingBuilderProps> = ({ skill = 'READI
         variant="danger"
       />
 
-      {/* Full Size Image Preview Modal */}
       {previewImageUrl && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"

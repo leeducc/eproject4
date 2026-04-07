@@ -18,7 +18,7 @@ class RankingApiService {
         if (token != null) 'Authorization': 'Bearer $token',
       };
 
-  // ── Public: leaderboard (no auth needed) ────────────────────────────────
+  
 
   Future<List<LeaderboardEntry>> fetchLeaderboard(LeaderboardType type,
       {int page = 0, int size = 50}) async {
@@ -44,7 +44,7 @@ class RankingApiService {
     }
   }
 
-  // ── Authenticated: my rank ───────────────────────────────────────────────
+  
 
   Future<MyRankInfo?> fetchMyRank(LeaderboardType type) async {
     try {
@@ -69,7 +69,7 @@ class RankingApiService {
     }
   }
 
-  // ── Authenticated: record stats (fire-and-forget) ────────────────────────
+  
 
   Future<void> recordAnswers(int count) async {
     try {

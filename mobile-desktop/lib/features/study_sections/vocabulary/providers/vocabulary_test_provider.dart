@@ -56,7 +56,7 @@ class VocabularyTestProvider with ChangeNotifier {
     notifyListeners();
     await _apiService.submitResults(_answers);
 
-    // Record vocabulary correct answers to ranking system
+    
     debugPrint('[VocabularyTestProvider] finalizeTest — correctCount=$_correctCount');
     await _rankingApiService.recordVocab(_correctCount);
 

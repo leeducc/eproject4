@@ -38,12 +38,12 @@ public class DataSeederService {
             q.setType(type);
             q.setDifficultyBand(difficulties[random.nextInt(difficulties.length)]);
             
-            // Diverse content using Datafaker
+            
             String content = faker.university().name() + ": " + faker.educator().course();
             q.setInstruction(faker.book().title() + " - " + faker.lorem().sentence());
             q.setExplanation("According to " + faker.name().fullName() + ", this relates to " + faker.science().element() + ". " + faker.lorem().paragraph());
             
-            // Specialized data based on question type
+            
             if (type == QuestionType.MULTIPLE_CHOICE) {
                 q.setData(String.format("{\"options\": [\"%s\", \"%s\", \"%s\", \"%s\"], \"correctIndex\": %d}", 
                         faker.word().adjective(), faker.word().adjective(), faker.word().adjective(), faker.word().adjective(), random.nextInt(4)));

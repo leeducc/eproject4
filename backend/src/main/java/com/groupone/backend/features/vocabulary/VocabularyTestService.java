@@ -32,14 +32,14 @@ public class VocabularyTestService {
         
         List<Long> selectedVocabIds = new ArrayList<>();
         
-        // 1. Review Words (60%) - up to 6 words
+        
         List<UserWordProgress> dueForReview = progressRepository.findDueForReview(userId, LocalDateTime.now());
         Collections.shuffle(dueForReview);
         dueForReview.stream().limit(6).forEach(p -> selectedVocabIds.add(p.getVocabulary().getId()));
         
-        // 2. Weak Words (20%) - up to 2 words
+        
         int weakLimit = 2;
-        if (selectedVocabIds.size() < 6) weakLimit += (6 - selectedVocabIds.size()); // Fill gaps if review words are few
+        if (selectedVocabIds.size() < 6) weakLimit += (6 - selectedVocabIds.size()); 
         
         List<UserWordProgress> weakWords = progressRepository.findWeakWords(userId).stream()
                 .filter(p -> !selectedVocabIds.contains(p.getVocabulary().getId()))
@@ -47,7 +47,7 @@ public class VocabularyTestService {
         Collections.shuffle(weakWords);
         weakWords.stream().limit(weakLimit).forEach(p -> selectedVocabIds.add(p.getVocabulary().getId()));
         
-        // 3. New Words (20%) - Words viewed but not yet tested
+        
         int remainingSlots = 10 - selectedVocabIds.size();
         if (remainingSlots > 0) {
             List<UserWordProgress> viewedNotTested = progressRepository.findViewedButNotTested(userId);
@@ -55,14 +55,14 @@ public class VocabularyTestService {
             viewedNotTested.stream().limit(remainingSlots).forEach(p -> selectedVocabIds.add(p.getVocabulary().getId()));
         }
         
-        // 4. Fallback: If still not enough, pick truly new words
+        
         remainingSlots = 10 - selectedVocabIds.size();
         if (remainingSlots > 0) {
             List<Long> newWordIds = progressRepository.findNewWordIds(userId, remainingSlots);
             selectedVocabIds.addAll(newWordIds);
         }
 
-        // Fetch questions for each selected word
+        
         List<TestQuestionDTO> questions = selectedVocabIds.stream()
                 .map(id -> {
                     VocabularyEntity vocab = vocabularyRepository.findById(id).orElse(null);
@@ -70,7 +70,7 @@ public class VocabularyTestService {
                     
                     List<VocabularyPracticeAiContentEntity> practices = practiceRepository.findAllByWord(vocab.getWord());
                     
-                    // If no practice exists, generate it on the fly
+                    
                     if (practices.isEmpty()) {
                         log.info("No practice questions found for word: '{}'. Generating on the fly...", vocab.getWord());
                         try {
@@ -151,7 +151,7 @@ public class VocabularyTestService {
                 progress.setCorrectStreak(progress.getCorrectStreak() + 1);
                 progress.setProficiencyLevel(Math.min(5, progress.getProficiencyLevel() + 1));
                 
-                // Spaced Repetition: +1, +3, +7, +14, +30 days
+                
                 int daysToAdd = switch (progress.getCorrectStreak()) {
                     case 1 -> 1;
                     case 2 -> 3;
@@ -163,7 +163,7 @@ public class VocabularyTestService {
             } else {
                 progress.setCorrectStreak(0);
                 progress.setProficiencyLevel(Math.max(0, progress.getProficiencyLevel() - 1));
-                progress.setNextReviewDate(LocalDateTime.now().plusDays(1)); // Review tomorrow
+                progress.setNextReviewDate(LocalDateTime.now().plusDays(1)); 
             }
             
             progress.setLastReviewedAt(LocalDateTime.now());

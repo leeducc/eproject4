@@ -38,4 +38,28 @@ public class EmailService {
             throw new RuntimeException("Failed to send OTP email: " + e.getMessage());
         }
     }
+
+    public void sendTeacherAccountEmail(String toEmail, String fullName, String password) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("IELTS App - Teacher Account Created");
+            
+            String htmlContent = "<h2>Welcome to the IELTS App Teaching Team!</h2>"
+                               + "<p>Hello " + (fullName != null ? fullName : "Teacher") + ",</p>"
+                               + "<p>An administrator has created a teacher account for you.</p>"
+                               + "<p><strong>Login Email:</strong> " + toEmail + "</p>"
+                               + "<p><strong>Password:</strong> " + password + "</p>"
+                               + "<p>Please log in and change your password as soon as possible.</p>";
+                               
+            helper.setText(htmlContent, true); 
+            
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send teacher account email: " + e.getMessage());
+        }
+    }
 }

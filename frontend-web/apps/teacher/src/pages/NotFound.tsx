@@ -11,7 +11,7 @@ const NotFound = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 p-6 transition-colors duration-500">
-            {/* Background Gradient Orbs */}
+            {}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/10 blur-[120px] dark:bg-emerald-600/5" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-teal-400/10 blur-[120px] dark:bg-teal-600/5" />

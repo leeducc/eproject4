@@ -11,19 +11,20 @@ import {
 } from "../features/grading";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { InstantTutoringTeacher } from "../features/tutoring/InstantTutoringTeacher";
 
 export default function TeacherDashboard() {
     const queryClient = useQueryClient();
     const [activeSubmission, setActiveSubmission] = useState<EssaySubmission | null>(null);
 
-    // Get current user from localStorage
+    
     const userJson = localStorage.getItem("teacher_user");
     const currentUser = userJson ? JSON.parse(userJson) : null;
     const currentUserId = currentUser?.id?.toString() || "";
 
     console.log("[TeacherDashboard] currentUserId:", currentUserId);
 
-    // Fetch submissions
+    
     const { data: essays = [], isLoading } = useQuery<EssaySubmission[]>({
         queryKey: ["essays"],
         queryFn: async () => {
@@ -35,13 +36,13 @@ export default function TeacherDashboard() {
         },
     });
 
-    // Claim mutation
+    
     const claimMutation = useMutation<EssaySubmission, Error, string>({
         mutationFn: (id: string) => gradingService.claimSubmission(id),
         onSuccess: (updatedEssay: EssaySubmission) => {
             queryClient.invalidateQueries({ queryKey: ["essays"] });
             setActiveSubmission(updatedEssay);
-            // Don't show toast if it's just a re-claim
+            
             if (updatedEssay.status !== 'IN_PROGRESS') {
                 toast.success(`Claimed essay for ${updatedEssay.studentName}`);
             }
@@ -49,7 +50,7 @@ export default function TeacherDashboard() {
         onError: () => toast.error("Failed to claim essay."),
     });
 
-    // Unclaim mutation
+    
     const unclaimMutation = useMutation<EssaySubmission, Error, string>({
         mutationFn: (id: string) => gradingService.unclaimSubmission(id),
         onSuccess: () => {
@@ -59,7 +60,7 @@ export default function TeacherDashboard() {
         onError: () => toast.error("Failed to unlock essay."),
     });
 
-    // Submit mutation
+    
     const submitMutation = useMutation<EssaySubmission, Error, { id: string; scores: IELTSScores; feedback: string; corrections: Correction[] }>({
         mutationFn: (data) => 
             gradingService.submitGrade(data.id, data.scores, data.feedback, data.corrections),
@@ -112,12 +113,14 @@ export default function TeacherDashboard() {
                 />
             ) : (
                 <div className="space-y-6">
-                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Teacher Dashboard</h2>
-                        <p className="text-gray-500">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 shadow-sm transition-colors duration-300">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100 mb-2">Teacher Dashboard</h2>
+                        <p className="text-gray-500 dark:text-slate-400">
                             Welcome back. You have {essays.filter(e => e.status === EssayStatus.PENDING).length} essays waiting in the queue.
                         </p>
                     </div>
+
+                    <InstantTutoringTeacher teacherId={parseInt(currentUserId)} />
 
                     <GradingDashboardView 
                         essays={essays}

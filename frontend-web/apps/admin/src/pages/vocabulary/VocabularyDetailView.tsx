@@ -40,13 +40,13 @@ export const VocabularyDetailView: React.FC = () => {
   const [historyPracticeId, setHistoryPracticeId] = useState<number | null>(null);
   const [expandedPractices, setExpandedPractices] = useState<Set<number>>(new Set());
   
-  // States for practice editing
+  
   const [editPracticeId, setEditPracticeId] = useState<number | null>(null);
   const [editingPracticeContent, setEditingPracticeContent] = useState<any>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Load the core word item
+  
   useEffect(() => {
     const loadItem = async () => {
       if (items.length === 0) {
@@ -61,7 +61,7 @@ export const VocabularyDetailView: React.FC = () => {
     loadItem();
   }, [id, items, fetchVocabularyPaginated]);
 
-  // Load Initial Content (No Auto-Trigger)
+  
   useEffect(() => {
     if (!item) return;
 
@@ -90,7 +90,7 @@ export const VocabularyDetailView: React.FC = () => {
     try {
       await ensureAIContent(item.word, abortControllerRef.current.signal);
       
-      // Re-load if not aborted
+      
       if (!abortControllerRef.current.signal.aborted) {
         const [newDeta, newPracs] = await Promise.all([
           fetchWordDetails(item.word),
@@ -225,7 +225,7 @@ export const VocabularyDetailView: React.FC = () => {
         onCancel={handleCancelAI}
       />
       <div className="p-8 space-y-8 bg-[#0B0F1A] min-h-screen text-white">
-        {/* Header */}
+        {}
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/admin/questions/vocabulary')}
@@ -275,7 +275,7 @@ export const VocabularyDetailView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column - Core Info */}
+          {}
           <div className="lg:col-span-4 space-y-8">
             <section className="bg-[#1A2235]/40 border border-gray-800 rounded-3xl p-6 backdrop-blur-sm shadow-xl">
               <div className="flex items-center gap-2 mb-6 text-blue-400">
@@ -422,7 +422,7 @@ export const VocabularyDetailView: React.FC = () => {
             </section>
           </div>
 
-          {/* Right Column - Practice Questions */}
+          {}
           <div className="lg:col-span-8 flex flex-col h-full">
              <section className="bg-[#1A2235]/40 border border-gray-800 rounded-3xl p-6 backdrop-blur-sm shadow-xl flex-grow">
               <div className="flex items-center justify-between mb-8">

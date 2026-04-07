@@ -23,7 +23,7 @@ public class RankingController {
 
     private final UserStatsService statsService;
 
-    // ── Public endpoints (leaderboard visible without login) ─────────────────
+    
 
     @GetMapping("/leaderboard")
     public ResponseEntity<List<LeaderboardEntryDto>> getLeaderboard(
@@ -34,7 +34,7 @@ public class RankingController {
         return ResponseEntity.ok(statsService.getLeaderboard(type, page, size));
     }
 
-    // ── Authenticated endpoints ───────────────────────────────────────────────
+    
 
     @GetMapping("/my-rank")
     public ResponseEntity<MyRankResponse> getMyRank(
@@ -68,7 +68,7 @@ public class RankingController {
         return ResponseEntity.ok().build();
     }
 
-    // ── Helper ───────────────────────────────────────────────────────────────
+    
 
     private Long getCurrentUserId() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

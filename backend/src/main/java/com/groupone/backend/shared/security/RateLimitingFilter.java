@@ -16,17 +16,14 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Filter to implement rate limiting per IP address using Bucket4j.
- * Prevents bots and DDoS by limiting requests to 100 per minute.
- */
+
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     private Bucket createNewBucket() {
-        // limit of 100 requests per minute
+        
         Bandwidth limit = Bandwidth.classic(100, Refill.greedy(100, Duration.ofMinutes(1)));
         return Bucket.builder()
                 .addLimit(limit)
@@ -37,7 +34,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Get client IP address
+        
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();

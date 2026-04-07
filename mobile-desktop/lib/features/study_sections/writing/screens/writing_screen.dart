@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import '../models/topic_model.dart';
 import '../models/essay_submission_response.dart';
@@ -7,6 +8,7 @@ import '../services/writing_api_service.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/ielts_level_provider.dart';
 import '../../../home/screens/choose_level_screen.dart';
+import '../../../../core/theme/app_theme.dart';
 
 
 class WritingScreen extends StatefulWidget {
@@ -43,6 +45,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     });
     try {
       final allSubmissions = await _apiService.fetchMySubmissions();
+      if (!mounted) return;
       setState(() {
         _history = allSubmissions.where((s) => s.topic.id == widget.topic.id).toList();
         _isLoadingHistory = false;
@@ -51,7 +54,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       setState(() {
         _isLoadingHistory = false;
       });
-      print('Error fetching history: $e');
+      debugPrint('Error fetching history: $e');
     }
   }
 
@@ -73,9 +76,11 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
         _gradingType,
       );
 
+      if (!mounted) return;
       _contentController.clear();
       await _fetchHistory();
 
+      if (!mounted) return;
       setState(() {
         _isSubmitting = false;
       });
@@ -95,7 +100,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text(message), backgroundColor: context.customColors.errorColor),
     );
   }
 
@@ -104,16 +109,16 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E2330),
-          title: const Text('Thông báo', style: TextStyle(color: Colors.white)),
+          backgroundColor: context.colorScheme.surface,
+          title: Text('Thông báo', style: TextStyle(color: context.colorScheme.onSurface)),
           content: Text(
             message,
-            style: const TextStyle(color: Colors.white70),
+            style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.7)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Đóng', style: TextStyle(color: Colors.blueAccent)),
+              child: Text('Đóng', style: TextStyle(color: context.colorScheme.primary)),
             ),
           ],
         );
@@ -133,16 +138,16 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     final level = context.watch<IeltsLevelProvider>().selectedLevel;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23),
+      backgroundColor: context.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Luyện Viết IELTS · ${level.label}',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.colorScheme.onSurface, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: context.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -156,14 +161,14 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           children: [
             const SizedBox(height: 16),
             _buildPromptHeader(),
-            const Divider(color: Colors.white12, height: 32),
+            Divider(color: context.colorScheme.onSurface.withValues(alpha: 0.1), height: 32),
             
             if (_submissionResponse != null) 
               _buildDetailView()
             else 
               _buildWritingArea(),
               
-            const Divider(color: Colors.white12, height: 48),
+            Divider(color: context.colorScheme.onSurface.withValues(alpha: 0.1), height: 48),
             _buildHistorySection(),
             const SizedBox(height: 40),
           ],
@@ -178,12 +183,12 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       children: [
         Text(
           widget.topic.title,
-          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Text(
           widget.topic.prompt,
-          style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+          style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 15, height: 1.5),
         ),
         if (widget.topic.imageUrl != null && widget.topic.imageUrl!.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -202,17 +207,17 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       children: [
         _buildGraderToggle(),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Bài viết của bạn',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Container(
           constraints: const BoxConstraints(minHeight: 200),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E2330),
+            color: context.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: context.colorScheme.onSurface.withValues(alpha: 0.1)),
           ),
           child: _buildEssayInput(),
         ),
@@ -227,15 +232,15 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Lịch sử làm bài',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         if (_isLoadingHistory)
-          const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+          Center(child: CircularProgressIndicator(color: context.colorScheme.primary))
         else if (_history.isEmpty)
-          const Text('Bạn chưa có bài nộp nào cho chủ đề này.', style: TextStyle(color: Colors.white54))
+          Text('Bạn chưa có bài nộp nào cho chủ đề này.', style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.5)))
         else
           ListView.separated(
             shrinkWrap: true,
@@ -252,10 +257,10 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
                   });
                 },
                 child: Card(
-                  color: const Color(0xFF1E2330),
+                  color: context.colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: _submissionResponse?.id == item.id ? Colors.blueAccent : Colors.transparent),
+                    side: BorderSide(color: _submissionResponse?.id == item.id ? context.colorScheme.primary : Colors.transparent),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -264,12 +269,12 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isAI ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
+                            color: isAI ? context.customColors.aisurface : context.customColors.humansurface,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             isAI ? 'AI' : 'Giáo viên',
-                            style: TextStyle(color: isAI ? Colors.purpleAccent : Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: isAI ? context.customColors.aiColor : context.customColors.humanColor, fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -279,12 +284,12 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
                             children: [
                               Text(
                                 _formatDate(item.createdAt),
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: context.colorScheme.onSurface, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 item.status == 'GRADED' ? 'Đã chấm' : (item.status == 'IN_PROGRESS' ? 'Đang chấm' : 'Chờ chấm'),
-                                style: TextStyle(color: item.status == 'GRADED' ? Colors.greenAccent : Colors.orangeAccent, fontSize: 12),
+                                style: TextStyle(color: item.status == 'GRADED' ? context.customColors.successColor : context.customColors.warningColor, fontSize: 12),
                               ),
                             ],
                           ),
@@ -292,17 +297,17 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
                         if (item.score != null)
                           Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white10,
+                              color: context.colorScheme.onSurface.withValues(alpha: 0.05),
                             ),
                             child: Text(
                               '${item.score}',
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: context.colorScheme.onSurface, fontWeight: FontWeight.bold),
                             ),
                           )
                         else
-                          const Icon(Icons.chevron_right, color: Colors.white30),
+                          Icon(Icons.chevron_right, color: context.colorScheme.onSurface.withValues(alpha: 0.3)),
                       ],
                     ),
                   ),
@@ -331,9 +336,9 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Chi tiết bài làm',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(color: context.colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: () {
@@ -350,9 +355,9 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
         Container(
           constraints: const BoxConstraints(minHeight: 200),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E2330),
+            color: context.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: context.colorScheme.onSurface.withValues(alpha: 0.1)),
           ),
           child: _buildRichTextEssay(_submissionResponse!.content, _submissionResponse!.corrections),
         ),
@@ -385,9 +390,9 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           });
         },
         style: SegmentedButton.styleFrom(
-          selectedBackgroundColor: _gradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
-          selectedForegroundColor: _gradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
-          side: BorderSide(color: _gradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.5) : Colors.blueAccent.withOpacity(0.5)),
+          selectedBackgroundColor: _gradingType == 'AI' ? context.customColors.aisurface : context.customColors.humansurface,
+          selectedForegroundColor: _gradingType == 'AI' ? context.customColors.aiColor : context.customColors.humanColor,
+          side: BorderSide(color: _gradingType == 'AI' ? context.customColors.aiColor!.withValues(alpha: 0.5) : context.customColors.humanColor!.withValues(alpha: 0.5)),
         ),
       ),
     );
@@ -396,13 +401,13 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
   Widget _buildEssayInput() {
     return TextField(
       controller: _contentController,
-      style: const TextStyle(color: Colors.white, height: 1.5),
+      style: TextStyle(color: context.colorScheme.onSurface, height: 1.5),
       maxLines: null,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Nhập bài luận của bạn vào đây...',
-        hintStyle: TextStyle(color: Colors.white30),
+        hintStyle: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.3)),
         border: InputBorder.none,
-        contentPadding: EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.all(16),
       ),
     );
   }
@@ -412,7 +417,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
     String remaining = content;
 
     if (corrections.isEmpty) {
-      spans.add(TextSpan(text: content, style: const TextStyle(color: Colors.white70)));
+      spans.add(TextSpan(text: content, style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.8))));
     } else {
       for (var correction in corrections) {
         int index = remaining.indexOf(correction.original);
@@ -422,19 +427,19 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
           spans.add(TextSpan(
             text: correction.original,
             style: TextStyle(
-              color: Colors.redAccent.withOpacity(0.8),
+              color: context.customColors.errorColor,
               decoration: TextDecoration.lineThrough,
-              backgroundColor: Colors.redAccent.withOpacity(0.1),
+              backgroundColor: context.customColors.errorsurface,
             ),
             recognizer: TapGestureRecognizer()..onTap = () => _showCorrectionDetail(correction),
           ));
 
           spans.add(TextSpan(
             text: ' ${correction.corrected} ',
-            style: const TextStyle(
-              color: Colors.greenAccent,
+            style: TextStyle(
+              color: context.customColors.successColor,
               fontWeight: FontWeight.bold,
-              backgroundColor: Color(0x2200FF00),
+              backgroundColor: context.customColors.successsurface,
             ),
             recognizer: TapGestureRecognizer()..onTap = () => _showCorrectionDetail(correction),
           ));
@@ -449,7 +454,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       padding: const EdgeInsets.all(16.0),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.6),
+          style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.8), fontSize: 16, height: 1.6),
           children: spans,
         ),
       ),
@@ -461,25 +466,25 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E2330),
-          title: const Text('Chi tiết lỗi', style: TextStyle(color: Colors.white)),
+          backgroundColor: context.colorScheme.surface,
+          title: Text('Chi tiết lỗi', style: TextStyle(color: context.colorScheme.onSurface)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Original: ${correction.original}', style: const TextStyle(color: Colors.redAccent, decoration: TextDecoration.lineThrough)),
+              Text('Original: ${correction.original}', style: TextStyle(color: context.customColors.errorColor, decoration: TextDecoration.lineThrough)),
               const SizedBox(height: 8),
-              Text('Corrected: ${correction.corrected}', style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+              Text('Corrected: ${correction.corrected}', style: TextStyle(color: context.customColors.successColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              const Text('Explanation:', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+              Text('Explanation:', style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.7), fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(correction.explanation, style: const TextStyle(color: Colors.white70)),
+              Text(correction.explanation, style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.7))),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Đóng', style: TextStyle(color: Colors.blueAccent)),
+              child: Text('Đóng', style: TextStyle(color: context.colorScheme.primary)),
             ),
           ],
         );
@@ -496,10 +501,10 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       padding: const EdgeInsets.only(top: 8, left: 4),
       child: Chip(
         visualDensity: VisualDensity.compact,
-        backgroundColor: Colors.white10,
+        backgroundColor: context.colorScheme.onSurface.withValues(alpha: 0.05),
         label: Text(
           '$count từ',
-          style: const TextStyle(color: Colors.white60, fontSize: 12),
+          style: TextStyle(color: context.colorScheme.onSurface.withOpacity(0.6), fontSize: 12),
         ),
       ),
     );
@@ -512,7 +517,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       child: ElevatedButton(
         onPressed: _isSubmitting ? null : _submitEssay,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _gradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
+          backgroundColor: _gradingType == 'AI' ? context.customColors.aiColor : context.customColors.humanColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
@@ -521,7 +526,7 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
             ? const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                   SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
                   SizedBox(width: 12),
                   Text('Đang xử lý...'),
                 ],
@@ -539,10 +544,10 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       children: [
         TabBar(
           controller: _tabController,
-          labelColor: Colors.blueAccent,
-          unselectedLabelColor: Colors.white30,
-          indicatorColor: Colors.blueAccent,
-          dividerColor: Colors.white10,
+          labelColor: context.colorScheme.primary,
+          unselectedLabelColor: context.colorScheme.onSurface.withValues(alpha: 0.3),
+          indicatorColor: context.colorScheme.primary,
+          dividerColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
           tabs: const [
             Tab(text: 'Feedback'),
             Tab(text: 'Kết quả'),
@@ -571,10 +576,10 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
     if ((aiFeedback == null || aiFeedback.isEmpty) && 
         (teacherFeedback == null || teacherFeedback.isEmpty)) {
-      return const Center(
+      return Center(
         child: Text(
           'Chưa có feedback cho bài làm này.',
-          style: TextStyle(color: Colors.white30),
+          style: TextStyle(color: context.colorScheme.onSurface.withOpacity(0.3)),
         ),
       );
     }
@@ -583,39 +588,39 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
       padding: const EdgeInsets.only(top: 8.0),
       children: [
         if (teacherFeedback != null && teacherFeedback.isNotEmpty) ...[
-          const Text(
+          Text(
             'Overall Feedback for Student',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(color: context.colorScheme.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: context.colorScheme.onSurface.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               teacherFeedback,
-              style: const TextStyle(color: Colors.white70, height: 1.6),
+              style: TextStyle(color: context.colorScheme.onSurface.withOpacity(0.7), height: 1.6),
             ),
           ),
           const SizedBox(height: 16),
         ],
         if (aiFeedback != null && aiFeedback.isNotEmpty) ...[
-          const Text(
+          Text(
             'AI Feedback',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(color: context.colorScheme.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: context.colorScheme.onSurface.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               aiFeedback,
-              style: const TextStyle(color: Colors.white70, height: 1.6),
+              style: TextStyle(color: context.colorScheme.onSurface.withOpacity(0.7), height: 1.6),
             ),
           ),
         ],
@@ -625,10 +630,10 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
 
   Widget _buildResultTab() {
     if (_submissionResponse == null) {
-      return const Center(
+      return Center(
         child: Text(
           'Nộp bài để xem kết quả.',
-          style: TextStyle(color: Colors.white30),
+          style: TextStyle(color: context.colorScheme.onSurface.withOpacity(0.3)),
         ),
       );
     }
@@ -641,19 +646,19 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
             height: 100,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.blueAccent, width: 4),
+              border: Border.all(color: context.colorScheme.primary, width: 4),
             ),
             child: Center(
               child: Text(
                 '${_submissionResponse!.score ?? "-"}',
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                style: TextStyle(color: context.colorScheme.onSurface, fontSize: 32, fontWeight: FontWeight.bold),
               ),
             ),
           ),
         ),
-        const Center(child: Padding(
-          padding: EdgeInsets.only(top: 8.0),
-          child: Text('OVERALL BAND', style: TextStyle(color: Colors.white30, letterSpacing: 1.2)),
+        Center(child: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text('OVERALL BAND', style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.3), letterSpacing: 1.2)),
         )),
         
         const SizedBox(height: 32),
@@ -683,13 +688,13 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
            showDialog(
              context: context,
              builder: (context) => AlertDialog(
-                backgroundColor: const Color(0xFF1E2330),
-                title: Text(label, style: const TextStyle(color: Colors.white)),
-                content: SingleChildScrollView(child: Text(reason, style: const TextStyle(color: Colors.white70))),
+                backgroundColor: context.colorScheme.surface,
+                title: Text(label, style: TextStyle(color: context.colorScheme.onSurface)),
+                content: SingleChildScrollView(child: Text(reason, style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.7)))),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Đóng', style: TextStyle(color: Colors.blueAccent)),
+                    child: Text('Đóng', style: TextStyle(color: context.colorScheme.primary)),
                   ),
                 ],
              ),
@@ -708,22 +713,22 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
                     Flexible(
                       child: Text(
                         label,
-                        style: const TextStyle(color: Colors.white60, fontSize: 12),
+                        style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (reason != null && reason.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4),
-                        child: Icon(Icons.info_outline, color: Colors.blueAccent, size: 14),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Icon(Icons.info_outline, color: context.colorScheme.primary, size: 14),
                       ),
                   ],
                 ),
               ),
               Text(
                 '$score',
-                style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                style: TextStyle(color: context.colorScheme.primary, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -732,8 +737,8 @@ class _WritingScreenState extends State<WritingScreen> with SingleTickerProvider
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: score / 9.0,
-              backgroundColor: Colors.white12,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              backgroundColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(context.colorScheme.primary),
               minHeight: 6,
             ),
           ),
@@ -761,7 +766,7 @@ class _LevelBadge extends StatelessWidget {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: level.primaryColor.withOpacity(0.2),
+          color: level.primaryColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: level.primaryColor, width: 1),
         ),

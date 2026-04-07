@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/exam_provider.dart';
 import '../../../../core/models/quiz_bank_models.dart';
 
-/// Bottom sheet that displays a grid of all question numbers for the current section.
-/// Shows answered (blue), flagged (flag icon), current (bordered), and unanswered (outline) states.
+
+
 class QuestionMapSheet extends StatelessWidget {
   final List<Question> questions;
   final int currentIndex;
@@ -17,7 +17,7 @@ class QuestionMapSheet extends StatelessWidget {
 
   static void show(BuildContext context, List<Question> questions, int currentIndex) {
     print('[QuestionMapSheet] Showing with ${questions.length} questions, current=$currentIndex');
-    // Capture the provider before opening modal (modal creates a new route = new context)
+    
     final provider = Provider.of<ExamProvider>(context, listen: false);
     showModalBottomSheet(
       context: context,
@@ -49,7 +49,7 @@ class QuestionMapSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Drag handle
+              
               Center(
                 child: Container(
                   width: 40, height: 4,

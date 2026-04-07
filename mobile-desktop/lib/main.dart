@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/providers/ielts_level_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/font_size_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/localization/app_localizations.dart';
+import 'core/providers/tutoring_provider.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'features/study_sections/listening/services/listening_provider.dart';
 import 'features/study_sections/writing/services/writing_api_service.dart';
 import 'features/study_sections/writing/services/real_writing_repository.dart';
 import 'features/study_sections/writing/services/writing_provider.dart';
@@ -20,14 +21,46 @@ import 'features/study_sections/vocabulary/screens/favorite_manager.dart';
 import 'features/study_sections/vocabulary/providers/vocabulary_test_provider.dart';
 import 'features/ranking/providers/ranking_provider.dart';
 
+import 'data/services/notification_service.dart';
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('[main] Loading .env');
   await dotenv.load(fileName: ".env");
-  runApp(const EnglishStudyApp());
+  debugPrint('[main] Initializing notifications');
+  await NotificationService.initialize();
+
+  // Pre-load SharedPreferences and settings
+  debugPrint('[main] Pre-loading settings from SharedPreferences');
+  final prefs = await SharedPreferences.getInstance();
+  
+  debugPrint('[main] Resolving settings');
+  final initialThemeMode = ThemeProvider.resolveThemeMode(prefs);
+  final initialFontSizeLevel = FontSizeProvider.resolveFontSizeLevel(prefs);
+  final initialLocale = LocaleProvider.resolveLocale(prefs);
+
+  debugPrint('[main] Starting EnglishStudyApp');
+
+  runApp(EnglishStudyApp(
+    initialThemeMode: initialThemeMode,
+    initialFontSizeLevel: initialFontSizeLevel,
+    initialLocale: initialLocale,
+  ));
 }
 
 class EnglishStudyApp extends StatelessWidget {
-  const EnglishStudyApp({Key? key}) : super(key: key);
+  final ThemeMode initialThemeMode;
+  final FontSizeLevel initialFontSizeLevel;
+  final Locale? initialLocale;
 
+  const EnglishStudyApp({
+    Key? key,
+    required this.initialThemeMode,
+    required this.initialFontSizeLevel,
+    this.initialLocale,
+  }) : super(key: key);
+
+  @override
   Widget build(BuildContext context) {
     debugPrint('[EnglishStudyApp] build – setting up MultiProvider');
 
@@ -35,7 +68,7 @@ class EnglishStudyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // ── Global level state ───────────────────────────────────
+        
         ChangeNotifierProvider<IeltsLevelProvider>(
           create: (_) {
             debugPrint('[main] IeltsLevelProvider created');
@@ -44,7 +77,7 @@ class EnglishStudyApp extends StatelessWidget {
         ),
 
         ChangeNotifierProvider<LocaleProvider>(
-          create: (_) => LocaleProvider(),
+          create: (_) => LocaleProvider(initialLocale: initialLocale, preloaded: true),
         ),
 
         ChangeNotifierProvider<FavoriteManager>(
@@ -54,12 +87,12 @@ class EnglishStudyApp extends StatelessWidget {
         ChangeNotifierProvider<FontSizeProvider>(
           create: (_) {
             debugPrint('[main] FontSizeProvider created');
-            return FontSizeProvider();
+            return FontSizeProvider(initialLevel: initialFontSizeLevel);
           },
         ),
         
         ChangeNotifierProvider<ThemeProvider>(
-          create: (_) => ThemeProvider(),
+          create: (_) => ThemeProvider(initialMode: initialThemeMode),
         ),
 
         ChangeNotifierProvider<VocabularyTestProvider>(
@@ -73,7 +106,7 @@ class EnglishStudyApp extends StatelessWidget {
           },
         ),
 
-        // ── Vocabulary section ───────────────────────────────────
+        
         ChangeNotifierProxyProvider<IeltsLevelProvider, VocabularyProvider>(
           create: (_) => VocabularyProvider(RealVocabularyRepository(VocabularyApiService())),
           update: (_, levelProvider, vocabProvider) {
@@ -85,25 +118,25 @@ class EnglishStudyApp extends StatelessWidget {
           },
         ),
 
-        // // ── Reading section ───────────────────────────────────
-        // ChangeNotifierProxyProvider<IeltsLevelProvider, ReadingProvider>(
-        //   create: (_) => ReadingProvider(MockReadingRepository()),
-        //   update: (_, levelProvider, readingProvider) {
-        //     readingProvider!.loadForBand(levelProvider.selectedLevel.band);
-        //     return readingProvider;
-        //   },
-        // ),
+        
+        
+        
+        
+        
+        
+        
+        
 
-        // ── Listening section ───────────────────────────────────
-        ChangeNotifierProxyProvider<IeltsLevelProvider, ListeningProvider>(
-          create: (_) => ListeningProvider(MockListeningRepository()),
-          update: (_, levelProvider, listeningProvider) {
-            listeningProvider!.loadForBand(levelProvider.selectedLevel.band);
-            return listeningProvider;
-          },
-        ),
+        
+        
+        
+        
+        
+        
+        
+        
 
-        // ── Writing section ───────────────────────────────────
+        
         ChangeNotifierProxyProvider<IeltsLevelProvider, WritingProvider>(
           create: (_) => WritingProvider(RealWritingRepository(writingApiService)),
           update: (_, levelProvider, writingProvider) {
@@ -111,13 +144,18 @@ class EnglishStudyApp extends StatelessWidget {
             return writingProvider;
           },
         ),
+
+        ChangeNotifierProvider<TutoringProvider>(
+          create: (_) => TutoringProvider(),
+        ),
       ],
       child: Consumer3<LocaleProvider, FontSizeProvider, ThemeProvider>(
         builder: (context, localeProvider, fontSizeProvider, themeProvider, child) {
+          debugPrint('[EnglishStudyApp] Consumer3 rebuild – Theme: ${themeProvider.themeMode}, Locale: ${localeProvider.locale}, FontScale: ${fontSizeProvider.fontScale}');
           return MaterialApp(
-            title: 'English Study App',
+            title: 'IELTS PREP',
             debugShowCheckedModeBanner: false,
-            // ── Dynamic Theme Setup ─────────────────────────────────
+            
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
@@ -125,7 +163,7 @@ class EnglishStudyApp extends StatelessWidget {
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                  textScaleFactor: fontSizeProvider.fontScale,
+                  textScaler: TextScaler.linear(fontSizeProvider.fontScale),
                 ),
                 child: child!,
               );

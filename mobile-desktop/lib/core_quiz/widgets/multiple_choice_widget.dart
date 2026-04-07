@@ -7,7 +7,7 @@ class MultipleChoiceWidget extends StatelessWidget {
   final List<String> correctIds;
   final String? selectedId;
   final bool isAnswered;
-  final void Function(String id) onSelect;
+  final void Function(String? id) onSelect;
 
   const MultipleChoiceWidget({
     super.key,
@@ -28,7 +28,11 @@ class MultipleChoiceWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
           child: Text(
             questionText,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+              fontSize: 18, 
+              fontWeight: FontWeight.bold, 
+              color: Theme.of(context).textTheme.titleLarge?.color
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -38,11 +42,11 @@ class MultipleChoiceWidget extends StatelessWidget {
           final option = entry.value;
           final isSelected = selectedId == option.id;
           final isCorrect = correctIds.contains(option.id);
-          final prefix = String.fromCharCode(65 + index); // A, B, C...
+          final prefix = String.fromCharCode(65 + index); 
 
-          Color backgroundColor = const Color(0xFF2C313D);
-          Color textColor = Colors.white;
-          Color prefixColor = Colors.grey;
+          Color backgroundColor = Theme.of(context).cardColor;
+          Color textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
+          Color prefixColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5) ?? Colors.grey;
 
           if (isAnswered) {
             if (isCorrect) {

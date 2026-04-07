@@ -21,7 +21,7 @@ public class UserStatsService {
     private final UserStatsRepository statsRepository;
     private final UserRepository userRepository;
 
-    // ── Upsert helpers ───────────────────────────────────────────────────────
+    
 
     @Transactional
     private UserStats getOrCreate(Long userId) {
@@ -34,7 +34,7 @@ public class UserStatsService {
         });
     }
 
-    // ── Recording methods ────────────────────────────────────────────────────
+    
 
     @Transactional
     public void recordCorrectAnswers(Long userId, int count) {
@@ -60,7 +60,7 @@ public class UserStatsService {
         statsRepository.save(stats);
     }
 
-    // ── Leaderboard ──────────────────────────────────────────────────────────
+    
 
     @Transactional(readOnly = true)
     public List<LeaderboardEntryDto> getLeaderboard(String type, int page, int size) {
@@ -110,7 +110,7 @@ public class UserStatsService {
                 .userId(userId).myRank(rank).myScore(score).ranked(true).build();
     }
 
-    // ── Mapper ───────────────────────────────────────────────────────────────
+    
 
     private LeaderboardEntryDto mapToEntry(UserStats stats, int rank, String type) {
         User user = stats.getUser();

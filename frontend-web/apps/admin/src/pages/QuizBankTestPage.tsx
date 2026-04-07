@@ -11,7 +11,7 @@ export const QuizBankTestPage: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Testing Controls Header */}
+        {}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-blue-200">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Quiz Bank Development Sandbox</h1>
           
@@ -43,7 +43,7 @@ export const QuizBankTestPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Builders Container */}
+        {}
         <div className="space-y-12">
           
           <section>
@@ -63,7 +63,7 @@ export const QuizBankTestPage: React.FC = () => {
 
         </div>
 
-        {/* Saved Output */}
+        {}
         <div className="bg-gray-800 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
            <h3 className="text-white font-bold mb-4">Store State Dump (Saved Questions): {questions.length} total</h3>
            <pre>{JSON.stringify(questions, null, 2)}</pre>

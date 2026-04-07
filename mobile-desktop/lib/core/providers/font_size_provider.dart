@@ -8,8 +8,23 @@ class FontSizeProvider extends ChangeNotifier {
   
   FontSizeLevel _level = FontSizeLevel.medium;
 
-  FontSizeProvider() {
-    _loadFontSize();
+  FontSizeProvider({FontSizeLevel? initialLevel}) {
+    if (initialLevel != null) {
+      debugPrint('[FontSizeProvider] Initialized with pre-loaded level: $initialLevel');
+      _level = initialLevel;
+    } else {
+      debugPrint('[FontSizeProvider] No pre-loaded level, loading asynchronously');
+      _loadFontSize();
+    }
+  }
+
+  static FontSizeLevel resolveFontSizeLevel(SharedPreferences prefs) {
+    final String? levelStr = prefs.getString(_fontSizeKey);
+    if (levelStr == null) return FontSizeLevel.medium;
+    return FontSizeLevel.values.firstWhere(
+      (e) => e.toString() == levelStr,
+      orElse: () => FontSizeLevel.medium,
+    );
   }
 
   FontSizeLevel get level => _level;
@@ -17,13 +32,13 @@ class FontSizeProvider extends ChangeNotifier {
   double get fontScale {
     switch (_level) {
       case FontSizeLevel.small:
-        return 0.85;
-      case FontSizeLevel.medium:
         return 1.0;
-      case FontSizeLevel.large:
+      case FontSizeLevel.medium:
         return 1.15;
-      case FontSizeLevel.extraLarge:
+      case FontSizeLevel.large:
         return 1.3;
+      case FontSizeLevel.extraLarge:
+        return 1.45;
     }
   }
 

@@ -15,17 +15,17 @@ import java.util.List;
 public class PracticeQuiz implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private String type; // MULTIPLE_CHOICE, MATCHING, FILL_IN_THE_BLANK
+    private String type; 
     
-    // Multiple Choice & Fill In The Blank
+    
     private String question;
     private List<String> options;
     private String answer;
     
-    // Matching
+    
     private List<MatchingPair> pairs;
     
-    // Fill In The Blank specific (optional, can reuse question)
+    
     private String sentence;
 
     @Data

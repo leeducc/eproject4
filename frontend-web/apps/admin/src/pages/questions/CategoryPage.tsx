@@ -41,7 +41,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
   const [questionToDelete, setQuestionToDelete] = useState<number | null>(null);
   const [questionHistoryId, setQuestionHistoryId] = useState<number | null>(null);
 
-  // Filter & Pagination State
+  
   const [filterType, setFilterType] = useState<string>('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('');
   const [pageSize, setPageSize] = useState<number | 'All'>(10);
@@ -53,7 +53,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [madeByMeOnly, setMadeByMeOnly] = useState(false);
 
-  // Debounce search term
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -61,7 +61,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // React to filter changes
+  
   useEffect(() => {
     const triggerFilterUpdate = async () => {
       setCurrentCursor(null);
@@ -109,7 +109,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
     }
   };
 
-  // Infinite Scroll Observer
+  
   const observerTarget = React.useRef(null);
   useEffect(() => {
     if (pageSize !== 'All' || !hasMore || isLoading) return;
@@ -157,12 +157,12 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
       try {
         await importQuestions(file);
         toast.success("Questions imported successfully");
-        // Reload current page
+        
         await loadQuestions(currentCursor, false);
       } catch (error) {
         toast.error("Failed to import questions");
       } finally {
-        // Reset input
+        
         if (fileInputRef.current) fileInputRef.current.value = '';
       }
     }
@@ -276,7 +276,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
             </div>
             
             <div className="flex items-end gap-4 flex-1">
-              {/* Search Bar */}
+              {}
               <div className="flex flex-col gap-1 flex-1 max-w-sm">
                 <label className="text-[10px] font-bold text-gray-400 uppercase">Search</label>
                 <div className="relative">
@@ -516,7 +516,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                 </table>
               </div>
                 
-                {/* Standard Pagination Controls */}
+                {}
                 {pageSize !== 'All' && !isCreating && !editingQuestion && (
                     <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between font-medium text-xs text-gray-500 dark:text-slate-400">
                         <div>
@@ -541,7 +541,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                     </div>
                 )}
 
-                {/* Infinite Scroll Trigger */}
+                {}
                 {pageSize === 'All' && hasMore && (
                     <div ref={observerTarget} className="p-8 flex justify-center border-t border-gray-100 dark:border-slate-800">
                         {isLoading ? (

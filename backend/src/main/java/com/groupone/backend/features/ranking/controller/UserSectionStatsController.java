@@ -18,11 +18,11 @@ public class UserSectionStatsController {
     @PostMapping("/{sectionId}/record")
     public ResponseEntity<Void> recordResult(
             @PathVariable Long sectionId,
-            @RequestBody RecordAnswersRequest request) { // Reusing RecordAnswersRequest (which has getCount())
+            @RequestBody RecordAnswersRequest request) { 
         Long userId = getCurrentUserId();
-        // Assuming RecordAnswersRequest might need totalCount in a real scenario, but for now using count.
-        // Let's assume we need total as well. For now, we use a simple record.
-        statsService.recordSectionResult(userId, sectionId, request.getCount(), request.getCount()); // Mocking total=correct for now, or update DTO
+        
+        
+        statsService.recordSectionResult(userId, sectionId, request.getCount(), request.getCount()); 
         return ResponseEntity.ok().build();
     }
 

@@ -24,12 +24,12 @@ public class TopicResponse {
         if (question == null) return null;
         return TopicResponse.builder()
                 .id(question.getId())
-                .title("IELTS Writing Task") // Default title for Quiz Bank questions
+                .title("IELTS Writing Task") 
                 .prompt(question.getInstruction())
                 .difficultyBand(question.getDifficultyBand() != null ? question.getDifficultyBand().name() : null)
                 .hint(question.getExplanation())
                 .imageUrl(question.getMediaUrl())
-                .audioUrl(null) // No direct audio field in Question entity, usually for Task 1/2
+                .audioUrl(null) 
                 .isProOnly(question.getIsPremiumContent() != null ? question.getIsPremiumContent() : false)
                 .build();
     }

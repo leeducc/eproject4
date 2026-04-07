@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/models/exam_model.dart';
 import '../services/exam_api_service.dart';
 import 'dart:async';
@@ -14,22 +15,22 @@ class ExamTestScreen extends StatefulWidget {
 }
 
 enum ExamStage {
-  PRE_FLIGHT,
-  LISTENING,
-  BREAK_1,
-  READING,
-  BREAK_2,
-  WRITING,
-  SUBMITTING,
-  FINISHED
+  preFlight,
+  listening,
+  break1,
+  reading,
+  break2,
+  writing,
+  submitting,
+  finished
 }
 
 class _ExamTestScreenState extends State<ExamTestScreen> {
   final ExamApiService _apiService = ExamApiService();
 
-  ExamStage _currentStage = ExamStage.PRE_FLIGHT;
+  ExamStage _currentStage = ExamStage.preFlight;
   
-  // Timers in seconds
+  
   int _listeningTime = 40 * 60;
   int _readingTime = 60 * 60;
   int _writingTime = 60 * 60;
@@ -38,10 +39,10 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
   int _currentRemainingSecs = 0;
   Timer? _timer;
 
-  // Track Scores
+  
   double? _listeningScore;
   double? _readingScore;
-  int? _writingSubmissionId; // Placeholder
+  int? _writingSubmissionId; 
 
   final TextEditingController _writingController = TextEditingController();
   String _writingGradingType = 'AI';
@@ -74,29 +75,29 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
     _timer?.cancel();
     setState(() {
       switch (_currentStage) {
-        case ExamStage.PRE_FLIGHT:
-          _currentStage = ExamStage.LISTENING;
+        case ExamStage.preFlight:
+          _currentStage = ExamStage.listening;
           _startTimer(_listeningTime);
           break;
-        case ExamStage.LISTENING:
-          _listeningScore = Random().nextDouble() * 9; // Auto-grade mock
-          _currentStage = ExamStage.BREAK_1;
+        case ExamStage.listening:
+          _listeningScore = Random().nextDouble() * 9; 
+          _currentStage = ExamStage.break1;
           _startTimer(_breakTime);
           break;
-        case ExamStage.BREAK_1:
-          _currentStage = ExamStage.READING;
+        case ExamStage.break1:
+          _currentStage = ExamStage.reading;
           _startTimer(_readingTime);
           break;
-        case ExamStage.READING:
-          _readingScore = Random().nextDouble() * 9; // Auto-grade mock
-          _currentStage = ExamStage.BREAK_2;
+        case ExamStage.reading:
+          _readingScore = Random().nextDouble() * 9; 
+          _currentStage = ExamStage.break2;
           _startTimer(_breakTime);
           break;
-        case ExamStage.BREAK_2:
-          _currentStage = ExamStage.WRITING;
+        case ExamStage.break2:
+          _currentStage = ExamStage.writing;
           _startTimer(_writingTime);
           break;
-        case ExamStage.WRITING:
+        case ExamStage.writing:
           _submitExam();
           break;
         default:
@@ -106,20 +107,20 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
   }
 
   void _skipBreak() {
-    if (_currentStage == ExamStage.BREAK_1 || _currentStage == ExamStage.BREAK_2) {
+    if (_currentStage == ExamStage.break1 || _currentStage == ExamStage.break2) {
       _nextStage();
     }
   }
 
   Future<void> _submitExam() async {
     setState(() {
-      _currentStage = ExamStage.SUBMITTING;
+      _currentStage = ExamStage.submitting;
     });
 
     try {
-      // In real scenario, we would submit the writing text to WritingApiService first.
-      // E.g. _writingSubmissionId = await writingService.submitEssay(...)
-      _writingSubmissionId = 123; // Placeholder
+      
+      
+      _writingSubmissionId = 123; 
 
       await _apiService.submitExam(
         widget.exam.id,
@@ -129,16 +130,18 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
         'COMPLETED',
       );
 
+      if (!mounted) return;
       setState(() {
-        _currentStage = ExamStage.FINISHED;
+        _currentStage = ExamStage.finished;
       });
     } catch (e) {
-      print('Submit error: $e');
-       ScaffoldMessenger.of(context).showSnackBar(
+      debugPrint('Submit error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lỗi khi nộp bài. Bạn có thể kiểm tra kết nối.')),
       );
       setState(() {
-        _currentStage = ExamStage.FINISHED;
+        _currentStage = ExamStage.finished;
       });
     }
   }
@@ -157,8 +160,8 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // close dialog
-              Navigator.pop(context); // pop screen
+              Navigator.pop(context); 
+              Navigator.pop(context); 
             },
             child: const Text('Thoát', style: TextStyle(color: Colors.redAccent)),
           ),
@@ -189,7 +192,7 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
           onPressed: _giveUp,
         ),
         actions: [
-          if (_currentStage != ExamStage.PRE_FLIGHT && _currentStage != ExamStage.FINISHED && _currentStage != ExamStage.SUBMITTING)
+          if (_currentStage != ExamStage.preFlight && _currentStage != ExamStage.finished && _currentStage != ExamStage.submitting)
             Center(
               child: Padding(
                 padding: const EdgeInsets.only(right: 16.0),
@@ -210,7 +213,7 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
               Expanded(
                 child: _buildCurrentStageView(),
               ),
-              if (_currentStage != ExamStage.PRE_FLIGHT && _currentStage != ExamStage.FINISHED && _currentStage != ExamStage.SUBMITTING && !_currentStage.toString().contains('BREAK'))
+              if (_currentStage != ExamStage.preFlight && _currentStage != ExamStage.finished && _currentStage != ExamStage.submitting && !_currentStage.toString().toLowerCase().contains('break'))
                  ElevatedButton(
                   onPressed: _nextStage,
                   style: ElevatedButton.styleFrom(
@@ -228,20 +231,20 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
 
   Widget _buildCurrentStageView() {
     switch (_currentStage) {
-      case ExamStage.PRE_FLIGHT:
+      case ExamStage.preFlight:
         return _buildPreFlight();
-      case ExamStage.LISTENING:
+      case ExamStage.listening:
         return _buildSectionPlaceholder('Listening', 'Nghe đoạn hội thoại và trả lời câu hỏi. (Auto-graded)');
-      case ExamStage.BREAK_1:
-      case ExamStage.BREAK_2:
+      case ExamStage.break1:
+      case ExamStage.break2:
         return _buildBreak();
-      case ExamStage.READING:
+      case ExamStage.reading:
         return _buildSectionPlaceholder('Reading', 'Đọc đoạn văn và trả lời câu hỏi. (Auto-graded)');
-      case ExamStage.WRITING:
+      case ExamStage.writing:
         return _buildWritingSection();
-      case ExamStage.SUBMITTING:
+      case ExamStage.submitting:
         return const Center(child: CircularProgressIndicator());
-      case ExamStage.FINISHED:
+      case ExamStage.finished:
         return _buildFinished();
     }
   }
@@ -363,7 +366,7 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
                   });
                 },
                 style: SegmentedButton.styleFrom(
-                  selectedBackgroundColor: _writingGradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
+                  selectedBackgroundColor: _writingGradingType == 'AI' ? Colors.purpleAccent.withValues(alpha: 0.2) : Colors.blueAccent.withValues(alpha: 0.2),
                   selectedForegroundColor: _writingGradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
                 ),
               ),
@@ -406,7 +409,7 @@ class _ExamTestScreenState extends State<ExamTestScreen> {
           const SizedBox(height: 48),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // go back to menu
+              Navigator.pop(context); 
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 48),

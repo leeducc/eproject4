@@ -14,7 +14,7 @@ public interface UserStatsRepository extends JpaRepository<UserStats, Long> {
 
     Optional<UserStats> findByUserId(Long userId);
 
-    // ── Leaderboard queries ──────────────────────────────────────────────────
+    
 
     @Query("""
         SELECT s FROM UserStats s
@@ -43,7 +43,7 @@ public interface UserStatsRepository extends JpaRepository<UserStats, Long> {
     """)
     List<UserStats> findTopByTimeSeconds(Pageable pageable);
 
-    // ── Rank position queries ────────────────────────────────────────────────
+    
 
     @Query("SELECT COUNT(s) + 1 FROM UserStats s WHERE s.totalCorrectAnswers > (SELECT ms.totalCorrectAnswers FROM UserStats ms WHERE ms.userId = :userId)")
     long findRankByAnswers(Long userId);

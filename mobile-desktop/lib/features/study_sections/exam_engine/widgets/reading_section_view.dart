@@ -39,14 +39,14 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
         final state = provider.state;
         if (state == null) return const SizedBox.shrink();
 
-        // Flatten all READING questions maintaining group context
+        
         final List<_ReadingQuestion> flatQuestions = [];
-        for (var group in (state.exam.groups ?? []).where((g) => g.skill == SkillType.READING)) {
+        for (var group in (state.exam.groups ?? []).where((g) => g.skill == SkillType.reading)) {
           for (var q in group.questions) {
             flatQuestions.add(_ReadingQuestion(q, group));
           }
         }
-        for (var q in (state.exam.questions ?? []).where((q) => q.skill == SkillType.READING)) {
+        for (var q in (state.exam.questions ?? []).where((q) => q.skill == SkillType.reading)) {
           flatQuestions.add(_ReadingQuestion(q, null));
         }
 
@@ -69,7 +69,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
 
         return Column(
           children: [
-            // ── Tab Toggle: Passage | Questions ─────────────────────────────
+            
             Container(
               margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
               decoration: BoxDecoration(
@@ -106,7 +106,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
               ),
             ),
 
-            // ── Header bar (flag + map) ──────────────────────────────────────
+            
             ExamSectionHeader(
               title: current.group?.title ?? 'Reading',
               current: targetIndex,
@@ -120,13 +120,13 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
               ),
             ),
 
-            // ── Tab Content ─────────────────────────────────────────────────
+            
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(), // swipe handled by PageView
+                physics: const NeverScrollableScrollPhysics(), 
                 children: [
-                  // Passage tab
+                  
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -163,7 +163,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
                     ),
                   ),
 
-                  // Questions tab — swipeable PageView
+                  
                   Column(
                     children: [
                       Expanded(
@@ -181,7 +181,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Quick passage reference chip
+                                  
                                   if (item.group != null)
                                     GestureDetector(
                                       onTap: () => _tabController.animateTo(0),
@@ -213,13 +213,13 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
               ),
             ),
 
-            // ── Nav Controls ────────────────────────────────────────────────
+            
             ExamPageNavBar(
               currentIndex: targetIndex,
               total: flatQuestions.length,
               onPrev: () {
                 provider.prevQuestion();
-                _tabController.animateTo(1); // switch to Questions tab
+                _tabController.animateTo(1); 
               },
               onNext: () {
                 provider.nextQuestion(flatQuestions.length);

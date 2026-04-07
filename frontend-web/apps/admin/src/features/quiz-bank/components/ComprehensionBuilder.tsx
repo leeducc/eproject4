@@ -45,7 +45,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   
-  // Child questions management
+  
   const [childQuestions, setChildQuestions] = useState<Partial<Question>[]>(
     initialGroup?.questions || []
   );
@@ -56,13 +56,16 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log('[ComprehensionBuilder] Starting media upload', { fileName: file.name, fileSize: file.size, fileType: file.type });
     setIsUploading(true);
     try {
       const storedPath = await uploadMedia(file, 'questions');
+      console.log('[ComprehensionBuilder] Media uploaded successfully', { storedPath });
       setMediaUrl(storedPath);
       setMediaType(file.type.startsWith('audio/') ? 'AUDIO' : 'IMAGE');
       toast.success("Media uploaded successfully");
     } catch (error) {
+      console.error('[ComprehensionBuilder] Media upload failed', error);
       toast.error("Failed to upload media");
     } finally {
       setIsUploading(false);
@@ -70,6 +73,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
   };
 
   const handleAddQuestion = (type: QuestionType) => {
+    console.log('[ComprehensionBuilder] Adding new child question', { type, currentCount: childQuestions.length });
     const newQuestion: Partial<Question> = {
       type,
       skill,
@@ -77,7 +81,8 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
       data: type === 'MULTIPLE_CHOICE' ? { options: [{id: '1', label: 'Option 1'}, {id: '2', label: 'Option 2'}], correct_ids: [], multiple_select: false } :
             type === 'MATCHING' ? { left_items: [], right_items: [], solution: {} } :
             { template: '', blanks: {} },
-      isPremiumContent: false
+      isPremiumContent: false,
+      tags: []
     };
     setChildQuestions([...childQuestions, newQuestion]);
     setExpandedIndex(childQuestions.length);
@@ -87,7 +92,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
   const handleRemoveQuestion = async (index: number) => {
     const q = childQuestions[index];
     if (q.id) {
-       // If it exists in DB, we should probably confirm deletion
+       
        if (window.confirm("Delete this child question permanently?")) {
          await deleteQuestion(q.id);
        } else {
@@ -99,6 +104,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
   };
 
   const handleSave = async () => {
+    console.log('[ComprehensionBuilder] Attempting to save comprehension', { title, questionsCount: childQuestions.length });
     if (!title.trim() || !content.trim()) {
       toast.error("Please provide a title and passage content.");
       return;
@@ -121,6 +127,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
         authorId: currentUser.id
       };
 
+      console.log('[ComprehensionBuilder] Saving group payload', groupPayload);
       let group;
       if (initialGroup) {
         group = await updateGroup(initialGroup.id, groupPayload);
@@ -128,7 +135,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
         group = await createGroup(groupPayload);
       }
 
-      // Save/Update child questions with groupId
+      console.log('[ComprehensionBuilder] Group saved, now saving child questions', { groupId: group.id });
       for (const q of childQuestions) {
         const payload = { ...q, groupId: group.id };
         if (q.id) {
@@ -138,9 +145,11 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
         }
       }
 
+      console.log('[ComprehensionBuilder] Everything saved successfully');
       toast.success("Comprehension saved successfully!");
       if (onSave) onSave();
     } catch (error) {
+      console.error('[ComprehensionBuilder] Save failed', error);
       toast.error("Failed to save comprehension.");
     } finally {
       setIsSaving(false);
@@ -149,7 +158,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20">
-      {/* Passage Section */}
+      {}
       <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -205,20 +214,25 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
                 <input 
                   type="file" 
                   className="hidden" 
-                  accept="image/*,audio/*"
                   onChange={handleMediaUpload}
-                  disabled={isUploading}
+                  accept="audio/*,image/*" 
                 />
               </label>
-              
+
               {mediaUrl && (
-                <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/30">
-                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400 truncate max-w-xs">{mediaUrl.split('/').pop()}</span>
+                <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/10 p-2 border border-blue-100 dark:border-blue-900/30 rounded-lg animate-in fade-in duration-300">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-md">
+                    {mediaType === 'AUDIO' ? <Music size={18} /> : <FileText size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0 pr-4">
+                    <p className="text-xs font-bold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{mediaUrl.split('/').pop()}</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-tight">{mediaType}</p>
+                  </div>
                   <button 
                     onClick={() => { setMediaUrl(''); setMediaType(''); }}
-                    className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded text-blue-400"
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
                   >
-                    <X size={14} />
+                    <X size={16} />
                   </button>
                 </div>
               )}
@@ -226,8 +240,6 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Child Questions Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
@@ -341,7 +353,7 @@ export const ComprehensionBuilder: React.FC<ComprehensionBuilderProps> = ({
         </div>
       </div>
 
-      {/* Persistence Footer */}
+      {}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border dark:border-slate-800 px-6 py-4 rounded-2xl shadow-2xl z-50">
         <button 
           onClick={handleSave}

@@ -146,11 +146,11 @@ class _SmartExamScreenState extends State<SmartExamScreen> {
 
                   if (selected != null) {
                     if (isCorrect) {
-                      bgColor = Colors.green.withOpacity(0.2);
+                      bgColor = Colors.green.withValues(alpha: 0.2);
                       borderColor = Colors.green;
                     }
                     if (isSelected && !isCorrect) {
-                      bgColor = Colors.red.withOpacity(0.2);
+                      bgColor = Colors.red.withValues(alpha: 0.2);
                       borderColor = Colors.red;
                     }
                   }

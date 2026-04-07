@@ -35,12 +35,14 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
   Future<void> _loadQuestions() async {
     try {
       final fetched = await SmartTestApiService().generateSmartTest(widget.skill, widget.level);
+      if (!mounted) return;
       setState(() {
         questions = fetched;
         isLoading = false;
       });
       _startTimer();
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -75,10 +77,12 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
       final req = SmartTestSubmitRequest(skill: widget.skill, difficultyBand: widget.level, attempts: attempts);
       final res = await SmartTestApiService().submitSmartTest(req);
       
-      Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context); // pop loading dialog
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SmartTestSummaryScreen(response: res)));
     } catch (e) {
-      Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context); // pop loading dialog
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Submit Error: $e')));
       }
@@ -86,7 +90,7 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
   }
   
   bool _checkAnswerMock(Question q, String answer) {
-      // In a real scenario, this would evaluate data Map for correct options.
+      
       final quizQ = QuizQuestion.from(q);
       if (quizQ.correctIds.isNotEmpty) {
         return answer == quizQ.correctIds.first;
@@ -132,7 +136,7 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
     super.dispose();
   }
 
-  // ignore: deprecated_member_use
+  
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -158,9 +162,15 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
          appBar: AppBar(
            title: const Text("Smart Test"),
@@ -222,10 +232,10 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
                              DynamicQuestionBuilder(
                                question: QuizQuestion.from(q),
                                selectedId: userAnswers[q.id],
-                               isAnswered: false, // In smart test, user can change answer until submit
+                               isAnswered: false, 
                                onAnswer: (val) {
                                  setState(() {
-                                   userAnswers[q.id] = val;
+                                   userAnswers[q.id] = val!;
                                  });
                                },
                              ),
@@ -235,8 +245,7 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
                      );
                    },
                  ),
-      )
+      ),
     );
   }
 }
-

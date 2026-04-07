@@ -70,7 +70,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Progress Bar Mock */}
+                    {}
                     <div className="w-full h-8 flex rounded-xl overflow-hidden mb-6">
                         <div className="h-full bg-primary w-1/2 flex items-center justify-center text-white text-xs font-bold">50%</div>
                         <div className="h-full bg-cyan-400 w-1/4 flex items-center justify-center text-white text-xs font-bold">25%</div>
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
                     <div className="w-full flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-gray-800 dark:text-slate-100">Progress Overview</h3>
                     </div>
-                    {/* Semi-Circle Progress Mock */}
+                    {}
                     <div className="relative w-48 h-24 overflow-hidden mb-6">
                         <div className="absolute top-0 left-0 w-48 h-48 rounded-full border-[1.5rem] border-gray-100 dark:border-slate-800"></div>
                         <div className="absolute top-0 left-0 w-48 h-48 rounded-full border-[1.5rem] border-primary border-t-transparent border-r-transparent -rotate-45"></div>

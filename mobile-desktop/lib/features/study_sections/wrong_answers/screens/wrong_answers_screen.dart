@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class WrongAnswersScreen extends StatelessWidget {
   const WrongAnswersScreen({Key? key}) : super(key: key);
@@ -6,23 +7,23 @@ class WrongAnswersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23), // Màu nền tối đồng nhất
+      backgroundColor: context.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Luyện Nghe IELTS', // Đổi tên tương ứng ở các file khác
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          'Luyện Nghe IELTS',
+          style: TextStyle(color: context.colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: context.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: const Center(
+      body: Center(
         child: Text(
           'Nội dung phần Nghe sẽ nằm ở đây',
-          style: TextStyle(color: Colors.white54, fontSize: 16),
+          style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 16),
         ),
       ),
     );

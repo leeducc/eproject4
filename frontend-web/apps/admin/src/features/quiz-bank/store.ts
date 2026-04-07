@@ -10,10 +10,10 @@ interface QuizBankState {
   isLoading: boolean;
   error: string | null;
   
-  // Actions
+  
   switchRole: (role: Role) => void;
   
-  // Async Data Fetching
+  
   fetchQuestions: (skill?: SkillType) => Promise<void>;
   fetchQuestionsPaginated: (params: { 
     skill?: SkillType; 
@@ -36,7 +36,7 @@ interface QuizBankState {
   fetchQuestionHistory: (id: number) => Promise<QuestionHistory[]>;
   rollbackToVersion: (historyId: number) => Promise<void>;
 
-  // Question Groups
+  
   fetchGroups: (skill?: SkillType) => Promise<void>;
   fetchGroupById: (id: number) => Promise<QuestionGroup | null>;
   createGroup: (group: any, mediaFile?: File) => Promise<any>;
@@ -49,7 +49,7 @@ interface QuizBankState {
   updateExam: (id: number, exam: Partial<Exam>) => Promise<void>;
   deleteExam: (id: number) => Promise<void>;
   
-  // Tags
+  
   fetchTags: () => Promise<any[]>;
   filterQuestionsByTags: (request: any) => Promise<Question[]>;
 }
@@ -157,14 +157,14 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
         headers: getHeaders()
       });
       if (!response.ok) throw new Error('Failed to fetch paginated questions');
-      const data = await response.json(); // { items, nextCursor, hasMore }
+      const data = await response.json(); 
       
       set((state) => ({ 
         questions: append ? [...state.questions, ...data.items] : data.items,
         isLoading: false 
       }));
       
-      return data; // Return full payload for component-level cursor management
+      return data; 
     } catch (err: any) {
       console.error('[QuizBankStore] fetchQuestionsPaginated Error:', err);
       set({ error: err.message || 'Failed to fetch paginated questions', isLoading: false });
@@ -180,7 +180,7 @@ export const useQuizBankStore = create<QuizBankState>((set, get) => ({
       const data = await response.json();
       console.log(`[QuizBankStore] Fetched question ${id}`, data);
       
-      // Update the local list if it exists
+      
       set((state) => ({
         isLoading: false,
         questions: state.questions.some(q => q.id === id) 

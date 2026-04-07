@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/models/exam_model.dart';
@@ -28,7 +29,7 @@ class ExamApiService {
         throw Exception('Failed to load exams of type $examType: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching exams by type: $e');
+      debugPrint('Error fetching exams by type: $e');
       throw Exception('Failed to fetch exams');
     }
   }
@@ -60,7 +61,7 @@ class ExamApiService {
         throw Exception('Failed to submit exam: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error submitting exam: $e');
+      debugPrint('Error submitting exam: $e');
       throw Exception('Failed to submit exam: $e');
     }
   }
@@ -85,7 +86,7 @@ class ExamApiService {
         throw Exception('Failed to fetch exam submissions');
       }
     } catch (e) {
-      print('Error fetching exam submissions: $e');
+      debugPrint('Error fetching exam submissions: $e');
       throw Exception('Failed to fetch exam submissions: $e');
     }
   }

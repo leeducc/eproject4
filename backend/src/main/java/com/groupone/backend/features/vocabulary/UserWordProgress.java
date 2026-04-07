@@ -30,7 +30,7 @@ public class UserWordProgress {
 
     @Column(name = "proficiency_level", nullable = false)
     @Builder.Default
-    private Integer proficiencyLevel = 0; // 0-5
+    private Integer proficiencyLevel = 0; 
 
     @Column(name = "next_review_date")
     private LocalDateTime nextReviewDate;

@@ -11,7 +11,7 @@ class BreakScreen extends StatefulWidget {
 }
 
 class _BreakScreenState extends State<BreakScreen> {
-  int _breakSeconds = 10 * 60; // 10 minutes default
+  int _breakSeconds = 10 * 60; 
   Timer? _timer;
 
   @override
@@ -40,7 +40,7 @@ class _BreakScreenState extends State<BreakScreen> {
     if (!mounted) return;
     _timer?.cancel();
     Provider.of<ExamProvider>(context, listen: false).nextSection();
-    Navigator.pop(context); // Pops the BreakScreen, bringing us back to ExamTestScreen
+    Navigator.pop(context); 
   }
 
   String _formatTime(int totalSeconds) {
@@ -79,7 +79,7 @@ class _BreakScreenState extends State<BreakScreen> {
                ),
                const SizedBox(height: 48),
                
-               // Timer display
+               
                Container(
                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                  decoration: BoxDecoration(

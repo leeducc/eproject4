@@ -7,6 +7,8 @@ import '../../../core/providers/font_size_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../faq/screens/faq_list_screen.dart';
 import 'about_us_screen.dart';
+import 'delete_account_screen.dart';
+import 'wallet_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -26,7 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     
-    // Explicitly determine current language name for display
+    
     String currentLanguageCode = localeProvider.locale?.languageCode ?? Localizations.localeOf(context).languageCode;
     String currentLanguageName = _getLanguageName(currentLanguageCode, l10n);
 
@@ -36,11 +38,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.translate('settings'), style: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 18)),
+        title: Text(l10n.translate('settings'), style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18)),
         centerTitle: true,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onBackground),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: ListView(
         children: [
@@ -55,6 +57,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _soundEffects = value;
             });
           }),
+          _buildSettingsSwitch(l10n.translate('night_mode'), themeProvider.themeMode == ThemeMode.dark, (value) {
+            debugPrint('[SettingsScreen] Night Mode toggled: $value');
+            themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+          }),
           _buildSettingsItem(
             l10n.translate('font_size'),
             trailingText: currentFontSizeName,
@@ -68,6 +74,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               MaterialPageRoute(builder: (context) => const FAQListScreen()),
             ),
           ),
+          _buildSettingsItem(
+            'Ví xu của tôi',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const WalletScreen()),
+            ),
+          ),
+          _buildDivider(),
           _buildSettingsItem(l10n.translate('recharge_supertest_card')),
           _buildDivider(),
           _buildSettingsItem(l10n.translate('clear_cache')),
@@ -89,7 +103,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => _showAppearanceDialog(context),
           ),
           _buildDivider(),
-          _buildSettingsItem(l10n.translate('delete_account')),
+          _buildSettingsItem(
+            l10n.translate('delete_account'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DeleteAccountScreen()),
+            ),
+          ),
           _buildDivider(),
           const SizedBox(height: 20),
           Padding(
@@ -127,14 +147,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingsItem(String title, {String? trailingText, VoidCallback? onTap}) {
     final theme = Theme.of(context);
     return ListTile(
-      title: Text(title, style: TextStyle(color: theme.colorScheme.onBackground, fontSize: 15)),
+      title: Text(title, style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 15)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (trailingText != null)
-            Text(trailingText, style: TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.5), fontSize: 14)),
+            Text(trailingText, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.5), fontSize: 14)),
           if (trailingText != null) const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: theme.colorScheme.onBackground.withOpacity(0.5), size: 20),
+          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withOpacity(0.5), size: 20),
         ],
       ),
       onTap: onTap ?? () {},
@@ -146,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingsSwitch(String title, bool value, ValueChanged<bool> onChanged) {
     final theme = Theme.of(context);
     return ListTile(
-      title: Text(title, style: TextStyle(color: theme.colorScheme.onBackground, fontSize: 15)),
+      title: Text(title, style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 15)),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
@@ -161,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDivider() {
-    return Divider(color: Colors.white.withOpacity(0.05), height: 1, thickness: 1);
+    return Divider(color: Theme.of(context).dividerTheme.color, height: 1, thickness: 1);
   }
 
   void _showLanguageDialog(BuildContext context) {
@@ -170,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1F2531),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -182,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 l10n.translate('select_language'),
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               _buildLanguageOption(context, 'Tiếng Việt', 'vi', localeProvider),
@@ -202,10 +222,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildLanguageOption(BuildContext context, String name, String code, LocaleProvider provider) {
     bool isSelected = provider.locale?.languageCode == code || (provider.locale == null && code == 'vi');
+    final theme = Theme.of(context);
     
     return ListTile(
-      title: Text(name, style: TextStyle(color: isSelected ? AppColors.primaryBlue : Colors.white)),
-      trailing: isSelected ? const Icon(Icons.check, color: AppColors.primaryBlue) : null,
+      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
+      trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
       onTap: () {
         provider.setLocale(Locale(code));
         Navigator.pop(context);
@@ -232,7 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 l10n.translate('font_size'),
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               _buildFontSizeOption(context, l10n.translate('font_size_small'), FontSizeLevel.small, fontSizeProvider),
@@ -256,7 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     
     return ListTile(
-      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onBackground)),
+      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
       trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
       onTap: () {
         provider.setFontSizeLevel(level);
@@ -284,7 +305,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 l10n.translate('appearance'),
-                style: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               _buildThemeOption(context, l10n.translate('theme_light'), ThemeMode.light, themeProvider),
@@ -307,7 +328,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     
     return ListTile(
-      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onBackground)),
+      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
       trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
       onTap: () {
         provider.setThemeMode(mode);

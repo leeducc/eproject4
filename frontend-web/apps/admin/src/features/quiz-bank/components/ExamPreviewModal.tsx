@@ -30,7 +30,7 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-gray-50/95 backdrop-blur-sm animate-in fade-in duration-200">
       
-      {/* Header Pipeline */}
+      {}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
@@ -61,7 +61,7 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Navigation */}
+        {}
         <div className="w-64 bg-white border-r border-gray-100 flex flex-col hidden md:flex shadow-sm z-10">
            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Exam Contents</h3>
@@ -108,7 +108,7 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
            </div>
         </div>
 
-      {/* Main Content Scroll */}
+      {}
       <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar scroll-smooth">
          <div className="max-w-4xl mx-auto space-y-12 pb-24">
             
@@ -130,10 +130,10 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
                     <div className="h-px bg-gray-200 flex-1"></div>
                  </div>
 
-                 {/* Render Groups */}
+                 {}
                  {section.groups.map((group, gIdx) => (
                     <div id={`part-${group.id}`} key={`group-${group.id}`} className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden break-inside-avoid scroll-mt-32">
-                       {/* Group Header */}
+                       {}
                        <div className="bg-slate-900 px-8 py-5 flex items-center justify-between">
                           <h3 className="text-xl font-bold text-white flex items-center gap-3">
                              <span className="bg-white/20 text-white px-3 py-1 rounded-lg text-sm tracking-widest uppercase">
@@ -143,14 +143,14 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
                           </h3>
                        </div>
 
-                       {/* Group Content */}
+                       {}
                        <div className="p-8 border-b border-gray-100 bg-gray-50/50">
                           <div className="prose max-w-none text-gray-800 text-lg leading-relaxed font-serif whitespace-pre-wrap">
                              {group.content}
                           </div>
                        </div>
 
-                       {/* Group Questions */}
+                       {}
                        <div className="p-8 space-y-10 bg-white">
                           {group.questions?.map((q, qIdx) => (
                             <div key={q.id} className="pt-6 first:pt-0">
@@ -169,7 +169,7 @@ export const ExamPreviewModal: React.FC<ExamPreviewModalProps> = ({ examTitle, g
                     </div>
                  ))}
 
-                 {/* Render Independent Questions */}
+                 {}
                  {section.questions.length > 0 && (
                     <div id={`indep-${section.skill}`} className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden scroll-mt-32">
                        <div className="bg-indigo-900 px-8 py-5 flex items-center justify-between">

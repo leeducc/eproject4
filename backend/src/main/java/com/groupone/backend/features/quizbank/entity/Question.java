@@ -40,7 +40,7 @@ public class Question {
     private DifficultyBand difficultyBand;
 
     @Column(columnDefinition = "TEXT")
-    private String data; // JSON blob for options, blanks, etc.
+    private String data; 
 
     @Column(name = "is_premium_content", nullable = false)
     @Builder.Default

@@ -34,7 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Strength 8 is faster (~80ms) vs default 10 (~300ms) — sufficient for security
+        
         System.out.println("[SecurityConfig] Initializing BCryptPasswordEncoder with strength=8");
         return new BCryptPasswordEncoder(8);
     }
@@ -42,17 +42,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // NOTE: Spring's CorsConfiguration does NOT support wildcard ports like "http://10.0.2.2:*".
-        // Using a wildcard pattern means it NEVER matches, causing CORS preflight to silently fail
-        // and the Flutter client to wait until the 10s timeout fires.
-        // Fix: list each allowed origin explicitly.
+        
+        
+        
+        
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "http://localhost:3001",
             "http://localhost:3002",
-            "http://10.0.2.2:8123"   // Android Emulator -> host machine port 8123
+            "http://10.0.2.2:8123"   
         ));
-        // Also allow any origin pattern for the Android emulator on any port (dev convenience)
+        
         configuration.setAllowedOriginPatterns(List.of("http://10.0.2.2:*", "http://localhost:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
@@ -73,11 +73,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/vocabulary/**").permitAll()
                         .requestMatchers("/api/v1/app-sections/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/faqs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/policies/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/exams/**").permitAll()
                         .requestMatchers("/api/v1/questions/filter").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/ranking/leaderboard").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/questions/seed").permitAll()
+                        .requestMatchers("/media/**").permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/api/chat/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/api/v1/moderation/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/teacher/**").hasRole("TEACHER")

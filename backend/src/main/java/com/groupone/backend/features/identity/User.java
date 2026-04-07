@@ -6,8 +6,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
 @Table(name = "users")
@@ -16,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,6 +58,10 @@ public class User {
     @Builder.Default
     private Integer iCoinBalance = 0;
 
+    @Column(name = "held_icoin_balance", nullable = false)
+    @Builder.Default
+    private Integer heldICoinBalance = 0;
+
     @Column(name = "is_pro", nullable = false)
     @Builder.Default
     private Boolean isPro = false;
@@ -60,6 +69,48 @@ public class User {
     @Column(name = "pro_expiry_date")
     private LocalDateTime proExpiryDate;
 
+    @Builder.Default
+    @Column(name = "is_online", nullable = false)
+    private boolean isOnline = false;
+
+    @Column(name = "last_active_at")
+    private LocalDateTime lastActiveAt;
+    
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile profile;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return passwordHash;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return status != UserStatus.SUSPENDED;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status == UserStatus.ACTIVE;
+    }
 }

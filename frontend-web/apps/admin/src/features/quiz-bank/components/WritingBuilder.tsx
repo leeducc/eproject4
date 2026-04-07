@@ -7,7 +7,7 @@ import { getMediaUrl } from '../utils';
 
 export interface WritingBuilderProps {
   initialQuestion?: Question | null;
-  onSave?: () => void;
+  onSave?: (data?: Partial<Question>) => void;
 }
 
 export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion, onSave }) => {
@@ -36,26 +36,29 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
       return;
     }
 
-    // There's no specific answers data needed for a writing question, keeping it generic.
+    
     const retainedMediaUrls = retainedMedia.map(m => m.url);
     const payload = {
-      skill: 'WRITING' as const, // Special type technically
-      type: 'ESSAY' as const, // Correctly categorized as ESSAY
+      skill: 'WRITING' as const, 
+      type: 'ESSAY' as const, 
       difficultyBand: difficultyBand,
       instruction,
       explanation,
-      data: initialQuestion?.data || { template: '', blanks: {} }, // Mock payload for typing
+      data: initialQuestion?.data || { template: '', blanks: {} }, 
       isPremiumContent: isPremium,
-      retainedMediaUrls
+      retainedMediaUrls,
+      tags: initialQuestion?.tags || []
     };
-    if (initialQuestion) {
-      console.log('[WritingBuilder] Updating a writing question', { instruction });
+    if (initialQuestion?.id) {
+      console.log('[WritingBuilder] Updating writing question', { id: initialQuestion.id, payload });
       await updateQuestion(initialQuestion.id, payload);
-    } else {
-      console.log('[WritingBuilder] Saving a writing question', { instruction });
+    } else if (!initialQuestion) {
+      console.log('[WritingBuilder] Creating new writing question', { payload });
       await createQuestion(payload);
+    } else {
+      console.log('[WritingBuilder] Draft state updated');
     }
-    if (onSave) onSave();
+    if (onSave) onSave(payload);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +119,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
 
   return (
     <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8 transition-colors">
-      {/* Header */}
+      {}
       <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select 
           className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
@@ -140,7 +143,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
         </div>
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="p-6 space-y-6">
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Writing Prompt / Task Description</label>
@@ -164,15 +167,20 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="text-sm text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 transition-colors outline-none"
+                  className="hidden"
+                  id="writing-attachment"
                 />
+                <label 
+                  htmlFor="writing-attachment"
+                  className="cursor-pointer bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium border dark:border-slate-700 transition-colors"
+                >
+                  Select Files
+                </label>
               </div>
-              
+
               {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
-                <div className="mt-2 text-sm text-gray-500 dark:text-slate-400">
-                  <div className="font-semibold mb-2 text-gray-700 dark:text-slate-300">Media Previews:</div>
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-800 transition-colors">
                   <div className="flex flex-wrap gap-4">
-                    {/* Retained Media previews */}
                     {retainedMedia.map((media, idx) => (
                       <div key={`retained-${idx}`} className="relative border dark:border-slate-800 rounded p-1 inline-block transition-colors">
                         <button 
@@ -201,7 +209,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
                       </div>
                     ))}
 
-                    {/* New Files Previews */}
+                    {}
                     {mediaFiles.map((file, idx) => {
                        const objectUrl = URL.createObjectURL(file);
                        return (
@@ -233,7 +241,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
           </div>
         </div>
 
-        {/* Explanation Input */}
+        {}
         <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800 transition-colors">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation / Grading Rubric (Optional)</label>
           <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-900 transition-colors">
@@ -247,7 +255,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
         </div>
       </div>
 
-      {/* Footer Settings */}
+      {}
       <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex items-center justify-end transition-colors">
         <div>
            <button 
@@ -269,7 +277,7 @@ export const WritingBuilder: React.FC<WritingBuilderProps> = ({ initialQuestion,
         variant="danger"
       />
 
-      {/* Full Size Image Preview Modal */}
+      {}
       {previewImageUrl && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"

@@ -115,7 +115,7 @@ public class QuestionBankController {
 
     @GetMapping("/sample-excel")
     public ResponseEntity<byte[]> getSampleExcel() throws IOException {
-        // Simple internal implementation for sample
+        
         try (org.apache.poi.ss.usermodel.Workbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(); 
              java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
             org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Sample Questions");

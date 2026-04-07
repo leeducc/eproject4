@@ -1,4 +1,5 @@
 package com.groupone.backend.features.quizbank.service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,7 @@ public class QuestionBankService {
     @Value("${media.upload.dir:d:/project/eproject4/backend/uploads}")
     private String baseUploadDir;
 
+    @Transactional(readOnly = true)
     public List<QuestionResponse> getAllQuestions(SkillType skill) {
         List<Question> questions = (skill != null) ? questionRepository.findBySkill(skill)
                 : questionRepository.findAll();
@@ -70,6 +72,7 @@ public class QuestionBankService {
         return questions.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public PaginatedResponse<QuestionResponse> getQuestionsPaginated(
             SkillType skill, 
             QuestionType type, 
@@ -83,7 +86,7 @@ public class QuestionBankService {
             
         List<QuestionResponse> allResponses = new ArrayList<>();
 
-        // 1. Fetch Groups if type is COMPREHENSION or ALL
+        
         if (type == null || type == QuestionType.COMPREHENSION) {
             List<QuestionGroup> groups = questionGroupRepository.findAll().stream()
                 .filter(g -> (skill == null || g.getSkill() == skill))
@@ -96,7 +99,7 @@ public class QuestionBankService {
             log.info("[QuestionBankService] Found {} groups", groups.size());
         }
 
-        // 2. Fetch Questions if type is NOT COMPREHENSION or ALL
+        
         if (type == null || type != QuestionType.COMPREHENSION) {
             List<Question> questions = questionRepository.findPaginated(
                     skill != null ? skill.name() : null,
@@ -111,7 +114,7 @@ public class QuestionBankService {
             log.info("[QuestionBankService] Found {} questions", questions.size());
         }
 
-        // Simple sorting for now - standalone questions after groups or by ID
+        
         allResponses.sort((a, b) -> b.getId().compareTo(a.getId()));
 
         int toIndex = Math.min(allResponses.size(), limit);
@@ -130,6 +133,7 @@ public class QuestionBankService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public QuestionResponse getQuestionById(Long id) {
         Question q = questionRepository.findById(id).orElseThrow(() -> new RuntimeException("Question not found"));
         return mapToResponse(q);
@@ -140,12 +144,12 @@ public class QuestionBankService {
         mapToEntity(req, q);
         Map<String, String> fileNameToUrl = handleMediaUpload(q, mediaFiles, req.getRetainedMediaUrls(), null);
         
-        // Post-process data to replace placeholders
+        
         if (q.getData() != null && !fileNameToUrl.isEmpty()) {
             q.setData(replacePlaceholders(q.getData(), fileNameToUrl));
         }
 
-        // Set author from Security Context
+        
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof User) {
             q.setAuthorId(((User) principal).getId());
@@ -162,12 +166,12 @@ public class QuestionBankService {
         mapToEntity(req, q);
         Map<String, String> fileNameToUrl = handleMediaUpload(q, mediaFiles, req.getRetainedMediaUrls(), originalUrls);
         
-        // Post-process data to replace placeholders
+        
         if (q.getData() != null && !fileNameToUrl.isEmpty()) {
             q.setData(replacePlaceholders(q.getData(), fileNameToUrl));
         }
 
-        // Maintain original creator, but if it's null (old data) set it to the current user
+        
         if (q.getAuthorId() == null) {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (principal instanceof User) {
@@ -245,15 +249,15 @@ public class QuestionBankService {
     private Map<String, String> handleMediaUpload(Question q, List<MultipartFile> mediaFiles, List<String> retainedMediaUrls, String originalUrls) {
         Map<String, String> fileNameToUrl = new java.util.HashMap<>();
         
-        // finalUrls will hold the URLs we want to save
+        
         List<String> finalUrls = new ArrayList<>();
         List<String> finalTypes = new ArrayList<>();
 
-        // 1. Process Retained Media
+        
         if (retainedMediaUrls != null && !retainedMediaUrls.isEmpty()) {
             for (String url : retainedMediaUrls) {
                 finalUrls.add(url);
-                // Lookup MIME type for retained files
+                
                 String mimeType = mediaFileRepository.findByStoredPath(url.trim())
                         .map(MediaFile::getMimeType)
                         .orElse("application/octet-stream");
@@ -261,7 +265,7 @@ public class QuestionBankService {
             }
         }
 
-        // 2. Identify and delete removed files (comparing vs what was ON DISK before this request)
+        
         List<String> oldUrls = (originalUrls != null && !originalUrls.isEmpty()) 
                 ? Arrays.asList(originalUrls.split(",")) 
                 : new ArrayList<>();
@@ -269,13 +273,13 @@ public class QuestionBankService {
         List<String> retainedList = retainedMediaUrls != null ? retainedMediaUrls : new ArrayList<>();
 
         for (String url : oldUrls) {
-            // If it's not in the retained list, delete it
+            
             if (!retainedList.contains(url)) {
                 deleteFileFromStorage(url);
             }
         }
 
-        // 3. Process New Media Files
+        
         if (mediaFiles != null && !mediaFiles.isEmpty()) {
             for (MultipartFile media : mediaFiles) {
                 if (!media.isEmpty()) {
@@ -304,7 +308,7 @@ public class QuestionBankService {
             }
         }
 
-        // 4. Update Entity
+        
         if (!finalUrls.isEmpty()) {
             q.setMediaUrl(String.join(",", finalUrls));
             q.setMediaType(String.join(",", finalTypes));
@@ -350,7 +354,7 @@ public class QuestionBankService {
             String changesJson = null;
 
             if ("UPDATED".equals(action)) {
-                // Try to find the previous history record to compute diff
+                
                 Page<QuestionHistory> lastHistories = questionHistoryRepository.findByQuestionIdOrderByCreatedAtDesc(
                     question.getId(), PageRequest.of(0, 1));
                 
@@ -429,7 +433,7 @@ public class QuestionBankService {
         try {
             QuestionResponse snapshot = objectMapper.readValue(history.getSnapshot(), QuestionResponse.class);
             
-            // Restore fields from snapshot
+            
             question.setSkill(snapshot.getSkill());
             question.setType(snapshot.getType());
             question.setDifficultyBand(snapshot.getDifficultyBand());
@@ -441,7 +445,7 @@ public class QuestionBankService {
                 question.setData(objectMapper.writeValueAsString(snapshot.getData()));
             }
 
-            // Media mapping
+            
             if (snapshot.getMediaUrls() != null && !snapshot.getMediaUrls().isEmpty()) {
                 question.setMediaUrl(String.join(",", snapshot.getMediaUrls()));
             } else {
@@ -467,7 +471,7 @@ public class QuestionBankService {
             return;
 
         try {
-            // e.g. /media/answers/abc.jpg -> answers/abc.jpg
+            
             String relativePath = mediaUrl.substring(7); 
             Path filePath = Paths.get(baseUploadDir).resolve(relativePath).toAbsolutePath().normalize();
             Files.deleteIfExists(filePath);
@@ -491,7 +495,7 @@ public class QuestionBankService {
     private void mapToEntity(QuestionRequest req, Question q) {
         q.setSkill(req.getSkill());
         
-        // Enforce WRITING skill always uses ESSAY type
+        
         if (req.getSkill() == SkillType.WRITING) {
             log.info("[QuestionBankService] Enforcing ESSAY type for WRITING skill. Previous type: {}", req.getType());
             q.setType(QuestionType.ESSAY);
@@ -532,6 +536,7 @@ public class QuestionBankService {
         }
     }
 
+    @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public QuestionResponse mapToResponse(Question q) {
         Map<String, Object> dataMap = null;
@@ -565,6 +570,7 @@ public class QuestionBankService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public QuestionResponse mapGroupToResponse(QuestionGroup g) {
         return QuestionResponse.builder()
                 .id(g.getId())
@@ -601,7 +607,7 @@ public class QuestionBankService {
         List<Map<String, String>> rows = excelService.importQuestionsFromExcel(inputStream);
         Map<String, Long> excelIdToDbGroupId = new HashMap<>();
 
-        // Pass 1: Handle PASSAGE rows
+        
         for (Map<String, String> row : rows) {
             String rowType = row.get("row_type");
             if ("PASSAGE".equalsIgnoreCase(rowType)) {
@@ -619,7 +625,7 @@ public class QuestionBankService {
                     
                     excelQuestionMapper.mapMapToGroup(row, g);
                     
-                    // Set author
+                    
                     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                     if (principal instanceof User) {
                         g.setAuthorId(((User) principal).getId());
@@ -635,7 +641,7 @@ public class QuestionBankService {
             }
         }
 
-        // Pass 2: Handle QUESTION rows
+        
         for (Map<String, String> row : rows) {
             String rowType = row.get("row_type");
             if ("QUESTION".equalsIgnoreCase(rowType)) {
@@ -653,7 +659,7 @@ public class QuestionBankService {
 
                     excelQuestionMapper.mapMapToEntity(row, q);
                     
-                    // Link to group if group_id is provided
+                    
                     String groupIdStr = row.get("group_id");
                     if (groupIdStr != null && !groupIdStr.trim().isEmpty()) {
                         Long dbGroupId = excelIdToDbGroupId.get(groupIdStr.trim());
@@ -671,7 +677,7 @@ public class QuestionBankService {
                         q.setGroup(null);
                     }
 
-                    // Set author
+                    
                     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                     if (principal instanceof User) {
                         q.setAuthorId(((User) principal).getId());

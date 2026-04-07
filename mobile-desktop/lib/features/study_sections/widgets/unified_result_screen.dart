@@ -4,8 +4,8 @@ import 'package:confetti/confetti.dart';
 class UnifiedResultScreen extends StatefulWidget {
   final int score;
   final int total;
-  final int time; // duration in seconds
-  final String skill; // 'READING' or 'LISTENING'
+  final int time; 
+  final String skill; 
 
   const UnifiedResultScreen({
     super.key,

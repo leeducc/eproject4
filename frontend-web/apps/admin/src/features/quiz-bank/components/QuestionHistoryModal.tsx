@@ -105,7 +105,7 @@ export const QuestionHistoryModal: React.FC<QuestionHistoryModalProps> = ({
                                             </span>
                                         </div>
 
-                                        {/* Specific Changes Display */}
+                                        {}
                                         {history.changes && (
                                             <div className="mt-4 p-4 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-800/30">
                                                 <p className="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
@@ -176,7 +176,7 @@ export const QuestionHistoryModal: React.FC<QuestionHistoryModalProps> = ({
                 </div>
             </div>
 
-            {/* Snapshot Viewer Sub-Modal */}
+            {}
             {selectedSnapshot && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedSnapshot(null)}>
                     <div 
@@ -222,7 +222,7 @@ export const QuestionHistoryModal: React.FC<QuestionHistoryModalProps> = ({
                         try {
                             await rollbackToVersion(rollbackId);
                             toast.success('Question rolled back successfully');
-                            // Refresh data
+                            
                             await fetchQuestionById(questionId);
                             const updatedHistory = await fetchQuestionHistory(questionId);
                             setHistories(updatedHistory);

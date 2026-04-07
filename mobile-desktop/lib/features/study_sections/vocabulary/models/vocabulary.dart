@@ -1,10 +1,10 @@
 class Vocabulary {
   final int? id;
   final String word;
-  final String type; // 'word' or 'phrase'
-  final String level; // Original CEFR (A1, A2, B1, B2, C1, C2)
-  final String levelGroup; // IELTS-style (0-4, 5-6, 7-8, 9)
-  final String pos; // Part of Speech
+  final String type; 
+  final String level; 
+  final String levelGroup; 
+  final String pos; 
   final String definitionUrl;
   final String voiceUrl;
   final String definition;
@@ -61,7 +61,7 @@ class Vocabulary {
       'pos': pos,
       'phonetic': phonetic,
       'vi': '', 
-      'meaning': definition, // Mapped for legacy UI support
+      'meaning': definition, 
       'definition': definition,
       'meaning_vi': '',
       'examples': examples,
@@ -73,4 +73,3 @@ class Vocabulary {
     };
   }
 }
-

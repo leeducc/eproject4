@@ -5,6 +5,6 @@ import java.util.List;
 
 @Data
 public class FilterGroup {
-    private String logic; // "AND" or "OR"
-    private List<String> tags; // e.g., "UI:TFNG", "Topic:Science"
+    private String logic; 
+    private List<String> tags; 
 }

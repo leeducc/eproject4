@@ -3,23 +3,25 @@ import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthApi {
 
   static final String baseUrl = '${dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api'}/auth';
   
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
-
     serverClientId: dotenv.env['GOOGLE_SERVER_CLIENT_ID'], 
     clientId: dotenv.env['GOOGLE_CLIENT_ID'],
     scopes: ['email'],
   );
 
+  static final _storage = FlutterSecureStorage();
+
   static Future<Map<String, dynamic>?> loginWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        return null; // The user canceled the sign-in
+        return null; 
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -29,7 +31,7 @@ class AuthApi {
         throw Exception('Failed to get ID token from Google');
       }
 
-      // Send the ID token to our Spring Boot backend
+      
       final response = await http.post(
         Uri.parse('$baseUrl/login/google'),
         headers: {'Content-Type': 'application/json'},
@@ -39,14 +41,14 @@ class AuthApi {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data.containsKey('token')) {
+          await _storage.write(key: 'auth_token', value: data['token']);
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', data['token']);
           if (data.containsKey('isPro')) {
             await prefs.setBool('is_pro', data['isPro'] == true);
           }
-          print('Saved token from Google login');
+          print('Saved token securely from Google login');
         }
-        return data; // contains token, email, role, fullName
+        return data; 
       } else {
         throw Exception('Backend authentication failed: ${response.statusCode} - ${response.body}');
       }
@@ -69,12 +71,12 @@ class AuthApi {
       
       if (response.statusCode == 200) {
         if (data.containsKey('token')) {
+          await _storage.write(key: 'auth_token', value: data['token']);
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', data['token']);
           if (data.containsKey('isPro')) {
             await prefs.setBool('is_pro', data['isPro'] == true);
           }
-          print('Saved token from email login');
+          print('Saved token securely from email login');
         }
         return {'success': true, ...data};
       } else {
@@ -93,6 +95,22 @@ class AuthApi {
         userMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra máy chủ backend.';
       }
       return {'success': false, 'error': '$userMessage: ${e.toString()}'};
+    }
+  }
+
+  static Future<bool> checkEmailAvailable(String email) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/register/check-email?email=$email'),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return data['available'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      print('Check email error: $e');
+      return false;
     }
   }
 
@@ -163,5 +181,13 @@ class AuthApi {
       print('Reset password error: $e');
       return false;
     }
+  }
+  static Future<String?> getToken() async {
+    return await _storage.read(key: 'auth_token');
+  }
+
+  static Future<void> logout() async {
+    await _storage.delete(key: 'auth_token');
+    await _googleSignIn.signOut();
   }
 }

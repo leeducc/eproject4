@@ -35,7 +35,7 @@ export const deleteFAQ = async (id: number): Promise<void> => {
     await apiClient.delete(`/v1/admin/faqs/${id}`);
 };
 
-// Public endpoint for mobile use (if needed in web as well)
+
 export const getPublicFAQs = async (): Promise<FAQ[]> => {
     const response = await apiClient.get('/v1/faqs');
     return response.data;

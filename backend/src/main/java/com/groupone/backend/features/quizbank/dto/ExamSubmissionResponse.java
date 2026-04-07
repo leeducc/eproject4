@@ -19,7 +19,7 @@ public class ExamSubmissionResponse {
     private Double listeningScore;
     private Double readingScore;
     
-    // Derived from writingSubmission
+    
     private Double writingScore;
     private String writingStatus;
 

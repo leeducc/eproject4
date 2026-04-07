@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/models/quiz_bank_models.dart';
 import 'package:provider/provider.dart';
 import '../providers/exam_provider.dart';
@@ -7,7 +8,7 @@ class QuestionRenderer extends StatelessWidget {
   final Question question;
   final int indexPrefix;
 
-  const QuestionRenderer({Key? key, required this.question, required this.indexPrefix}) : super(key: key);
+  const QuestionRenderer({super.key, required this.question, required this.indexPrefix});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class QuestionRenderer extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.2),
+                  color: Colors.blueAccent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -57,13 +58,13 @@ class QuestionRenderer extends StatelessWidget {
     final currentAnswer = provider.state?.userAnswers[question.id];
 
     switch (question.type) {
-      case QuestionType.MULTIPLE_CHOICE:
-        // SQL mock data uses 'multiple_select' boolean and 'label' for option text
+      case QuestionType.multipleChoice:
+        
         final bool isMultiSelect = question.data['multiple_select'] == true
             || question.data['selection_type'] == 'MULTI';
         final options = List<dynamic>.from(question.data['options'] ?? []);
 
-        print('[QuestionRenderer] MULTIPLE_CHOICE id=${question.id} options=${options.length} isMultiSelect=$isMultiSelect');
+        debugPrint('[QuestionRenderer] multipleChoice id=${question.id} options=${options.length} isMultiSelect=$isMultiSelect');
 
         if (options.isEmpty) {
           return const Text('No options defined.', style: TextStyle(color: Colors.white54));
@@ -71,7 +72,7 @@ class QuestionRenderer extends StatelessWidget {
 
         return Column(
           children: options.map<Widget>((opt) {
-            // SQL uses 'label', fallback to 'text' for flexibility
+            
             final optionId = (opt['id'] ?? '').toString();
             final optionText = (opt['label'] ?? opt['text'] ?? optionId).toString();
 
@@ -94,7 +95,7 @@ class QuestionRenderer extends StatelessWidget {
                         provider.recordAnswer(question.id, lst);
                       },
                       title: Text(optionText, style: const TextStyle(color: Colors.white70)),
-                      tileColor: isSelected ? Colors.blueAccent.withOpacity(0.1) : Colors.transparent,
+                      tileColor: isSelected ? Colors.blueAccent.withValues(alpha: 0.1) : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: BorderSide(color: isSelected ? Colors.blueAccent : Colors.white12),
@@ -107,7 +108,7 @@ class QuestionRenderer extends StatelessWidget {
                         provider.recordAnswer(question.id, val);
                       },
                       title: Text(optionText, style: const TextStyle(color: Colors.white70)),
-                      tileColor: isSelected ? Colors.blueAccent.withOpacity(0.1) : Colors.transparent,
+                      tileColor: isSelected ? Colors.blueAccent.withValues(alpha: 0.1) : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: BorderSide(color: isSelected ? Colors.blueAccent : Colors.white12),
@@ -117,13 +118,13 @@ class QuestionRenderer extends StatelessWidget {
           }).toList(),
         );
 
-      case QuestionType.FILL_BLANK:
+      case QuestionType.fillBlank:
         final blanksMap = question.data['blanks'] as Map<String, dynamic>? ?? {};
         final userInputs = currentAnswer is Map
             ? Map<String, dynamic>.from(currentAnswer)
             : <String, dynamic>{};
 
-        print('[QuestionRenderer] FILL_BLANK id=${question.id} blanks=${blanksMap.keys.toList()}');
+        debugPrint('[QuestionRenderer] fillBlank id=${question.id} blanks=${blanksMap.keys.toList()}');
 
         if (blanksMap.isEmpty) {
           return const Text('No blanks defined.', style: TextStyle(color: Colors.white54));
@@ -157,9 +158,9 @@ class QuestionRenderer extends StatelessWidget {
           }).toList(),
         );
 
-      case QuestionType.MATCHING:
-        // SQL format: left_items=[{id,text}], right_items=[{id,text}], solution={leftId: rightId}
-        // Fallback: slots/options (older format)
+      case QuestionType.matching:
+        
+        
         final leftItems = List<dynamic>.from(
             question.data['left_items'] ?? question.data['slots'] ?? []);
         final rightItems = List<dynamic>.from(
@@ -168,7 +169,7 @@ class QuestionRenderer extends StatelessWidget {
             ? Map<String, dynamic>.from(currentAnswer)
             : <String, dynamic>{};
 
-        print('[QuestionRenderer] MATCHING id=${question.id} left=${leftItems.length} right=${rightItems.length}');
+        debugPrint('[QuestionRenderer] matching id=${question.id} left=${leftItems.length} right=${rightItems.length}');
 
         if (leftItems.isEmpty) {
           return const Text('No matching items defined.', style: TextStyle(color: Colors.white54));

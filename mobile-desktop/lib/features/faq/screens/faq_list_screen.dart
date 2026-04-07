@@ -37,11 +37,11 @@ class _FAQListScreenState extends State<FAQListScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.translate('faq'), style: TextStyle(color: colorScheme.onBackground, fontSize: 18)),
+        title: Text(l10n.translate('faq'), style: TextStyle(color: colorScheme.onSurface, fontSize: 18)),
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshFAQs,
@@ -63,7 +63,7 @@ class _FAQListScreenState extends State<FAQListScreen> {
                       Text(
                         l10n.translate('data_load_error'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: colorScheme.onBackground),
+                        style: TextStyle(color: colorScheme.onSurface),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
@@ -79,11 +79,11 @@ class _FAQListScreenState extends State<FAQListScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.help_outline, color: colorScheme.onBackground.withOpacity(0.5), size: 48),
+                    Icon(Icons.help_outline, color: colorScheme.onSurface.withOpacity(0.5), size: 48),
                     const SizedBox(height: 16),
                     Text(
                       l10n.translate('no_data'),
-                      style: TextStyle(color: colorScheme.onBackground.withOpacity(0.5)),
+                      style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
@@ -104,9 +104,9 @@ class _FAQListScreenState extends State<FAQListScreen> {
                 return ListTile(
                   title: Text(
                     faq.getLocalizedQuestion(context),
-                    style: TextStyle(color: colorScheme.onBackground, fontSize: 15, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: colorScheme.onSurface, fontSize: 15, fontWeight: FontWeight.w500),
                   ),
-                  trailing: Icon(Icons.chevron_right, color: colorScheme.onBackground.withOpacity(0.5), size: 20),
+                  trailing: Icon(Icons.chevron_right, color: colorScheme.onSurface.withOpacity(0.5), size: 20),
                   onTap: () {
                     Navigator.push(
                       context,

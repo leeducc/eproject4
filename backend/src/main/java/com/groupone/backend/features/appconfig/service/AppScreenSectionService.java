@@ -35,7 +35,7 @@ public class AppScreenSectionService {
         Long userId = getCurrentUserId();
         List<AppScreenSection> sections;
         
-        // Normalize skill to uppercase to match DB values like "LISTENING"
+        
         String normalizedSkill = (skill != null) ? skill.toUpperCase() : null;
 
         if (normalizedSkill != null && difficultyBand != null) {
@@ -106,7 +106,7 @@ public class AppScreenSectionService {
     }
 
     private void validateDisplayOrder(AppScreenSection newSection) {
-        // Optional logic implementation
+        
     }
 
     private AppScreenSectionResponse mapToResponse(AppScreenSection section, Long userId) {

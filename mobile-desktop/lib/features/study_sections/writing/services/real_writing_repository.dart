@@ -16,13 +16,13 @@ class RealWritingRepository implements WritingRepository {
     try {
       final topics = await _apiService.fetchTopics();
       
-      // Filter by band and map to WritingPrompt
+      
       final filtered = topics.where((topic) {
         if (topic.difficultyBand == null) return false;
         
-        // Map backend band name to enum
-        // Backend: BAND_0_4, BAND_5_6, BAND_7_8, BAND_9
-        // Flutter: band0_4, band5_6, band7_8, band9
+        
+        
+        
         final backendBand = topic.difficultyBand!.toUpperCase();
         if (backendBand == 'BAND_0_4' && band == IeltsBand.band0_4) return true;
         if (backendBand == 'BAND_5_6' && band == IeltsBand.band5_6) return true;
@@ -33,7 +33,7 @@ class RealWritingRepository implements WritingRepository {
       }).map((topic) {
         return WritingPrompt(
           id: topic.id.toString(),
-          taskType: 2, // Default to Task 2 for now as we don't have taskType in backend yet
+          taskType: 2, 
           title: topic.title,
           promptText: topic.prompt,
           band: band,

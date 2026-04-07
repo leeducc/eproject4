@@ -43,9 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft > 0) {
-        setState(() {
-          _secondsLeft--;
-        });
+        if (mounted) setState(() => _secondsLeft--);
       } else {
         timer.cancel();
       }
@@ -53,11 +51,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _requestOtp() async {
+    debugPrint('[RegisterScreen] _requestOtp triggered');
     final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('enter_valid_email_first'))),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    final isAvailable = await AuthApi.checkEmailAvailable(email);
+    setState(() => _isLoading = false);
+
+    if (!isAvailable) {
+      debugPrint('[RegisterScreen] email already registered');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email đã được sử dụng')),
       );
       return;
     }
@@ -71,6 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (captchaToken != null && captchaToken.isNotEmpty) {
+      debugPrint('[RegisterScreen] captcha verified, sending code');
       _startCooldown();
       await AuthApi.sendVerificationCode(email, captchaToken);
 
@@ -85,6 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _handleRegister() async {
+    debugPrint('[RegisterScreen] _handleRegister triggered');
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     
@@ -105,11 +118,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!mounted) return;
     if (success) {
+      debugPrint('[RegisterScreen] registration success');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('registration_success'))),
       );
       Navigator.pop(context);
     } else {
+      debugPrint('[RegisterScreen] registration failed');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('invalid_info_or_code'))),
       );
@@ -118,15 +133,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[RegisterScreen] build triggered');
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        title: Text(
+          l10n.translate('register_title'),
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -134,7 +159,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 20),
+                Text(
+                   l10n.translate('join_us'),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.translate('register_subtitle'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+                const SizedBox(height: 48),
                 CustomTextField(
                   hintText: l10n.translate('email_hint'),
                   controller: _emailController,
@@ -146,7 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 CustomTextField(
-                  hintText: l10n.translate('password_placeholder'), // Using this as OTP placeholder too? No, I'll use a separate key.
+                  hintText: l10n.translate('verification_code_placeholder'),
                   controller: _codeController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -157,83 +199,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ? GestureDetector(
                           onTap: _requestOtp,
                           child: Text(
-                            l10n.translate('get_verification_code'),
-                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            l10n.translate('get_code'),
+                            style: TextStyle(
+                              color: theme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                         )
                       : (_secondsLeft > 0
                           ? Text(
                               '${_secondsLeft}s',
-                              style: const TextStyle(color: Colors.white54, fontSize: 14),
+                              style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.4), fontSize: 13),
                             )
-                          : null),
+                          : GestureDetector(
+                              onTap: _requestOtp,
+                              child: Text(
+                                l10n.translate('resend'),
+                                style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            )),
                 ),
-                if (_hasRequestedOtp && _secondsLeft == 0)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: _requestOtp,
-                        child: Text(
-                          l10n.translate('resend_verification_code'),
-                          style: const TextStyle(
-                            color: Colors.blueAccent,
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 CustomTextField(
                   hintText: l10n.translate('password_placeholder'),
                   isPassword: true,
                   controller: _passwordController,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return l10n.translate('enter_password');
-                    if (value.length < 6) return l10n.translate('password_too_short');
+                    if (value.length < 8) return l10n.translate('password_too_short');
+                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$').hasMatch(value)) {
+                      return 'Mật khẩu phải bao gồm chữ hoa, chữ thường và số';
+                    }
                     return null;
                   },
                 ),
-              const SizedBox(height: 10),
-              CustomButton(
-                text: l10n.translate('register_button'),
-                isLoading: _isLoading,
-                onPressed: _handleRegister,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () => setState(() => _isAgreed = !_isAgreed),
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _isAgreed ? Colors.white : Colors.transparent,
-                        border: Border.all(color: Colors.white54, width: 2),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: Checkbox(
+                        value: _isAgreed,
+                        onChanged: (val) => setState(() => _isAgreed = val ?? false),
+                        activeColor: theme.primaryColor,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        side: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
                       ),
-                      child: _isAgreed
-                          ? const Icon(Icons.check, size: 14, color: Colors.black)
-                          : null,
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.translate('privacy_policy_terms'),
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isAgreed = !_isAgreed),
+                        child: Text(
+                          l10n.translate('privacy_policy_terms'),
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                CustomButton(
+                  text: l10n.translate('register_button'),
+                  isLoading: _isLoading,
+                  onPressed: _handleRegister,
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    )
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:mobile_desktop/core/providers/ielts_level_provider.dart';
 
 class WritingPrompt {
   final String id;
-  final int taskType; // e.g., Task 1 or Task 2
+  final int taskType; 
   final String title;
   final String promptText;
   final IeltsBand band;

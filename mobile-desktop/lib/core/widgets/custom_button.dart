@@ -4,38 +4,48 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isLoading;
+  final Color? backgroundColor;
+  final Color? textColor;
 
   const CustomButton({
     Key? key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
+    this.backgroundColor,
+    this.textColor,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = backgroundColor ?? theme.primaryColor;
+    final tc = textColor ?? (bg == theme.primaryColor ? theme.colorScheme.onPrimary : Colors.white);
+
     return SizedBox(
       width: double.infinity,
-      height: 55,
+      height: 70,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1E2F42),
+          backgroundColor: bg,
+          foregroundColor: tc,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(35),
           ),
-          elevation: 0,
+          elevation: theme.brightness == Brightness.dark ? 0 : 4,
+          shadowColor: bg.withOpacity(0.4),
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading
-            ? const SizedBox(
-          height: 24,
-          width: 24,
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-        )
+            ? SizedBox(
+                height: 28,
+                width: 28,
+                child: CircularProgressIndicator(color: tc, strokeWidth: 3),
+              )
             : Text(
-          text,
-          style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+                text,
+                style: TextStyle(fontSize: 18, color: tc, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+              ),
       ),
     );
   }

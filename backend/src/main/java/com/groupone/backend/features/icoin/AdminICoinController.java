@@ -19,7 +19,7 @@ public class AdminICoinController {
     private final ICoinService iCoinService;
     private final UserRepository userRepository;
 
-    // ── List all transactions ─────────────────────────────────────────────────
+    
     @GetMapping("/api/admin/icoin/transactions")
     public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
         List<TransactionResponse> result = iCoinService.getAllTransactions().stream()
@@ -38,7 +38,7 @@ public class AdminICoinController {
         return ResponseEntity.ok(result);
     }
 
-    // ── Per-user balance operations ───────────────────────────────────────────
+    
     @GetMapping("/api/admin/users/{userId}/icoin")
     public ResponseEntity<ICoinBalanceResponse> getBalance(@PathVariable Long userId) {
         User user = userRepository.findById(userId)

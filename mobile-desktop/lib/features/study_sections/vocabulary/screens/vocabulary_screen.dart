@@ -26,7 +26,7 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
     super.initState();
     _tabController = TabController(length: kIeltsLevels.length, vsync: this);
     
-    // Set initial tab based on provider
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final levelProvider = Provider.of<IeltsLevelProvider>(context, listen: false);
       final index = kIeltsLevels.indexWhere((l) => l.band == levelProvider.selectedLevel.band);
@@ -212,7 +212,7 @@ class VocabularyGrid extends StatelessWidget {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 80)), // Space for button
+              const SliverToBoxAdapter(child: SizedBox(height: 80)), 
             ],
           ),
         );
@@ -343,7 +343,7 @@ class GridCell extends StatelessWidget {
               top: -6,
               left: -6,
               child: Icon(
-                Icons.workspace_premium, // Crown-like icon
+                Icons.workspace_premium, 
                 color: Colors.amber,
                 size: 20,
               ),

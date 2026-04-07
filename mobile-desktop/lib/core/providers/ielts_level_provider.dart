@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Enum for the four IELTS band groups. Used as a filter key in repositories.
+
 enum IeltsBand { band0_4, band5_6, band7_8, band9 }
 
-/// Represents one of the 4 IELTS band levels supported in the app.
+
 class IeltsLevel {
-  final IeltsBand band;     // type-safe filter key
-  final String label;       // e.g. "Band 0–4"
-  final String range;       // e.g. "0-4"
-  final String description; // short description shown on the picker
+  final IeltsBand band;     
+  final String label;       
+  final String range;       
+  final String description; 
   final Color primaryColor;
   final Color accentColor;
-  final int barHeight;      // relative height for the bar chart (1-4)
+  final int barHeight;      
 
   const IeltsLevel({
     required this.band,
@@ -68,7 +68,7 @@ const List<IeltsLevel> kIeltsLevels = [
 ];
 
 class IeltsLevelProvider extends ChangeNotifier {
-  // Default is Band 0-4 (index 0)
+  
   IeltsLevel _selectedLevel = kIeltsLevels[0];
 
   IeltsLevel get selectedLevel => _selectedLevel;

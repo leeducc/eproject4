@@ -79,7 +79,7 @@ class _ResultScreenState extends State<ResultScreen>
 
         child: Stack(
           children: [
-            /// RAY BACKGROUND
+            
             Center(
               child: RotationTransition(
                 turns: controller,
@@ -90,7 +90,7 @@ class _ResultScreenState extends State<ResultScreen>
               ),
             ),
 
-            /// FIRST SCREEN (ẢNH 1)
+            
             AnimatedPositioned(
               duration: const Duration(milliseconds: 500),
               top: showDetail ? 60 : 160,
@@ -101,14 +101,14 @@ class _ResultScreenState extends State<ResultScreen>
                     ? CrossAxisAlignment.start
                     : CrossAxisAlignment.center,
                 children: [
-                  /// STAR + KEEP TRYING
+                  
                   Row(
                     mainAxisAlignment: showDetail
                         ? MainAxisAlignment.start
                         : MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      /// STARS
+                      
                       Row(
                         children: List.generate(3, (index) {
                           return Padding(
@@ -124,7 +124,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                       if (showDetail) const SizedBox(width: 12),
 
-                      /// KEEP TRYING
+                      
                       if (showDetail)
                         const Text(
                           "Keep trying!",
@@ -139,7 +139,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                   const SizedBox(height: 6),
 
-                  /// LEVEL + TOPIC (giữ nguyên dưới sao)
+                  
                   if (showDetail)
                     Text(
                       "$level • $topic",
@@ -168,7 +168,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                   const SizedBox(height: 35),
 
-                  /// RESULT BOX
+                  
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 40),
                     padding: const EdgeInsets.all(20),
@@ -232,7 +232,7 @@ class _ResultScreenState extends State<ResultScreen>
                 ],
               ),
 
-            /// REPORT PANEL (ẢNH 2)
+            
             AnimatedPositioned(
               duration: const Duration(milliseconds: 450),
 
@@ -254,7 +254,7 @@ class _ResultScreenState extends State<ResultScreen>
                     const SizedBox(height: 20),
                     const SizedBox(height: 20),
 
-                    /// STATS BOX
+                    
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -267,7 +267,7 @@ class _ResultScreenState extends State<ResultScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          /// ACCURACY
+                          
                           Column(
                             children: [
                               const Text(
@@ -289,7 +289,7 @@ class _ResultScreenState extends State<ResultScreen>
                             ],
                           ),
 
-                          /// TIME
+                          
                           Column(
                             children: [
                               const Text(
@@ -311,7 +311,7 @@ class _ResultScreenState extends State<ResultScreen>
                             ],
                           ),
 
-                          /// CORRECT
+                          
                           Column(
                             children: [
                               const Text(
@@ -338,7 +338,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                     const SizedBox(height: 20),
 
-                    /// TITLE
+                    
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
@@ -356,7 +356,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                     const SizedBox(height: 10),
 
-                    /// WORD LIST
+                    
                     Expanded(
                       child: ListView.builder(
                         itemCount: widget.weakWords.length,
@@ -377,13 +377,13 @@ class _ResultScreenState extends State<ResultScreen>
 
                             child: Row(
                               children: [
-                                /// WORD INFO
+                                
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      ///WORD
+                                      
                                       Row(
                                         children: [
                                           Text(
@@ -396,7 +396,7 @@ class _ResultScreenState extends State<ResultScreen>
 
                                           const SizedBox(width: 8),
 
-                                          /// TAG
+                                          
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 8,
@@ -429,7 +429,7 @@ class _ResultScreenState extends State<ResultScreen>
                                       ),
                                       const SizedBox(height: 3),
 
-                                      /// MEANING
+                                      
                                       Text(
                                         w["meaning_vi"],
                                         style: const TextStyle(
@@ -441,7 +441,7 @@ class _ResultScreenState extends State<ResultScreen>
                                   ),
                                 ),
 
-                                /// STAR
+                                
                                 IconButton(
                                   icon: Icon(
                                     favoriteManager.isFavorite(w["word"])
@@ -462,7 +462,7 @@ class _ResultScreenState extends State<ResultScreen>
                       ),
                     ),
 
-                    /// BUTTONS
+                    
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(

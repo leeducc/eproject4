@@ -27,7 +27,7 @@ class _ActiveTestScreenState extends State<ActiveTestScreen> {
 
     final questions = currentTest['questions'] as List<dynamic>;
     if (testProvider.currentIndex >= questions.length) {
-      // Completed all questions
+      
       Future.microtask(() => Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const TestSummaryScreen()),

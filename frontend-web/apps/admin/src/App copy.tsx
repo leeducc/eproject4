@@ -21,48 +21,48 @@ export const App: React.FC = () => {
     <Router>
         <Toaster position="top-right" richColors closeButton />
         <Routes>
-          {/* Public Routes */}
+          {}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Admin Routes */}
+          {}
           <Route element={<PrivateRoute allowedRole="ADMIN" />}>
             <Route path="/admin" element={<DashboardPage />} />
             
-            {/* Question Bank Routes */}
+            {}
             <Route path="/admin/questions/reading" element={<CategoryPage skill="READING" title="Reading" />} />
             <Route path="/admin/questions/listening" element={<CategoryPage skill="LISTENING" title="Listening" />} />
             <Route path="/admin/questions/vocabulary" element={<CategoryPage skill="VOCABULARY" title="Vocabulary" />} />
             <Route path="/admin/questions/writing" element={<CategoryPage skill="WRITING" title="Writing" />} />
             <Route path="/admin/questions/exam" element={<ExamPage />} />
             
-            {/* Dedicated Question View/Edit */}
+            {}
             <Route path="/admin/questions/:id" element={<QuestionDetailView />} />
             <Route path="/admin/questions/:id/edit" element={<QuestionEditPage />} />
             
-            {/* Dedicated Comprehension View/Edit */}
+            {}
             <Route path="/admin/comprehensions/:id" element={<ComprehensionDetailView />} />
             <Route path="/admin/comprehensions/:id/edit" element={<ComprehensionEditPage />} />
 
-            {/* Exam Routes */}
+            {}
             <Route path="/admin/exams" element={<ExamPage />} />
-            <Route path="/admin/exams/:id" element={<SettingsPage title="Exam Detail View" />} /> {/* Placeholder */}
+            <Route path="/admin/exams/:id" element={<SettingsPage title="Exam Detail View" />} /> {}
 
-            {/* Vocabulary Routes */}
+            {}
             <Route path="/admin/vocabulary" element={<VocabularyPage />} />
             <Route path="/admin/vocabulary/new" element={<VocabularyCreateView />} />
             <Route path="/admin/vocabulary/:id" element={<VocabularyDetailView />} />
 
-            {/* User Management */}
+            {}
             <Route path="/admin/users" element={<UserManagementPage />} />
 
-            {/* Finance/Transactions */}
+            {}
             <Route path="/admin/transactions" element={<TransactionPage />} />
 
-            {/* Settings */}
+            {}
             <Route path="/admin/settings" element={<SettingsPage title="Settings" />} />
           </Route>
 
-          {/* Default Redirect */}
+          {}
           <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>

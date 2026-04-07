@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Sidebar, NavItem } from "./Sidebar";
-import { Bell, Mail, Target, LogOut, Search, Sun, Moon } from "lucide-react";
+import { Mail, Target, LogOut, Search, Sun, Moon } from "lucide-react";
 
 export interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -8,8 +8,11 @@ export interface DashboardLayoutProps {
     userName?: string;
     userRole?: string;
     onLogout?: () => void;
-    theme?: "light" | "dark";
+    theme?: "light" | "dark" | "system";
     toggleTheme?: () => void;
+    notificationBell?: React.ReactNode;
+    profileImageUrl?: string;
+    onProfileClick?: () => void;
 }
 
 export function DashboardLayout({ 
@@ -19,7 +22,10 @@ export function DashboardLayout({
     userRole = "Online",
     onLogout,
     theme = "light",
-    toggleTheme
+    toggleTheme,
+    notificationBell,
+    profileImageUrl,
+    onProfileClick
 }: DashboardLayoutProps) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -33,7 +39,7 @@ export function DashboardLayout({
             />
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
-                {/* Top Header */}
+                {}
                 <header className="h-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-8 shrink-0 transition-all duration-300">
                     <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-full px-4 py-2 w-96 shadow-sm">
                         <Search className="w-4 h-4 text-gray-400 mr-2" />
@@ -64,10 +70,7 @@ export function DashboardLayout({
 
                         <div className="flex items-center gap-4 border-r border-gray-100 dark:border-slate-800 pr-6">
                             <Target className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
-                            <div className="relative">
-                                <Bell className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
-                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-white text-[10px] items-center justify-center flex font-bold rounded-full border-2 border-white dark:border-slate-900">1</span>
-                            </div>
+                            {notificationBell}
                             <Mail className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300" />
                         </div>
 
@@ -79,9 +82,18 @@ export function DashboardLayout({
                                     <span className="text-xs text-sidebar-inactive dark:text-slate-400">{userRole}</span>
                                 </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-orange-100 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
-                                {/* Avatar Placeholder */}
-                                <span className="text-lg">🧑‍🏫</span>
+                            <div 
+                                className="w-10 h-10 rounded-full bg-orange-100 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all"
+                                onClick={() => {
+                                    console.log("[DashboardLayout] Profile avatar clicked");
+                                    onProfileClick?.();
+                                }}
+                            >
+                                {profileImageUrl ? (
+                                    <img src={profileImageUrl} alt={userName} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-lg">🧑‍🏫</span>
+                                )}
                             </div>
                             <LogOut 
                                 className="w-5 h-5 text-gray-400 ml-2 cursor-pointer hover:text-red-500 transition-colors" 
@@ -94,7 +106,7 @@ export function DashboardLayout({
                     </div>
                 </header>
 
-                {/* Main Content Area */}
+                {}
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-dashboard-bg dark:bg-slate-950 p-8 transition-colors duration-300">
                     {children}
                 </main>

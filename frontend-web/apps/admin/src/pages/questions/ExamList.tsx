@@ -34,7 +34,7 @@ export const ExamList: React.FC<{
     fetchExams();
   }, [fetchExams]);
 
-  // Route protection / Reset
+  
   useEffect(() => {
     console.log('[ExamList] Route changed (%s), resetting view state.', window.location.pathname);
     setIsCreating(false);
@@ -129,7 +129,7 @@ export const ExamList: React.FC<{
                         Cancel & Return
                     </button>
                 </div>
-                {/* Embed the Exam Composition interface */}
+                {}
                 <ExamCompositionUI onSave={() => setIsCreating(false)} />
             </div>
         ) : (
@@ -203,7 +203,7 @@ export const ExamList: React.FC<{
                                                 <Edit2 size={16} />
                                             </button>
                                             
-                                            {/* RBAC Rules again: hide Deletes for TEACHER role */}
+                                            {}
                                             {!isTeacher && (
                                                 <button 
                                                     onClick={() => setExamToDelete(exam.id)}

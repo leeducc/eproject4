@@ -8,6 +8,7 @@ class VocabularyProvider extends ChangeNotifier {
 
   VocabularyProvider(this.repository);
 
+  IeltsBand? _currentBand;
   List<Vocabulary> _vocabularies = [];
   bool _isLoading = false;
   String? _error;
@@ -30,6 +31,11 @@ class VocabularyProvider extends ChangeNotifier {
   }
 
   Future<void> loadForBand(IeltsBand band) async {
+    if (band == _currentBand && _vocabularies.isNotEmpty) {
+      return;
+    }
+    
+    _currentBand = band;
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -38,7 +44,7 @@ class VocabularyProvider extends ChangeNotifier {
       final levelGroup = _mapBandToLevelGroup(band);
       final list = await repository.getVocabularyForLevel(levelGroup);
       
-      // Sort: non-premium first, then premium
+      
       list.sort((a, b) {
         if (a.isPremium == b.isPremium) return 0;
         return a.isPremium ? 1 : -1;

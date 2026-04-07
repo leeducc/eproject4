@@ -5,8 +5,22 @@ class LocaleProvider extends ChangeNotifier {
   Locale? _locale;
   static const String _localeKey = 'selected_locale';
 
-  LocaleProvider() {
-    _loadLocale();
+  LocaleProvider({Locale? initialLocale, bool preloaded = false}) {
+    if (preloaded) {
+      debugPrint('[LocaleProvider] Initialized with pre-loaded locale: ${initialLocale?.languageCode ?? "system default"}');
+      _locale = initialLocale;
+    } else {
+      debugPrint('[LocaleProvider] No pre-loaded locale, loading asynchronously');
+      _loadLocale();
+    }
+  }
+
+  static Locale? resolveLocale(SharedPreferences prefs) {
+    final String? languageCode = prefs.getString(_localeKey);
+    if (languageCode != null) {
+      return Locale(languageCode);
+    }
+    return null;
   }
 
   Locale? get locale => _locale;

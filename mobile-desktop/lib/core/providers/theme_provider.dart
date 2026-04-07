@@ -5,24 +5,31 @@ class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   static const String _themeKey = 'selected_theme';
 
-  ThemeProvider() {
-    debugPrint('[ThemeProvider] Initializing...');
-    _loadTheme();
+  ThemeProvider({ThemeMode? initialMode}) {
+    if (initialMode != null) {
+      _themeMode = initialMode;
+    } else {
+      _loadTheme();
+    }
+  }
+
+  static ThemeMode resolveThemeMode(SharedPreferences prefs) {
+    final String? themeValue = prefs.getString(_themeKey);
+    if (themeValue == null) return ThemeMode.system;
+    if (themeValue == ThemeMode.light.toString()) return ThemeMode.light;
+    if (themeValue == ThemeMode.dark.toString()) return ThemeMode.dark;
+    return ThemeMode.system;
   }
 
   ThemeMode get themeMode => _themeMode;
 
   Future<void> _loadTheme() async {
-    debugPrint('[ThemeProvider] Loading theme from SharedPreferences');
     final prefs = await SharedPreferences.getInstance();
     final String? themeValue = prefs.getString(_themeKey);
     
     if (themeValue != null) {
-      debugPrint('[ThemeProvider] Found saved theme: $themeValue');
       _themeMode = _parseThemeMode(themeValue);
       notifyListeners();
-    } else {
-      debugPrint('[ThemeProvider] No saved theme found, using system default');
     }
   }
 

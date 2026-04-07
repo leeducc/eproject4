@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 public class VocabularyItem {
     private Long id;
     private String word;
-    private String type; // 'word' or 'phrase'
-    private String level; // Original CEFR (A1, A2, B1, B2, C1, C2)
-    private String levelGroup; // IELTS-style (0-4, 5-6, 7-8, 9)
-    private String pos; // Part of Speech
+    private String type; 
+    private String level; 
+    private String levelGroup; 
+    private String pos; 
     private String definitionUrl;
     private String voiceUrl;
 
-    // AI Contents
+    
     private String definition;
     private java.util.List<String> examples;
     private java.util.List<String> synonyms;
@@ -28,7 +28,7 @@ public class VocabularyItem {
     private Boolean isPremium;
     private Boolean isFavorite;
 
-    // Assuming VocabularyEntity exists and has corresponding getters
+    
     public static VocabularyItem mapToItem(VocabularyEntity entity) {
         return VocabularyItem.builder()
                 .id(entity.getId())
@@ -40,7 +40,7 @@ public class VocabularyItem {
                 .definitionUrl(entity.getDefinitionUrl())
                 .voiceUrl(entity.getVoiceUrl())
                 .definition(entity.getDefinition())
-                .examples(java.util.Collections.emptyList()) // Manual mapping doesn't have objectMapper
+                .examples(java.util.Collections.emptyList()) 
                 .synonyms(java.util.Collections.emptyList())
                 .build();
     }

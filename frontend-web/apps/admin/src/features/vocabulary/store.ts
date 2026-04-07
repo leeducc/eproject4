@@ -12,7 +12,7 @@ interface VocabularyState {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
+  
   fetchVocabularyPaginated: (params: {
     type?: string;
     levelGroup?: string;
@@ -327,7 +327,7 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
     const formData = new FormData();
     formData.append('file', file);
     
-    // Custom headers for FormData (exclude Content-Type to let browser set boundary)
+    
     const adminToken = localStorage.getItem('admin_token');
     const teacherToken = localStorage.getItem('teacher_token');
     const token = adminToken || teacherToken;

@@ -1,5 +1,5 @@
-#!/bin/sh
-# This is a generated file; do not edit or check into version control.
+
+
 export "FLUTTER_ROOT=F:\flutter"
 export "FLUTTER_APPLICATION_PATH=F:\Project4\eproject4\mobile-desktop\mobile_desktop"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"

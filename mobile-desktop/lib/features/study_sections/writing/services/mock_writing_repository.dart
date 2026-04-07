@@ -4,7 +4,7 @@ import '../models/writing_prompt.dart';
 import '../../../../core/providers/ielts_level_provider.dart';
 
 const List<WritingPrompt> _kAllPrompts = [
-  // Band 0-4
+  
   WritingPrompt(
     id: 'w1',
     taskType: 1,
@@ -20,7 +20,7 @@ const List<WritingPrompt> _kAllPrompts = [
     band: IeltsBand.band0_4,
   ),
   
-  // Band 5-6
+  
   WritingPrompt(
     id: 'w3',
     taskType: 1,
@@ -36,7 +36,7 @@ const List<WritingPrompt> _kAllPrompts = [
     band: IeltsBand.band5_6,
   ),
 
-  // Band 7-8
+  
   WritingPrompt(
     id: 'w5',
     taskType: 1,
@@ -52,7 +52,7 @@ const List<WritingPrompt> _kAllPrompts = [
     band: IeltsBand.band7_8,
   ),
 
-  // Band 9
+  
   WritingPrompt(
     id: 'w7',
     taskType: 1,

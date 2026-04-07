@@ -13,7 +13,7 @@ export const AIGeneratingOverlay: React.FC<AIGeneratingOverlayProps> = ({ isOpen
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0B0F1A]/80 backdrop-blur-md transition-all duration-500">
       <div className="relative p-8 rounded-3xl bg-[#1A2235]/60 border border-blue-500/30 shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)] max-w-md w-full text-center overflow-hidden">
-        {/* Animated Background Glow */}
+        {}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/20 blur-[80px] rounded-full animate-pulse" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600/20 blur-[80px] rounded-full animate-pulse" />
 

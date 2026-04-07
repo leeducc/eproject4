@@ -27,12 +27,12 @@ export interface Tag {
 export interface Passage {
   id: number;
   title: string;
-  content: string; // Text content or URL for script
-  media_url?: string; // Audio file URL
+  content: string; 
+  media_url?: string; 
   skill: SkillType;
 }
 
-// -- Question Data Payloads --
+
 
 export interface MultipleChoiceData {
   options: { id: string; label: string; image?: string }[];
@@ -44,18 +44,18 @@ export interface MultipleChoiceData {
 export interface MatchingData {
   left_items: { id: string; text: string; image?: string }[];
   right_items: { id: string; text: string; image?: string }[];
-  solution: Record<string, string>; // Maps left_id to right_id
+  solution: Record<string, string>; 
 }
 
 export interface FillBlankData {
-  template: string; // e.g., "The [blank1] is [blank2]."
+  template: string; 
   blanks: Record<string, { correct: string[]; max_words: number }>;
-  answer_pool?: string[]; // Optional: For drag-and-drop word banks
+  answer_pool?: string[]; 
 }
 
 export interface Question {
   id: number;
-  skill: SkillType; // Added skill association directly to question for easy filtering
+  skill: SkillType; 
   type: QuestionType;
   difficultyBand: DifficultyBand;
   instruction?: string;
@@ -82,8 +82,8 @@ export interface Exam {
   difficulty_band?: DifficultyBand;
   created_at: string;
   categories: SkillType[];
-  question_ids: number[]; // References to Questions stored in the Exam
-  group_ids: number[]; // References to QuestionGroups stored in the Exam
+  question_ids: number[]; 
+  group_ids: number[]; 
   tags: Tag[];
 }
 

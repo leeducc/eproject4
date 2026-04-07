@@ -41,7 +41,7 @@ class _CaptchaDialogState extends State<CaptchaDialog> {
         </style>
         <script>
           function captchaCallback(response) {
-            // Send the token back to Flutter through the JavascriptChannel
+            
             CaptchaChannel.postMessage(response);
           }
         </script>
@@ -107,7 +107,7 @@ class _CaptchaDialogState extends State<CaptchaDialog> {
                 ),
               ),
               
-            // Close Button
+            
             Positioned(
               top: 8,
               right: 8,

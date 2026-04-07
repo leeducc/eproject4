@@ -43,7 +43,7 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
     currentIndex = widget.initialIndex;
     _controller = PageController(initialPage: currentIndex);
     
-    // Log view for the initial word
+    
     _logCurrentView();
   }
 
@@ -154,12 +154,12 @@ class _VocabularyDetailScreenState extends State<VocabularyDetailScreen> {
   }
 
   Widget _buildWordContent(Map<String, dynamic> vocab) {
-    // Trigger AI generation if definition or phonetic is missing
+    
     final String word = vocab['word'] ?? '';
     final bool hasNoContent = (vocab['definition'] == null || vocab['definition'].toString().trim().isEmpty);
 
     if (hasNoContent && !isGenerating && !_failedWords.contains(word)) {
-      // Trigger after build
+      
       Future.microtask(() => _triggerAiGeneration(vocab));
     }
 

@@ -28,7 +28,7 @@ export interface AppScreenSectionRequest {
 
 export interface Policy {
     id: number;
-    type: "TERMS" | "PRIVACY";
+    type: "TERMS" | "PRIVACY" | "DELETE_ACCOUNT";
     titleEn: string;
     titleVi: string;
     titleZh: string;
@@ -36,6 +36,13 @@ export interface Policy {
     contentVi: string;
     contentZh: string;
     updatedAt: string;
+}
+
+export interface PolicyHistory extends Omit<Policy, "id" | "updatedAt"> {
+    id: number;
+    adminId: number;
+    adminEmail: string;
+    changedAt: string;
 }
 
 export type PolicyRequest = Omit<Policy, "id" | "updatedAt">;
@@ -82,5 +89,15 @@ export const updatePolicy = async (data: Partial<Policy>): Promise<Policy> => {
 
 export const getPublicPolicy = async (type: string): Promise<Policy> => {
     const response = await apiClient.get(`/v1/policies?type=${type}`);
+    return response.data;
+};
+
+export const createSystemNotification = async (data: { title: string; content: string; type?: string }): Promise<any> => {
+    const response = await apiClient.post('/v1/system-notifications/admin', data);
+    return response.data;
+};
+
+export const getPolicyHistory = async (type: string): Promise<PolicyHistory[]> => {
+    const response = await apiClient.get(`/v1/admin/policies/${type}/history`);
     return response.data;
 };

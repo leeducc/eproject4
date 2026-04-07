@@ -38,7 +38,7 @@ public class ExcelQuestionMapper {
         map.put("media_url", q.getMediaUrl());
         map.put("content", "");
 
-        // Virtual columns
+        
         switch (q.getType()) {
             case MULTIPLE_CHOICE:
                 mapMultipleChoiceToExcel(q, map);
@@ -82,7 +82,7 @@ public class ExcelQuestionMapper {
         
         q.setSkill(SkillType.valueOf(row.get("skill").trim().toUpperCase()));
         
-        // Enforce WRITING skill always uses ESSAY type
+        
         if (q.getSkill() == SkillType.WRITING) {
             log.info("[ExcelQuestionMapper] Enforcing ESSAY type for WRITING skill. Original row type: {}", row.get("type"));
             q.setType(QuestionType.ESSAY);
@@ -123,7 +123,7 @@ public class ExcelQuestionMapper {
         log.info("[ExcelQuestionMapper] Mapping row to group: {}", row);
         
         g.setSkill(SkillType.valueOf(row.get("skill").trim().toUpperCase()));
-        g.setTitle(row.get("instruction")); // Passages use 'instruction' column as title
+        g.setTitle(row.get("instruction")); 
         g.setContent(row.get("content"));
         g.setDifficultyBand(DifficultyBand.valueOf(row.get("difficulty_band").trim().toUpperCase()));
         g.setMediaType(row.get("media_type"));
@@ -132,7 +132,7 @@ public class ExcelQuestionMapper {
         return g;
     }
 
-    // --- MULTIPLE_CHOICE ---
+    
 
     private void mapMultipleChoiceToExcel(Question q, Map<String, Object> map) {
         try {
@@ -154,7 +154,7 @@ public class ExcelQuestionMapper {
                     map.put("correct_answer", correctStr);
                 }
             }
-            map.put("question_prompt", q.getInstruction()); // MCQ often uses instruction as prompt
+            map.put("question_prompt", q.getInstruction()); 
         } catch (Exception e) {
             log.error("Error mapping MULTIPLE_CHOICE to Excel", e);
         }
@@ -193,7 +193,7 @@ public class ExcelQuestionMapper {
         saveData(q, data);
     }
 
-    // --- MATCHING ---
+    
 
     private void mapMatchingToExcel(Question q, Map<String, Object> map) {
         try {
@@ -287,7 +287,7 @@ public class ExcelQuestionMapper {
                 .orElse(null);
     }
 
-    // --- FILL_BLANK ---
+    
 
     private void mapFillBlankToExcel(Question q, Map<String, Object> map) {
         try {
@@ -295,7 +295,7 @@ public class ExcelQuestionMapper {
             map.put("question_prompt", data.get("template"));
             Map<String, Map<String, Object>> blanks = (Map<String, Map<String, Object>>) data.get("blanks");
             if (blanks != null) {
-                // Order by blank key (blank1, blank2...)
+                
                 List<String> sortedKeys = blanks.keySet().stream()
                         .sorted(Comparator.comparingInt(k -> Integer.parseInt(k.replaceAll("\\D", ""))))
                         .collect(Collectors.toList());
@@ -337,7 +337,7 @@ public class ExcelQuestionMapper {
         saveData(q, data);
     }
 
-    // --- ESSAY ---
+    
 
     private void mapEssayToExcel(Question q, Map<String, Object> map) {
         map.put("question_prompt", q.getInstruction());
@@ -352,14 +352,14 @@ public class ExcelQuestionMapper {
             q.setExplanation(answer);
         }
         
-        // Essay can have a minimal JSON structure if needed, but it often works with direct fields.
-        // We'll provide a dummy payload to avoid null if required.
+        
+        
         Map<String, Object> data = new HashMap<>();
         data.put("type", "ESSAY");
         saveData(q, data);
     }
 
-    // --- Helpers ---
+    
 
     private List<String> splitAndTrim(String str) {
         if (str == null || str.trim().isEmpty()) {

@@ -3,6 +3,7 @@ package com.groupone.backend.features.appconfig.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +19,7 @@ public class Policy {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String type; // "TERMS", "PRIVACY"
+    private String type; 
 
     private String titleEn;
     private String titleVi;
@@ -35,6 +36,10 @@ public class Policy {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String contentZh;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

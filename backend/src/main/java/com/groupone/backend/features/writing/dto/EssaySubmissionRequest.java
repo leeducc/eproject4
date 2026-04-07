@@ -7,5 +7,5 @@ import lombok.Data;
 public class EssaySubmissionRequest {
     private Long topicId;
     private String content;
-    private GradingType gradingType; // "HUMAN" or "AI"
+    private GradingType gradingType; 
 }

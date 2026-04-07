@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/vocabulary.dart';
@@ -12,9 +13,9 @@ class VocabularyApiService {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
 
-      // The backend uses path /api/v1/vocabulary?levelGroup=0-4&limit=100
+      
       final uri = Uri.parse('$baseUrl?levelGroup=$levelGroup&limit=200');
-      print('Fetching vocabulary from: $uri');
+      debugPrint('Fetching vocabulary from: $uri');
 
       final response = await http.get(
         uri,
@@ -26,16 +27,16 @@ class VocabularyApiService {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        // The backend PaginatedResponse uses 'items' field, but some models might use 'content'
+        
         final List<dynamic> items = decoded['items'] ?? decoded['content'] ?? [];
-        print('Successfully fetched vocabulary: ${items.length} items for level $levelGroup');
+        debugPrint('Successfully fetched vocabulary: ${items.length} items for level $levelGroup');
         return items.map((json) => Vocabulary.fromJson(json)).toList();
       } else {
-        print('Failed to fetch vocabulary: ${response.statusCode} - ${response.body}');
+        debugPrint('Failed to fetch vocabulary: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Error fetching vocabulary: $e');
+      debugPrint('Error fetching vocabulary: $e');
       return [];
     }
   }
@@ -46,7 +47,7 @@ class VocabularyApiService {
       final token = prefs.getString('auth_token');
 
       final uri = Uri.parse('$baseUrl/${Uri.encodeComponent(word)}/details');
-      print('Fetching word details from: $uri');
+      debugPrint('Fetching word details from: $uri');
 
       final response = await http.get(
         uri,
@@ -59,11 +60,11 @@ class VocabularyApiService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
-        print('Failed to fetch word details: ${response.statusCode}');
+        debugPrint('Failed to fetch word details: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error fetching word details: $e');
+      debugPrint('Error fetching word details: $e');
       return null;
     }
   }
@@ -87,7 +88,7 @@ class VocabularyApiService {
       }
       return false;
     } catch (e) {
-      print('Error toggling favorite: $e');
+      debugPrint('Error toggling favorite: $e');
       return false;
     }
   }
@@ -112,7 +113,7 @@ class VocabularyApiService {
       }
       return [];
     } catch (e) {
-      print('Error fetching favorites: $e');
+      debugPrint('Error fetching favorites: $e');
       return [];
     }
   }

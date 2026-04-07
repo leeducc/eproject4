@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../services/writing_provider.dart';
 import 'writing_screen.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class TopicListScreen extends StatefulWidget {
   const TopicListScreen({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
 
   Future<void> _checkProStatus() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -35,26 +37,26 @@ class _TopicListScreenState extends State<TopicListScreen> {
     final isLoading = writingProvider.state == LoadState.loading || _isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23),
+      backgroundColor: context.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Chọn Chủ Đề Viết',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.colorScheme.onSurface, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: context.colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+          ? Center(child: CircularProgressIndicator(color: context.colorScheme.primary))
           : topics.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'Không có chủ đề nào.',
-                    style: TextStyle(color: Colors.white54, fontSize: 16),
+                    style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 16),
                   ),
                 )
               : ListView.builder(
@@ -68,15 +70,14 @@ class _TopicListScreenState extends State<TopicListScreen> {
                     const isProOnly = false; 
 
                     return Card(
-                      color: const Color(0xFF1E2330),
+                      color: context.colorScheme.surface,
                       margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 2,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-
-                          // Convert back to Topic for WritingScreen
+                          
                           final topic = Topic(
                             id: topicId,
                             title: title,
@@ -99,8 +100,8 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                 children: [
                                   Text(
                                     title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: context.colorScheme.onSurface,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -110,8 +111,8 @@ class _TopicListScreenState extends State<TopicListScreen> {
                                     description,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white54,
+                                    style: TextStyle(
+                                      color: context.colorScheme.onSurface.withValues(alpha: 0.54),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -119,7 +120,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                               ),
                             ),
                             if (isProOnly)
-                              // ignore: dead_code
+                              
                               const Positioned(
                                 top: 16,
                                 right: 16,

@@ -3,7 +3,7 @@ import { Role } from '../quiz-bank/types';
 export interface VocabularyItem {
   id?: number;
   word: string;
-  type: string; // 'word' or 'phrase'
+  type: string; 
   level: string;
   levelGroup: string;
   pos: string;
@@ -27,7 +27,7 @@ export interface VocabularyPractice {
   id: number;
   word: string;
   quizType: string;
-  jsonContent: string; // Serialized PracticeQuiz
+  jsonContent: string; 
   content?: PracticeQuiz;
   version?: number;
 }

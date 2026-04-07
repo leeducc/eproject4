@@ -21,7 +21,7 @@ public class OllamaService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String OLLAMA_URL = "http://localhost:11434/api/generate";
-    private final String MODEL_NAME = "llama3.2"; // or whatever model is available
+    private final String MODEL_NAME = "llama3.2"; 
 
     public OllamaGradingResult gradeEssay(String topicDescription, String essayContent) {
         log.info("Requesting essay grading from local Ollama ({})", MODEL_NAME);
@@ -66,7 +66,7 @@ public class OllamaService {
         Double score = null;
         String feedback = responseText;
 
-        // Extract score using Regex
+        
         Pattern scorePattern = Pattern.compile("SCORE:\\s*([0-9]*\\.?[0-9]+)", Pattern.CASE_INSENSITIVE);
         Matcher scoreMatcher = scorePattern.matcher(responseText);
         if (scoreMatcher.find()) {
@@ -77,7 +77,7 @@ public class OllamaService {
             }
         }
 
-        // Extract feedback (everything after FEEDBACK:)
+        
         Pattern feedbackPattern = Pattern.compile("FEEDBACK:\\s*(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher feedbackMatcher = feedbackPattern.matcher(responseText);
         if (feedbackMatcher.find()) {
@@ -85,7 +85,7 @@ public class OllamaService {
         }
 
         if (score == null) {
-            // Fallback if parsing fails but we got a response
+            
             score = 0.0;
         }
 

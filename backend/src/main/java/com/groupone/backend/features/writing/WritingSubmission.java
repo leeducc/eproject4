@@ -33,7 +33,7 @@ public class WritingSubmission {
 
     private Double score;
 
-    // IELTS Criteria scores
+    
     private Double taskAchievement;
     private Double cohesionCoherence;
     private Double lexicalResource;

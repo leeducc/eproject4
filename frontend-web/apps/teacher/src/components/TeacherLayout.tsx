@@ -1,16 +1,48 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardLayout, NavItem } from "@english-learning/ui";
-import { Layout, Users, MessageSquare, Database } from "lucide-react";
+import { DashboardLayout, NavItem, useTheme } from "@english-learning/ui";
+import { Layout, Users, MessageSquare, Database, Wallet } from "lucide-react";
+import { useAutoLogout } from "@english-learning/api";
+import { toast } from "@english-learning/ui";
+import { NotificationBell } from "./NotificationBell";
+import { useChatNotificationStore } from "../features/chat/notificationStore";
 
 interface TeacherLayoutProps {
     children: React.ReactNode;
 }
 
-import { toast } from "@english-learning/ui";
+interface UserProfile {
+    userId: number;
+    fullName: string;
+    role: string;
+    avatarUrl?: string;
+}
 
 export function TeacherLayout({ children }: TeacherLayoutProps) {
     const navigate = useNavigate();
+    const teacherToken = localStorage.getItem("teacher_token");
+    useAutoLogout(teacherToken);
+    
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const { unreadCounts, fetchUnreadStatus } = useChatNotificationStore();
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await fetch('http://localhost:8123/api/profile', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('teacher_token')}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfile(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch profile', err);
+            }
+        };
+        fetchProfile();
+        fetchUnreadStatus();
+    }, [fetchUnreadStatus]);
 
     const handleLogout = () => {
         toast("Ready to leave?", {
@@ -33,12 +65,14 @@ export function TeacherLayout({ children }: TeacherLayoutProps) {
 
     const sidebarItems: NavItem[] = [
         { title: "My Dashboard", href: "/teacher/dashboard", icon: <Layout size={20} /> },
+        { title: "My Wallet", href: "/teacher/wallet", icon: <Wallet size={20} /> },
         {
-            title: "1-on-1 Coaching",
+            title: "Teaching Zone",
             icon: <Users size={20} />,
             children: [
+                { title: "Grading Queue", href: "/teacher/grading-queue" },
                 { title: "Student List", href: "/teacher/coaching/students" },
-                { title: "Session Calendar", href: "/teacher/coaching/calendar" },
+                { title: "Teaching Schedule", href: "/teacher/schedule" },
             ],
         },
         {
@@ -50,20 +84,42 @@ export function TeacherLayout({ children }: TeacherLayoutProps) {
                 { title: "Reading", href: "/teacher/questions/reading" },
                 { title: "Writing", href: "/teacher/questions/writing" },
                 { title: "Exam", href: "/teacher/questions/exam" },
-                // These were the original links in TeacherDashboard.tsx:
-                // { title: "View Questions", href: "/teacher/questions/view", icon: <Eye size={16} /> },
-                // { title: "Submit New Question", href: "/teacher/questions/submit", icon: <PlusCircle size={16} /> },
             ],
         },
-        { title: "Communication", href: "/teacher/messages", icon: <MessageSquare size={20} /> },
+        { 
+            title: "Communication", 
+            icon: <MessageSquare size={20} />,
+            badge: Object.values(unreadCounts).reduce((a: any, b: any) => a + (b as number), 0) as number,
+            children: [
+                { 
+                    title: "Chat with Admin", 
+                    href: "/teacher/communication/chat",
+                    badge: Object.values(unreadCounts).reduce((a: any, b: any) => a + (b as number), 0) as number
+                },
+            ],
+        },
     ];
+
+    const { theme, setTheme } = useTheme();
+
+    const handleToggle = useCallback(() => {
+        setTheme(theme === "dark" ? "light" : "dark");
+    }, [theme, setTheme]);
 
     return (
         <DashboardLayout 
             sidebarItems={sidebarItems} 
-            userName="Teacher User" 
-            userRole="ESL Instructor"
+            userName={profile?.fullName || "Teacher User"} 
+            userRole={profile?.role || "ESL Instructor"}
             onLogout={handleLogout}
+            theme={theme}
+            toggleTheme={handleToggle}
+            notificationBell={profile && <NotificationBell token={localStorage.getItem('teacher_token')!} profile={{ userId: profile.userId }} />}
+            profileImageUrl={profile?.avatarUrl}
+            onProfileClick={() => {
+                console.log("[TeacherLayout] Navigating to profile...");
+                navigate("/teacher/profile");
+            }}
         >
             {children}
         </DashboardLayout>

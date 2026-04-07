@@ -14,13 +14,13 @@ import java.util.List;
 public class FAQController {
     private final FAQService faqService;
 
-    // Public endpoint for mobile app
+    
     @GetMapping("/faqs")
     public ResponseEntity<List<FAQDto>> getPublicFAQs() {
         return ResponseEntity.ok(faqService.getActiveFAQs());
     }
 
-    // Admin endpoints
+    
     @GetMapping("/admin/faqs")
     public ResponseEntity<List<FAQDto>> getAllFAQs() {
         return ResponseEntity.ok(faqService.getAllFAQs());

@@ -25,7 +25,7 @@ public class VocabularyPracticeAiContentEntity implements Serializable {
     private String word;
 
     @Column(name = "quiz_type", nullable = false)
-    private String quizType; // MULTIPLE_CHOICE, MATCHING, FILL_IN_THE_BLANK
+    private String quizType; 
 
     @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String jsonContent;

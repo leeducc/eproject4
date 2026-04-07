@@ -19,7 +19,7 @@ class FAQService {
         final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
         final faqs = data.map((json) => FAQModel.fromJson(json)).toList();
         
-        // Update cache
+        
         _cacheFAQs(response.body);
         
         return faqs;

@@ -32,12 +32,12 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
   const existingData = initialQuestion?.data as FillBlankData | undefined;
   const [template, setTemplate] = useState(existingData?.template || 'When selecting a style, consider your [blank1].');
 
-  // Active blanks dictionary
+  
   const [blanks, setBlanks] = useState<Record<string, { correct: string[]; max_words: number }>>(existingData?.blanks || {
     'blank1': { correct: ['Audience'], max_words: 1 }
   });
 
-  // Distractor answer pool
+  
   const [answerPool, setAnswerPool] = useState<string[]>(existingData?.answer_pool || ['Direction', 'Tone']);
 
 
@@ -45,16 +45,16 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Parse template into text chunks and blank tokens for visual display
+  
   const renderTemplateTokens = () => {
-    // regex to find [blankN]
+    
     const regex = /(\[blank\d+\])/g;
     const parts = template.split(regex);
 
     return parts.map((part, index) => {
       const match = part.match(/\[blank(\d+)\]/);
       if (match) {
-        const blankId = part.replace(/[\[\]]/g, ''); // "blank1"
+        const blankId = part.replace(/[\[\]]/g, ''); 
         const num = match[1];
         const blankData = blanks[blankId];
         const label = blankData && blankData.correct.length > 0 ? blankData.correct[0] : '...';
@@ -81,7 +81,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
     const selectedText = value.substring(selectionStart, selectionEnd).trim();
     if (!selectedText) return;
 
-    // Find next available blank ID
+    
     let nextId = 1;
     while (blanks[`blank${nextId}`]) {
       nextId++;
@@ -96,7 +96,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       [newBlankId]: { correct: [selectedText], max_words: selectedText.split(' ').length }
     });
 
-    // reset selection
+    
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -110,11 +110,11 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
     const newBlanks = { ...blanks };
     let changed = false;
 
-    // 1. Find all [...] matches
+    
     const regex = /\[(.*?)\]/g;
     const matches = Array.from(newDraft.matchAll(regex));
 
-    // 2. Track which blanks are actually present
+    
     const presentBlankIds = new Set<string>();
 
     for (const match of matches) {
@@ -122,25 +122,25 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       const fullMatch = match[0];
       const matchIndex = match.index!;
 
-      // Case A: content is [blankN] or [blank N]
+      
       const blankMatch = content.match(/^blank\s*(\d+)$/i);
       if (blankMatch) {
         const id = `blank${blankMatch[1]}`;
         presentBlankIds.add(id);
 
-        // Normalize [blank 1] to [blank1] if needed
+        
         if (content !== id) {
           currentTemplate = currentTemplate.substring(0, matchIndex) + `[${id}]` + currentTemplate.substring(matchIndex + fullMatch.length);
           changed = true;
         }
 
-        // Ensure state has this ID (might be new if user typed [blank5])
+        
         if (!newBlanks[id]) {
           newBlanks[id] = { correct: [''], max_words: 1 };
           changed = true;
         }
       }
-      // Case B: content is [some word] - transform to blank
+      
       else {
         let nextId = 1;
         while (newBlanks[`blank${nextId}`] || presentBlankIds.has(`blank${nextId}`)) {
@@ -155,7 +155,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       }
     }
 
-    // 3. Remove blanks no longer in template
+    
     Object.keys(newBlanks).forEach(id => {
       if (!presentBlankIds.has(id)) {
         delete newBlanks[id];
@@ -208,7 +208,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
 
   const handleDeleteBlank = (id: string) => {
     if (isTeacher) return;
-    // Remove from template
+    
     const newTemplate = template.replace(`[${id}]`, blanks[id]?.correct[0] || '');
     syncBlanksWithTemplate(newTemplate);
   };
@@ -263,17 +263,18 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       explanation,
       data,
       isPremiumContent: isPremium,
-      retainedMediaUrls
+      retainedMediaUrls,
+      tags: initialQuestion?.tags || []
     };
 
     if (initialQuestion?.id) {
-      console.log('[FillInTheBlankBuilder] Updating question', { data });
+      console.log('[FillInTheBlankBuilder] Updating question', { id: initialQuestion.id, payload });
       await updateQuestion(initialQuestion.id, payload);
     } else if (!initialQuestion) {
-      console.log('[FillInTheBlankBuilder] Saving question', { data });
+      console.log('[FillInTheBlankBuilder] Creating new question', { payload });
       await createQuestion(payload);
     } else {
-      console.log('[FillInTheBlankBuilder] Draft saved locally');
+      console.log('[FillInTheBlankBuilder] Draft state updated');
     }
 
     if (onSave) onSave(payload);
@@ -283,7 +284,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
     if (!e.target.files?.length) return;
     const newFiles = Array.from(e.target.files);
     
-    // Constraints check
+    
     const countImages = retainedMedia.filter(m => m.type.startsWith('image/')).length +
       newFiles.filter(f => f.type.startsWith('image/')).length;
 
@@ -306,13 +307,16 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
       return;
     }
 
+    console.log('[FillInTheBlankBuilder] Files selected', { count: newFiles.length });
     try {
       for (const file of newFiles) {
+        console.log('[FillInTheBlankBuilder] Uploading file', { name: file.name, type: file.type });
         const url = await uploadMedia(file, 'questions');
         setRetainedMedia(prev => [...prev, { url, type: file.type }]);
       }
       toast.success("Files uploaded successfully");
     } catch (err) {
+      console.error('[FillInTheBlankBuilder] Upload failed', err);
       toast.error("Failed to upload some files");
     }
     e.target.value = '';
@@ -339,7 +343,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
 
   return (
     <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-sm w-full max-w-4xl mx-auto p-0 overflow-hidden font-sans mt-8 transition-colors">
-      {/* Header */}
+      {}
       <div className="flex items-center p-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
         <select
           className="border-gray-300 dark:border-slate-700 rounded-md shadow-sm border p-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-blue-500"
@@ -363,10 +367,10 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
         </div>
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="p-6 space-y-6">
 
-        {/* Question Input */}
+        {}
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 w-max px-2 py-1 rounded transition-colors">
             <span className="bg-gray-800 dark:bg-slate-700 text-white rounded w-4 h-4 flex items-center justify-center text-[10px]">?</span>
@@ -389,14 +393,20 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
                   accept="image/*,video/*,audio/*"
                   multiple
                   onChange={handleFileChange}
-                  className="text-sm text-gray-600 dark:text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/60 outline-none transition-colors"
+                  className="hidden"
+                  id="fib-media-upload"
                 />
+                <label 
+                  htmlFor="fib-media-upload"
+                  className="cursor-pointer bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium border dark:border-slate-700 transition-colors"
+                >
+                  Select Files
+                </label>
               </div>
+
               {(retainedMedia.length > 0 || mediaFiles.length > 0) && (
-                <div className="mt-2 text-sm text-gray-500 dark:text-slate-400">
-                  <div className="font-semibold mb-2 text-gray-700 dark:text-slate-300">Media Previews:</div>
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-800 transition-colors">
                   <div className="flex flex-wrap gap-4">
-                    {/* Retained Media previews */}
                     {retainedMedia.map((media, idx) => (
                       <div key={`retained-${idx}`} className="relative border dark:border-slate-800 rounded p-1 inline-block transition-colors">
                         <button
@@ -425,7 +435,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
                       </div>
                     ))}
 
-                    {/* New Files Previews */}
+                    {}
                     {mediaFiles.map((file, idx) => {
                       const objectUrl = URL.createObjectURL(file);
                       return (
@@ -457,7 +467,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
           </div>
         </div>
 
-        {/* Interactive Editor Area */}
+        {}
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Sentence Editor</label>
           <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">
@@ -465,7 +475,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
           </p>
 
           <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col transition-colors">
-            {/* Toolbar */}
+            {}
             <div className="flex items-center justify-between p-2 px-4 border-b dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 transition-colors">
               <button
                 onClick={handleCreateBlank}
@@ -482,7 +492,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
               </button>
             </div>
 
-            {/* Editor body */}
+            {}
             <div className="relative min-h-[120px] p-4 bg-white dark:bg-slate-900 text-base transition-colors">
               {isEditing ? (
                 <textarea
@@ -504,12 +514,12 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
           </div>
         </div>
 
-        {/* Answer Options Display (Correct answers and distractors) */}
+        {}
         <div className="space-y-4 pt-4 border-t border-dashed dark:border-slate-800 transition-colors">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Answer Pool & Options</label>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Core Blanks List */}
+            {}
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Blanks (Correct Answers)</h4>
@@ -540,7 +550,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
                       )}
                     </div>
 
-                    {/* Synonyms List */}
+                    {}
                     <div className="space-y-2 pl-7">
                       {blankData.correct.map((val, idx) => (
                         <div key={`${id}-synonym-${idx}`} className="flex items-center gap-2">
@@ -575,7 +585,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
               )}
             </div>
 
-            {/* Distractors List */}
+            {}
             <div className="space-y-3">
               <h4 className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Distractors (Incorrect)</h4>
               {answerPool.map((distractor, index) => (
@@ -610,7 +620,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
           </div>
         </div>
 
-        {/* Explanation Input */}
+        {}
         <div className="space-y-2 pt-4 border-t border-dashed dark:border-slate-800">
           <label className="text-sm font-semibold text-gray-800 dark:text-slate-200">Explanation (Optional)</label>
           <div className="border dark:border-slate-800 rounded-md focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-slate-900 transition-colors">
@@ -624,7 +634,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
         </div>
       </div>
 
-      {/* Footer Settings */}
+      {}
       <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-t dark:border-slate-800 flex items-center justify-end transition-colors">
         <div>
           <button
@@ -646,7 +656,7 @@ export const FillInTheBlankBuilder: React.FC<FillInTheBlankBuilderProps> = ({ sk
         variant="danger"
       />
 
-      {/* Full Size Image Preview Modal */}
+      {}
       {previewImageUrl && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200"

@@ -187,7 +187,7 @@ export const FAQManagementPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Meta details */}
+                {}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Display Order</label>
@@ -212,7 +212,7 @@ export const FAQManagementPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Content Tabs */}
+                {}
                 <div>
                   <div className="flex space-x-1 border-b mb-4">
                     {(["EN", "VI", "ZH"] as TabType[]).map((tab) => (

@@ -24,13 +24,13 @@ public class QuestionHistory {
     private Long editorId;
 
     @Column(nullable = false)
-    private String action; // CREATED, UPDATED
+    private String action; 
 
     @Column(columnDefinition = "TEXT")
-    private String snapshot; // JSON snapshot of the question data
+    private String snapshot; 
 
     @Column(columnDefinition = "TEXT")
-    private String changes; // JSON representation of changes
+    private String changes; 
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

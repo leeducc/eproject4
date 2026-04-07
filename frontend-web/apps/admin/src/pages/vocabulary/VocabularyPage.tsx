@@ -51,14 +51,14 @@ export const VocabularyPage: React.FC = () => {
     }
   };
 
-  // Initial load
+  
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<number | null>(null);
 
   const [wordToDelete, setWordToDelete] = useState<number | null>(null);
   const [historyWordId, setHistoryWordId] = useState<number | null>(null);
 
-  // Debounce search
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -66,7 +66,7 @@ export const VocabularyPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset pagination on filter change
+  
   useEffect(() => {
     setCurrentCursor(null);
     setCursorStack([]);
@@ -161,7 +161,7 @@ export const VocabularyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters & Search */}
+        {}
         <div className="flex items-center gap-6 bg-[#151B2B] p-5 rounded-2xl border border-gray-800 shadow-xl backdrop-blur-sm">
           <div className="flex items-center gap-2 text-gray-400 border-r border-gray-700 pr-6 mr-2">
             <Filter size={20} />
@@ -232,7 +232,7 @@ export const VocabularyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
+        {}
         <div className="bg-[#151B2B] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -307,7 +307,7 @@ export const VocabularyPage: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination and Modals */}
+          {}
           <div className="px-6 py-4 bg-[#1A2235] border-t border-gray-800 flex justify-end items-center">
             <div className="flex gap-3">
               <button

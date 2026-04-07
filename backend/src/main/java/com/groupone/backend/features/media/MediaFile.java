@@ -24,12 +24,12 @@ public class MediaFile {
     private Long id;
 
     private String originalName;
-    private String storedName; // The UUID filename on disk
-    private String storedPath; // e.g /media/videos/uuid.mp4
+    private String storedName; 
+    private String storedPath; 
     private String mimeType;
-    private Long fileSize; // Bytes
+    private Long fileSize; 
 
     private LocalDateTime uploadedAt;
 
-    private Long uploadedByUserId; // Optional: map to UserProfile id
+    private Long uploadedByUserId; 
 }

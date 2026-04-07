@@ -60,7 +60,7 @@ let groupIdOffset = 1;
 let questionIdOffset = 1;
 
 function generateExam(examVarName, examPrefix, authorId) {
-    // LISTENING: 4 parts, 10 questions each
+    
     for (let p = 1; p <= 4; p++) {
         sql += `\n-- LISTENING Part ${p} for ${examPrefix}\n`;
         sql += `INSERT INTO qb_question_groups (skill, title, content, difficulty_band, author_id, created_at) VALUES ('LISTENING', '${examPrefix} - LISTENING Part ${p}', 'Placeholder audio transcript for LISTENING part ${p}...', 'BAND_5_6', ${authorId}, NOW());\n`;
@@ -77,7 +77,7 @@ function generateExam(examVarName, examPrefix, authorId) {
         groupIdOffset++;
     }
 
-    // READING: 3 parts, 13, 13, 14 questions
+    
     const readingQCounts = [13, 13, 14];
     for (let p = 1; p <= 3; p++) {
         sql += `\n-- READING Part ${p} for ${examPrefix}\n`;
@@ -96,7 +96,7 @@ function generateExam(examVarName, examPrefix, authorId) {
         groupIdOffset++;
     }
 
-    // WRITING: 2 standalone tasks
+    
     sql += `\n-- Writing Tasks for ${examPrefix}\n`;
     for(let t = 1; t <= 2; t++) {
        sql += `INSERT INTO qb_questions (skill, type, difficulty_band, instruction, data, is_premium_content, author_id) VALUES ('WRITING', 'ESSAY', 'BAND_5_6', 'Writing Task ${t} for ${examPrefix}: Discuss...', '{}', false, ${authorId});\n`;

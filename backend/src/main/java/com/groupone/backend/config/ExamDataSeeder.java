@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
-@Order(2) // Run after DataSeeder which defaults to lowest precedence or we can explicitly order it
+@Order(2) 
 @RequiredArgsConstructor
 @Slf4j
 public class ExamDataSeeder implements CommandLineRunner {
@@ -41,7 +41,7 @@ public class ExamDataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Only seed if no exams exist yet (idempotent)
+        
         if (examRepository.count() > 0) {
             log.info("[ExamDataSeeder] Exam data already exists. Skipping re-seeding to preserve stable IDs.");
             return;
@@ -49,12 +49,12 @@ public class ExamDataSeeder implements CommandLineRunner {
 
         log.info("[ExamDataSeeder] No exam data found. Starting to seed exam sample data with IELTS requirements...");
 
-        // 1. Get or Create Author
+        
         User admin = userRepository.findByEmail("admin@englishhub.com")
                 .orElseThrow(() -> new RuntimeException("Admin user not found. Run DataSeeder first."));
         Long authorId = admin.getId();
 
-        // 2. Create Tags
+        
         Tag ieltsTag = getOrCreateTag("IELTS", "exam_format");
         Tag academicTag = getOrCreateTag("Academic", "exam_type");
         List<Tag> tags = List.of(ieltsTag, academicTag);
@@ -62,7 +62,7 @@ public class ExamDataSeeder implements CommandLineRunner {
         List<QuestionGroup> allGroups = new ArrayList<>();
         List<Question> standaloneQuestions = new ArrayList<>();
 
-        // 3. Create 3 Reading Groups (Total 40 Questions: 13, 13, 14)
+        
         int[] readingQCounts = {13, 13, 14};
         for (int i = 0; i < 3; i++) {
             QuestionGroup group = QuestionGroup.builder()
@@ -85,7 +85,7 @@ public class ExamDataSeeder implements CommandLineRunner {
             }
         }
 
-        // 4. Create 4 Listening Groups (Total 40 Questions: 10 per section)
+        
         for (int i = 0; i < 4; i++) {
             QuestionGroup group = QuestionGroup.builder()
                     .skill(SkillType.LISTENING)
@@ -109,7 +109,7 @@ public class ExamDataSeeder implements CommandLineRunner {
             }
         }
 
-        // 5. Create Writing Tasks (Standalone) for ALL bands
+        
         for (DifficultyBand band : DifficultyBand.values()) {
             for (int i = 0; i < 2; i++) {
                 createEssay(null, SkillType.WRITING, band, 
@@ -118,7 +118,7 @@ public class ExamDataSeeder implements CommandLineRunner {
             }
         }
 
-        // 6. Create Full IELTS Exam
+        
         Exam ieltsExam = Exam.builder()
                 .title("Full IELTS Mock Test - Automated Seed")
                 .examType(ExamType.IELTS)

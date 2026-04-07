@@ -13,5 +13,5 @@ public class MyRankResponse {
     private Long userId;
     private long myRank;
     private long myScore;
-    private boolean ranked; // false if user has 0 score (never played)
+    private boolean ranked; 
 }

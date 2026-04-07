@@ -1,5 +1,7 @@
-enum SkillType { READING, LISTENING, VOCABULARY, WRITING }
-enum QuestionType { MULTIPLE_CHOICE, MATCHING, FILL_BLANK, ESSAY, COMPREHENSION }
+import 'package:mobile_desktop/core/utils/url_helper.dart';
+
+enum SkillType { reading, listening, vocabulary, writing }
+enum QuestionType { multipleChoice, matching, fillBlank, essay, comprehension }
 
 class Tag {
   final int id;
@@ -25,8 +27,8 @@ class QuestionGroup {
   final String difficultyBand;
   final String title;
   final String content;
-  final String? mediaUrl;
-  final String? mediaType;
+  final List<String> mediaUrls;
+  final List<String> mediaTypes;
   final List<Question> questions;
 
   QuestionGroup({
@@ -35,21 +37,26 @@ class QuestionGroup {
     required this.difficultyBand,
     required this.title,
     required this.content,
-    this.mediaUrl,
-    this.mediaType,
+    required this.mediaUrls,
+    required this.mediaTypes,
     required this.questions,
   });
+
+  String? get mediaUrl => UrlHelper.fixMediaUrl(mediaUrls.isNotEmpty ? mediaUrls.first : null);
+  String? get mediaType => mediaTypes.isNotEmpty ? mediaTypes.first : null;
 
   factory QuestionGroup.fromJson(Map<String, dynamic> json) {
     var rawQuestions = json['questions'] as List<dynamic>?;
     return QuestionGroup(
-      id: json['id'] as int,
-      skill: SkillType.values.firstWhere((e) => e.name == (json['skill']?.toString()), orElse: () => SkillType.READING),
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      skill: SkillType.values.firstWhere((e) => e.name.toUpperCase() == (json['skill']?.toString()), orElse: () => SkillType.reading),
       difficultyBand: json['difficultyBand']?.toString() ?? 'BAND_5_6',
       title: json['title']?.toString() ?? json['instruction']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
-      mediaUrl: json['mediaUrl']?.toString(),
-      mediaType: json['mediaType']?.toString(),
+      mediaUrls: (json['mediaUrls'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? 
+                 (json['mediaUrl'] != null ? [json['mediaUrl'].toString()] : []),
+      mediaTypes: (json['mediaTypes'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? 
+                  (json['mediaType'] != null ? [json['mediaType'].toString()] : []),
       questions: rawQuestions != null ? rawQuestions.map((q) => Question.fromJson(q)).toList() : [],
     );
   }
@@ -63,6 +70,7 @@ class Question {
   final String instruction;
   final String? explanation;
   final List<String> mediaUrls;
+  final List<String> mediaTypes;
   final Map<String, dynamic> data;
 
   Question({
@@ -73,19 +81,21 @@ class Question {
     required this.instruction,
     this.explanation,
     required this.mediaUrls,
+    required this.mediaTypes,
     required this.data,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      id: json['id'] as int,
-      skill: SkillType.values.firstWhere((e) => e.name == (json['skill']?.toString()), orElse: () => SkillType.READING),
-      type: QuestionType.values.firstWhere((e) => e.name == (json['type']?.toString()), orElse: () => QuestionType.MULTIPLE_CHOICE),
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      skill: SkillType.values.firstWhere((e) => e.name.toUpperCase() == (json['skill']?.toString()), orElse: () => SkillType.reading),
+      type: QuestionType.values.firstWhere((e) => e.name.toUpperCase() == (json['type']?.toString().replaceAll('_', '')), orElse: () => QuestionType.multipleChoice),
       difficultyBand: json['difficultyBand']?.toString() ?? 'BAND_5_6',
       instruction: json['instruction']?.toString() ?? '',
       explanation: json['explanation']?.toString(),
       mediaUrls: (json['mediaUrls'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      data: json['data'] as Map<String, dynamic>? ?? {},
+      mediaTypes: (json['mediaTypes'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      data: (json['data'] is Map) ? Map<String, dynamic>.from(json['data'] as Map) : {},
     );
   }
 }

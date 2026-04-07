@@ -30,7 +30,7 @@ class _WritingSectionViewState extends State<WritingSectionView> {
     String task2 = '';
 
     final writingQuestions = provider.state?.exam.questions
-            ?.where((q) => q.skill == SkillType.WRITING)
+            ?.where((q) => q.skill == SkillType.writing)
             .toList() ??
         [];
     if (writingQuestions.isNotEmpty && _controllers.containsKey(writingQuestions[0].id)) {
@@ -48,15 +48,15 @@ class _WritingSectionViewState extends State<WritingSectionView> {
     );
 
     if (result != null && mounted) {
-      // Navigate first, THEN clear session to avoid unmounting this widget
-      // before Navigator.pushReplacement can execute.
+      
+      
       await Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => ExamResultScreen(result: result),
         ),
       );
-      // clearSession is safe here — we've already left the exam screen
+      
       provider.clearSession();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,13 +73,13 @@ class _WritingSectionViewState extends State<WritingSectionView> {
     final state = Provider.of<ExamProvider>(context).state;
     if (state == null) return const SizedBox.shrink();
 
-    final writingQuestions = state.exam.questions?.where((q) => q.skill == SkillType.WRITING).toList() ?? [];
+    final writingQuestions = state.exam.questions?.where((q) => q.skill == SkillType.writing).toList() ?? [];
 
     if (writingQuestions.isEmpty) {
        return const Center(child: Text('No writing tasks available.', style: TextStyle(color: Colors.white70)));
     }
 
-    // Initialize controllers
+    
     for (var q in writingQuestions) {
       if (!_controllers.containsKey(q.id)) {
         _controllers[q.id] = TextEditingController();

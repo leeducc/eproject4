@@ -46,7 +46,7 @@ public class SmartTestService {
         try {
             skill = SkillType.valueOf(skillStr.toUpperCase());
         } catch (Exception e) {
-            // fallback if null or invalid
+            
         }
         
         List<Question> questions = new ArrayList<>();
@@ -65,7 +65,7 @@ public class SmartTestService {
             int remaining = required - questions.size();
             if (remaining > 0) {
                 List<Question> randoms = questionRepository.findRandomBySkillAndDifficulty(
-                        skill.name(), difficultyBand, required); // fetch max required just in case of dupes
+                        skill.name(), difficultyBand, required); 
                 
                 Set<Long> existingIds = questions.stream().map(Question::getId).collect(Collectors.toSet());
                 for (Question q : randoms) {
@@ -75,7 +75,7 @@ public class SmartTestService {
                 }
             }
         } else {
-            // fallback generic fetch
+            
         }
 
         return questions.stream().map(this::mapToResponse).collect(Collectors.toList());
@@ -91,7 +91,7 @@ public class SmartTestService {
         
         UserTestSession session = UserTestSession.builder()
                 .user(user)
-                .startTime(LocalDateTime.now().minusMinutes(10)) // Mock 10 min past start
+                .startTime(LocalDateTime.now().minusMinutes(10)) 
                 .endTime(LocalDateTime.now())
                 .score(score)
                 .skill(request.getSkill())

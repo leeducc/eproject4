@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TrueFalseWidget extends StatelessWidget {
   final String questionText;
   final bool isAnswered;
-  final bool? result; // true: correct, false: wrong, null: unanswered
+  final bool? result; 
   final void Function(bool choice) onAnswer;
 
   const TrueFalseWidget({

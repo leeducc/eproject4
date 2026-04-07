@@ -47,9 +47,9 @@ public class QuestionGroupService {
         
         if (req.getQuestions() != null) {
             for (QuestionRequest qReq : req.getQuestions()) {
-                questionBankService.createQuestion(qReq, null); // Media handled separately or in chunks
-                // Note: We need to link the created question to the group.
-                // QuestionBankService might need an update to accept group_id or we link it here.
+                questionBankService.createQuestion(qReq, null); 
+                
+                
             }
         }
         

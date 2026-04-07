@@ -5,7 +5,7 @@ import java.util.List;
 
 @Data
 public class FilterRequest {
-    private String logic; // "AND" or "OR"
-    private String skill; // "LISTENING" or "READING"
+    private String logic; 
+    private String skill; 
     private List<FilterGroup> groups;
 }

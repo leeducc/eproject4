@@ -1,4 +1,5 @@
 package com.groupone.backend.features.quizbank.service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.groupone.backend.features.quizbank.dto.ExamRequest;
 import com.groupone.backend.features.quizbank.dto.ExamResponse;
@@ -35,16 +36,19 @@ public class ExamService {
     @Autowired
     private QuestionBankService questionBankService;
 
+    @Transactional(readOnly = true)
     public List<ExamResponse> getAllExams() {
         return examRepository.findAll().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ExamResponse> getExamsByType(ExamType examType) {
         return examRepository.findByExamType(examType).stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ExamResponse getExamById(Long id) {
         Exam e = examRepository.findById(id).orElseThrow(() -> new RuntimeException("Exam not found"));
         return mapToResponseDTO(e);

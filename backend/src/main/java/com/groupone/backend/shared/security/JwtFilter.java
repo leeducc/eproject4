@@ -34,37 +34,51 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        String userEmail;
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        jwt = authHeader.substring(7);
         try {
-            userEmail = jwtUtil.extractEmail(jwt);
-        } catch (Exception e) {
-            log.warn("[JwtFilter] JWT validation failed: {}", e.getMessage());
-            userEmail = null;
-        }
+            final String authHeader = request.getHeader("Authorization");
+            final String jwt;
+            String userEmail;
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<User> userOptional = userRepository.findByEmail(userEmail);
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                if (jwtUtil.validateToken(jwt, user)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            jwt = authHeader.substring(7);
+            try {
+                userEmail = jwtUtil.extractEmail(jwt);
+            } catch (Exception e) {
+                log.warn("[JwtFilter] JWT extraction failed: {}", e.getMessage());
+                userEmail = null;
+            }
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Optional<User> userOptional = userRepository.findByEmail(userEmail);
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    if (jwtUtil.validateToken(jwt, user)) {
+                        String roleName = (user.getRole() != null) ? user.getRole().name() : "USER";
+                        log.debug("[JwtFilter] Authenticated user: {}, Role: {}", userEmail, roleName);
+                        
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                user,
+                                null,
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName)));
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    } else {
+                        log.warn("[JwtFilter] JWT validation failed for user: {}", userEmail);
+                    }
+                } else {
+                    log.warn("[JwtFilter] User not found for email extracted from JWT: {}", userEmail);
                 }
             }
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            log.error("[JwtFilter] CRITICAL error in JWT Filter", e);
+            
+            
+            throw e;
         }
-        filterChain.doFilter(request, response);
     }
 }

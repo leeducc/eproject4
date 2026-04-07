@@ -32,11 +32,11 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
   const [selectedSkillFilter, setSelectedSkillFilter] = useState<SkillType | 'ALL'>('ALL');
   const [examLevel, setExamLevel] = useState<DifficultyBand | 'MIXED'>('MIXED');
   
-  // Selection
+  
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
 
-  // Preview
+  
   const [previewItem, setPreviewItem] = useState<{ item: any, type: 'QUESTION' | 'GROUP' } | null>(null);
   const [showExamPreview, setShowExamPreview] = useState(false);
 
@@ -60,10 +60,10 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
     }
   }, [fetchQuestions, fetchGroups, examId, fetchExamById]);
 
-  // Combined Pool
+  
   const filteredPool = useMemo(() => {
     const qPool = questions.filter(q => {
-      if (q.skill !== 'WRITING') return false; // Strict enforce: only show standalone writing tasks
+      if (q.skill !== 'WRITING') return false; 
       const matchesSkill = selectedSkillFilter === 'ALL' || q.skill === selectedSkillFilter;
       const matchesSearch = (q.instruction || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
                             q.type.toLowerCase().includes(searchQuery.toLowerCase());
@@ -89,7 +89,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
     }
   };
 
-  // IELTS Validation Counts
+  
   const ieltsCounts = useMemo(() => {
     const counts = { 
       listeningGroups: 0, 
@@ -140,7 +140,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
       return;
     }
 
-    // Determine unique categories
+    
     const includedCategories = Array.from(new Set([
       ...selectedQuestions.map(id => questions.find(q => q.id === id)?.skill).filter(Boolean),
       ...selectedGroups.map(id => questionGroups.find(g => g.id === id)?.skill).filter(Boolean)
@@ -179,7 +179,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
   return (
     <div className="flex flex-col lg:flex-row gap-8 font-sans p-2">
       
-      {/* Left Column: Exam Meta Data */}
+      {}
       <div className="w-full lg:w-80 space-y-6 lg:border-r lg:pr-8 bg-white text-gray-900 border-gray-100">
          <div className="space-y-4">
             <div className="space-y-1.5">
@@ -236,7 +236,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
             </div>
          </div>
 
-         {/* IELTS Progress Tracker */}
+         {}
          {examType === 'IELTS' && (
            <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl space-y-3">
               <h4 className="font-bold text-primary text-xs uppercase tracking-wider">IELTS Requirements</h4>
@@ -318,7 +318,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
          </div>
       </div>
 
-      {/* Right Column: Resource Pool */}
+      {}
       <div className="flex-1 flex flex-col h-[650px] bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden text-gray-900">
          <div className="p-4 border-b bg-gray-50/30">
             <h3 className="text-lg font-bold text-gray-800 mb-4 text-gray-900">Resource Bank</h3>
@@ -412,7 +412,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
                           </p>
                        </div>
 
-                       {/* Preview Button */}
+                       {}
                        <div className="shrink-0 self-center">
                           <button 
                             onClick={(e) => {
@@ -432,7 +432,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
          </div>
       </div>
 
-      {/* Preview Modal Overlay */}
+      {}
       {previewItem && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200" 
@@ -442,7 +442,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
             className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+            {}
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-xl ${previewItem.type === 'GROUP' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
@@ -460,7 +460,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
               </button>
             </div>
 
-            {/* Modal Content */}
+            {}
             <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
               {previewItem.type === 'GROUP' ? (
                 <div className="space-y-8">
@@ -535,7 +535,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
               )}
             </div>
 
-            {/* Modal Footer */}
+            {}
             <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex justify-end items-center gap-4 bg-gray-50/50 dark:bg-slate-900/50">
               <span className="text-xs text-gray-500 font-medium hidden sm:block">
                 Click outside to close
@@ -568,7 +568,7 @@ export const ExamCompositionUI: React.FC<ExamCompositionUIProps> = ({ onSave, ex
         </div>
       )}
 
-      {/* Full Exam Preview Modal */}
+      {}
       {showExamPreview && (
         <ExamPreviewModal 
            examTitle={title}

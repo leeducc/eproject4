@@ -38,11 +38,11 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.translate('about_us'), style: TextStyle(color: colorScheme.onBackground, fontSize: 18)),
+        title: Text(l10n.translate('about_us'), style: TextStyle(color: colorScheme.onSurface, fontSize: 18)),
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: Column(
         children: [
@@ -51,7 +51,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  // App Logo
+                  
                   Center(
                     child: Container(
                       width: 100,
@@ -76,7 +76,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   Text(
                     'EnglishHub',
                     style: TextStyle(
-                      color: colorScheme.onBackground,
+                      color: colorScheme.onSurface,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -85,16 +85,16 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   const SizedBox(height: 8),
                   Text(
                     l10n.translate('app_version', params: {'version': '$_version+$_buildNumber'}),
-                    style: TextStyle(color: colorScheme.onBackground.withOpacity(0.6), fontSize: 14),
+                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
                   ),
                   const SizedBox(height: 40),
                   
-                  // Latest Version Installed Row
+                  
                   _buildStatusRow(l10n.translate('latest_version_installed'), Icons.check_circle, Colors.greenAccent),
                   
                   const SizedBox(height: 24),
                   
-                  // Policy Buttons
+                  
                   _buildPolicyItem(
                     context,
                     l10n.translate('terms_of_service'),
@@ -122,19 +122,19 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
             ),
           ),
           
-          // Company Footer
+          
           Padding(
             padding: const EdgeInsets.only(bottom: 30.0, top: 20.0),
             child: Column(
               children: [
                 Text(
                   l10n.translate('company_footer'),
-                  style: TextStyle(color: colorScheme.onBackground.withOpacity(0.3), fontSize: 12),
+                  style: TextStyle(color: colorScheme.onSurface.withOpacity(0.3), fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Copyright © 2024 EnglishHub. All rights reserved.',
-                  style: TextStyle(color: colorScheme.onBackground.withOpacity(0.2), fontSize: 10),
+                  style: TextStyle(color: colorScheme.onSurface.withOpacity(0.2), fontSize: 10),
                 ),
               ],
             ),
@@ -149,7 +149,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onBackground.withOpacity(0.05),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -166,8 +166,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   Widget _buildPolicyItem(BuildContext context, String title, VoidCallback onTap) {
     final theme = Theme.of(context);
     return ListTile(
-      title: Text(title, style: TextStyle(color: theme.colorScheme.onBackground, fontSize: 15)),
-      trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onBackground.withOpacity(0.5), size: 20),
+      title: Text(title, style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 15)),
+      trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withOpacity(0.5), size: 20),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
     );

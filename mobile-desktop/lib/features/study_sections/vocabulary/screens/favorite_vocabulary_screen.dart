@@ -61,7 +61,7 @@ class _FavoriteVocabularyScreenState extends State<FavoriteVocabularyScreen> wit
                   child: SingleChildScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
                     child: SizedBox(
-                      height: 400, // Enough height to catch the drag
+                      height: 400, 
                       child: Center(
                         child: Text(
                           'Chưa có từ vựng yêu thích nào',

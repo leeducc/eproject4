@@ -22,7 +22,7 @@ public class CaptchaVerificationService {
 
     private static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
-    // Reuse a single RestTemplate with timeouts — avoids creating a new connection pool per call
+    
     private final RestTemplate restTemplate;
 
     public CaptchaVerificationService(RestTemplateBuilder builder) {
@@ -69,6 +69,6 @@ public class CaptchaVerificationService {
         private boolean success;
         private String challenge_ts;
         private String hostname;
-        private List<String> errorCodes; // "error-codes" in JSON
+        private List<String> errorCodes; 
     }
 }

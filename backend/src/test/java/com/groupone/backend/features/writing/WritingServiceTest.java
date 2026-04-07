@@ -69,7 +69,7 @@ class WritingServiceTest {
 
         assertNotNull(result);
         assertEquals(SubmissionStatus.GRADED, result.getStatus());
-        assertEquals(7.0, result.getScore()); // (7+7.5+7+6.5)/4 = 7.0
+        assertEquals(7.0, result.getScore()); 
         verify(submissionRepository).save(submission);
     }
 

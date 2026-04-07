@@ -44,7 +44,7 @@ public class WritingService {
                 .orElseThrow(() -> new RuntimeException("Submission not found"));
 
         if (submission.getStatus() != SubmissionStatus.PENDING) {
-            // Allow re-claiming if the current user is the locker
+            
             if (submission.getStatus() == SubmissionStatus.IN_PROGRESS && 
                 submission.getLockedBy() != null && 
                 submission.getLockedBy().getId().equals(teacher.getId())) {
@@ -52,7 +52,7 @@ public class WritingService {
                 return submission;
             }
             
-            // Allow viewing if already graded
+            
             if (submission.getStatus() == SubmissionStatus.GRADED) {
                 log.info("Teacher {} is viewing graded submission {}", teacher.getEmail(), id);
                 return submission;
@@ -117,17 +117,17 @@ public class WritingService {
         submission.setGrammaticalRange(request.getGrammaticalRange());
         submission.setTeacherFeedback(request.getTeacherFeedback());
         
-        // Detailed Reasoning & Corrections
+        
         submission.setTaskAchievementReason(request.getTaskAchievementReason());
         submission.setCohesionCoherenceReason(request.getCohesionCoherenceReason());
         submission.setLexicalResourceReason(request.getLexicalResourceReason());
         submission.setGrammaticalRangeReason(request.getGrammaticalRangeReason());
         submission.setCorrectionsJson(request.getCorrectionsJson());
         
-        // Calculate average score
+        
         double avg = (request.getTaskAchievement() + request.getCohesionCoherence() + 
                      request.getLexicalResource() + request.getGrammaticalRange()) / 4.0;
-        submission.setScore(Math.round(avg * 2) / 2.0); // Round to nearest 0.5
+        submission.setScore(Math.round(avg * 2) / 2.0); 
         
         submission.setStatus(SubmissionStatus.GRADED);
         
@@ -149,7 +149,7 @@ public class WritingService {
                         return new RuntimeException("Question not found");
                     });
                     
-            // Initialize submission
+            
             WritingSubmission submission = WritingSubmission.builder()
                     .question(question)
                     .student(student)
@@ -159,7 +159,7 @@ public class WritingService {
                     .status(SubmissionStatus.PENDING)
                     .build();
 
-            // Perform AI Grading if requested
+            
             if (request.getGradingType() == GradingType.AI) {
                 log.info("Initiating AI Grading for submission on question '{}'", question.getInstruction());
                 OllamaService.OllamaGradingResult result = ollamaService.gradeEssay(question.getInstruction(), request.getContent());

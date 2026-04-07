@@ -24,13 +24,13 @@ public class VocabularyPracticeHistory {
     private Long editorId;
 
     @Column(nullable = false)
-    private String action; // CREATED, UPDATED, ROLLBACK
+    private String action; 
 
     @Column(columnDefinition = "TEXT")
-    private String snapshot; // JSON snapshot of the practice data
+    private String snapshot; 
 
     @Column(columnDefinition = "TEXT")
-    private String changes; // JSON representation of changes
+    private String changes; 
 
     @Column(name = "version")
     private Integer version;

@@ -6,7 +6,7 @@ import { toast } from '@english-learning/ui';
 import { AdminLayout } from '../../components/AdminLayout';
 import { ArrowLeft, Edit2, Eye, FileText, ChevronRight, BookOpen, Music } from 'lucide-react';
 import { getMediaUrl } from '../../features/quiz-bank/utils';
-// @ts-ignore
+
 import { StudentPreview } from '../../features/quiz-bank/components/StudentPreview';
 
 export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: React.ComponentType<{ children: React.ReactNode }> }> = ({ basePath = '/admin', Layout = AdminLayout }) => {
@@ -45,7 +45,7 @@ export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: Rea
     return (
         <Layout>
             <div className="max-w-6xl mx-auto py-8 px-4">
-                {/* Header */}
+                {}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <button 
@@ -80,7 +80,7 @@ export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: Rea
                     <StudentPreview question={group as any} />
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Main Content: Passage */}
+                        {}
                         <div className="lg:col-span-2 space-y-8">
                             <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-colors">
                                 <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mb-6 flex items-center gap-2">
@@ -111,7 +111,7 @@ export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: Rea
                                 </div>
                             </section>
 
-                            {/* Child Questions List */}
+                            {}
                             <section className="space-y-4">
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 px-2 flex items-center justify-between">
                                     <span>Questions ({childQuestions.length})</span>
@@ -140,7 +140,7 @@ export const ComprehensionDetailView: React.FC<{ basePath?: string, Layout?: Rea
                             </section>
                         </div>
 
-                        {/* Sidebar */}
+                        {}
                         <div className="space-y-6">
                             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm transition-colors">
                                 <h3 className="text-sm font-bold text-gray-800 dark:text-slate-200 mb-4 border-b dark:border-slate-800 pb-2">Properties</h3>

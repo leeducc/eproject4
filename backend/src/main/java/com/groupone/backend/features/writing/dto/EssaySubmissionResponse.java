@@ -22,7 +22,7 @@ public class EssaySubmissionResponse {
     private LocalDateTime createdAt;
     private String status;
 
-    // Detailed assessment
+    
     private Double taskAchievement;
     private Double cohesionCoherence;
     private Double lexicalResource;

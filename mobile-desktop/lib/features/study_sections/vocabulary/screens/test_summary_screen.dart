@@ -44,7 +44,7 @@ class TestSummaryScreen extends StatelessWidget {
                 onPressed: () async {
                   await testProvider.finalizeTest();
                   if (context.mounted) {
-                    Navigator.pop(context); // Go back to DailyTestScreen (it will show updated due count)
+                    Navigator.pop(context); 
                   }
                 },
                 style: ElevatedButton.styleFrom(

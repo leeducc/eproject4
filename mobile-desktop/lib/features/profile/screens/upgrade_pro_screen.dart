@@ -144,7 +144,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // CARD BACKGROUND
+                  
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
@@ -171,7 +171,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // TITLE
+                        
                         SizedBox(
                           height: 16,
                           child: Text(
@@ -191,7 +191,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
                         const SizedBox(height: 10),
 
-                        // PRICE
+                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -225,7 +225,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
                         const SizedBox(height: 6),
 
-                        // 🔥 ORIGINAL PRICE (ĐẸP + RÕ)
+                        
                         SizedBox(
                           height: 16,
                           child: p['originalPrice'] != null
@@ -276,7 +276,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
                     ),
                   ),
 
-                  // BADGE
+                  
                   if (p['discount'] != null)
                     Positioned(
                       top: -10,
@@ -353,12 +353,12 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 🔥 DIVIDER TRÊN CÙNG
+        
         _buildDivider(),
 
         const SizedBox(height: 10),
 
-        // ===== BAO ĐỖ HSK =====
+        
         const Center(
           child: Text(
             'Bao đỗ HSK',
@@ -397,7 +397,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
         _buildDivider(),
 
-        // ===== LUYỆN TẬP KỸ NĂNG =====
+        
         const Center(
           child: Text(
             'Luyện tập kỹ năng',
@@ -521,7 +521,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
       ),
       child: Row(
         children: [
-          // TEXT
+          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,7 +548,7 @@ class _UpgradeProScreenState extends State<UpgradeProScreen> {
 
           const SizedBox(width: 12),
 
-          // 🔥 ICON STYLE GIỐNG ẢNH
+          
           Container(
             width: 44,
             height: 44,

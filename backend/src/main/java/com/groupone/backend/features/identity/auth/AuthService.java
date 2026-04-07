@@ -42,6 +42,11 @@ public class AuthService {
     @Value("${google.client.id}")
     private String googleClientId;
 
+    public boolean checkEmailAvailability(String email) {
+        System.out.println("[AuthService] Checking availability for email: " + email);
+        return !userRepository.existsByEmail(email);
+    }
+
     public void sendOtp(String email, String captchaToken) {
         if (!captchaVerificationService.verifyToken(captchaToken)) {
             throw new IllegalArgumentException("reCAPTCHA verification failed. Please try again.");
@@ -59,7 +64,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email is already registered");
         }
 
-        // Validate OTP against our cache
+        
         if (!otpCacheService.validateOtp(request.getEmail(), request.getCode())) {
             throw new IllegalArgumentException("Invalid or expired verification code");
         }
@@ -67,13 +72,13 @@ public class AuthService {
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(UserRole.CUSTOMER) // Default role for app signups
-                .isEmailConfirmed(true) // Confirmed because they entered the OTP correctly
+                .role(UserRole.STUDENT) 
+                .isEmailConfirmed(true) 
                 .build();
 
         user = userRepository.save(user);
 
-        // Create empty profile
+        
         UserProfile profile = UserProfile.builder()
                 .user(user)
                 .build();
@@ -130,17 +135,17 @@ public class AuthService {
                 String email = payload.getEmail();
 
                 User user = userRepository.findByEmail(email).orElseGet(() -> {
-                    // Create new user if they don't exist
+                    
                     User newUser = User.builder()
                             .email(email)
-                            // Generate random complex password since they login with google
+                            
                             .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
-                            .role(UserRole.CUSTOMER)
+                            .role(UserRole.STUDENT)
                             .isEmailConfirmed(payload.getEmailVerified() != null ? payload.getEmailVerified() : true)
                             .build();
                     newUser = userRepository.save(newUser);
 
-                    // Create empty profile
+                    
                     UserProfile profile = UserProfile.builder()
                             .user(newUser)
                             .fullName((String) payload.get("name"))

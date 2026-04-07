@@ -16,7 +16,7 @@ class ExamResultScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header ────────────────────────────────────────────────────
+              
               Row(
                 children: [
                   Container(
@@ -45,13 +45,13 @@ class ExamResultScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // ── Overall Band ──────────────────────────────────────────────
+              
               if (!result.writingPending) ...[
                 _OverallBandCard(band: result.overallBand),
                 const SizedBox(height: 28),
               ],
 
-              // ── Section Scores ────────────────────────────────────────────
+              
               const Text('Section Scores',
                   style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
               const SizedBox(height: 14),
@@ -73,7 +73,7 @@ class ExamResultScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Writing — conditional on grading type
+              
               if (result.writingPending)
                 _WritingPendingCard()
               else
@@ -87,7 +87,7 @@ class ExamResultScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // ── IELTS Band Guide ──────────────────────────────────────────
+              
               _BandGuideSection(
                 listeningScore: result.listeningScore,
                 readingScore: result.readingScore,
@@ -95,12 +95,12 @@ class ExamResultScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // ── Actions ───────────────────────────────────────────────────
+              
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    // Pop back until we're off the exam stack entirely
+                    
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   icon: const Icon(Icons.home_outlined),
@@ -121,7 +121,7 @@ class ExamResultScreen extends StatelessWidget {
   }
 }
 
-// ─── Overall Band Card ──────────────────────────────────────────────────────
+
 
 class _OverallBandCard extends StatelessWidget {
   final double band;
@@ -198,7 +198,7 @@ class _OverallBandCard extends StatelessWidget {
   }
 }
 
-// ─── Score Card ─────────────────────────────────────────────────────────────
+
 
 class _ScoreCard extends StatelessWidget {
   final IconData icon;
@@ -290,7 +290,7 @@ class _ScoreCard extends StatelessWidget {
   }
 }
 
-// ─── Writing Pending Card ────────────────────────────────────────────────────
+
 
 class _WritingPendingCard extends StatelessWidget {
   @override
@@ -348,7 +348,7 @@ class _WritingPendingCard extends StatelessWidget {
   }
 }
 
-// ─── Band Guide Section ──────────────────────────────────────────────────────
+
 
 class _BandGuideSection extends StatelessWidget {
   final double listeningScore;

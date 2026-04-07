@@ -23,21 +23,25 @@ public class QuestionFilterService {
         Specification<Question> spec = (root, query, cb) -> {
             List<Predicate> groupPredicates = new ArrayList<>();
 
-            for (FilterGroup group : request.getGroups()) {
-                Predicate groupPredicate = buildGroupPredicate(root, query, cb, group);
-                if (groupPredicate != null) {
-                    groupPredicates.add(groupPredicate);
+            if (request.getGroups() != null) {
+                for (FilterGroup group : request.getGroups()) {
+                    Predicate groupPredicate = buildGroupPredicate(root, query, cb, group);
+                    if (groupPredicate != null) {
+                        groupPredicates.add(groupPredicate);
+                    }
                 }
             }
 
-            if (groupPredicates.isEmpty()) return null;
-
-            Predicate finalTagsPredicate = "OR".equalsIgnoreCase(request.getLogic()) 
-                ? cb.or(groupPredicates.toArray(new Predicate[0])) 
-                : cb.and(groupPredicates.toArray(new Predicate[0]));
+            Predicate finalTagsPredicate = null;
+            if (!groupPredicates.isEmpty()) {
+                finalTagsPredicate = "OR".equalsIgnoreCase(request.getLogic()) 
+                    ? cb.or(groupPredicates.toArray(new Predicate[0])) 
+                    : cb.and(groupPredicates.toArray(new Predicate[0]));
+            }
 
             if (request.getSkill() != null && !request.getSkill().isEmpty()) {
-                return cb.and(finalTagsPredicate, cb.equal(root.get("skill"), request.getSkill().toUpperCase()));
+                Predicate skillPredicate = cb.equal(root.get("skill"), request.getSkill().toUpperCase());
+                return finalTagsPredicate != null ? cb.and(finalTagsPredicate, skillPredicate) : skillPredicate;
             }
 
             return finalTagsPredicate;
@@ -54,7 +58,7 @@ public class QuestionFilterService {
             String namespace = parts[0].trim();
             String name = parts.length > 1 ? parts[1].trim() : null;
 
-            // Subquery to check for tag existence to avoid cross-product issues with joins
+            
             Subquery<Long> subquery = query.subquery(Long.class);
             Root<Question> subRoot = subquery.from(Question.class);
             Join<Question, Tag> join = subRoot.join("tags");
@@ -68,7 +72,7 @@ public class QuestionFilterService {
                     cb.equal(join.get("name"), name)
                 );
             } else {
-                tagMatch = cb.equal(join.get("name"), namespace); // fallback if no colon
+                tagMatch = cb.equal(join.get("name"), namespace); 
             }
             
             subquery.where(cb.and(cb.equal(subRoot.get("id"), root.get("id")), tagMatch));
