@@ -16,7 +16,6 @@ class VocabularyScreen extends StatefulWidget {
 }
 
 class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerProviderStateMixin {
-  static const bgColor = Color(0xFF0F172A);
   static const primaryBlue = Color(0xFF3B82F6);
   
   late TabController _tabController;
@@ -56,13 +55,17 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    debugPrint('[VocabularyScreen] build – brightness: ${theme.brightness}');
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Từ vựng IELTS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: bgColor,
+        title: Text('Từ vựng IELTS', style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
@@ -102,7 +105,7 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
           isScrollable: true,
           indicatorColor: primaryBlue,
           labelColor: primaryBlue,
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: colorScheme.onSurface.withOpacity(0.5),
           tabs: kIeltsLevels.map((level) => Tab(text: level.label)).toList(),
         ),
       ),
@@ -113,8 +116,8 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: bgColor,
-          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+          color: theme.scaffoldBackgroundColor,
+          border: Border(top: BorderSide(color: colorScheme.onSurface.withOpacity(0.05))),
         ),
         child: ElevatedButton(
           onPressed: () {},
@@ -140,6 +143,7 @@ class VocabularyGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<VocabularyProvider>(
       builder: (context, provider, child) {
+        final theme = Theme.of(context);
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator(color: Colors.blue));
         }
@@ -150,7 +154,7 @@ class VocabularyGrid extends StatelessWidget {
 
         final vocabularies = provider.vocabularies;
         if (vocabularies.isEmpty) {
-          return const Center(child: Text('Chưa có từ vựng cho band này', style: TextStyle(color: Colors.white70)));
+          return Center(child: Text('Chưa có từ vựng cho band này', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))));
         }
 
         return RefreshIndicator(
@@ -163,16 +167,16 @@ class VocabularyGrid extends StatelessWidget {
                   child: HeaderSection(count: vocabularies.length, band: band),
                 ),
               ),
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue, size: 16),
-                      SizedBox(width: 8),
+                      const Icon(Icons.info_outline, color: Colors.blue, size: 16),
+                      const SizedBox(width: 8),
                       Text(
                         'Từ vựng xuất hiện nhiều trong IELTS',
-                        style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.5), fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -229,14 +233,16 @@ class HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final level = kIeltsLevels.firstWhere((l) => l.band == band);
     
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B).withOpacity(0.5),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.08)),
       ),
       child: Row(
         children: [
@@ -272,28 +278,28 @@ class HeaderSection extends StatelessWidget {
               children: [
                 Text(
                   'Từ vựng mới ${level.label} ($count)',
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: colorScheme.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     const Icon(Icons.flash_on, color: Colors.blue, size: 16),
                     const SizedBox(width: 4),
-                    const Text('0/', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                    Text('$count', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text('0/', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 13)),
+                    Text('$count', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 13)),
                     const SizedBox(width: 16),
                     const Icon(Icons.star, color: Colors.amber, size: 16),
                     const SizedBox(width: 4),
-                    const Text('0/0', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text('0/0', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 13)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: const LinearProgressIndicator(
+                  child: LinearProgressIndicator(
                     value: 0.0,
-                    backgroundColor: Colors.white10,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    backgroundColor: colorScheme.onSurface.withOpacity(0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                     minHeight: 4,
                   ),
                 ),
@@ -315,6 +321,7 @@ class GridCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -323,7 +330,7 @@ class GridCell extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1.5),
             ),
@@ -376,16 +383,12 @@ class VocabularySearchDelegate extends SearchDelegate {
 
   @override
   ThemeData appBarTheme(BuildContext context) {
-    return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF0F172A),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF0F172A),
-        foregroundColor: Colors.white,
+    final theme = Theme.of(context);
+    return theme.copyWith(
+      appBarTheme: theme.appBarTheme.copyWith(
         elevation: 0,
       ),
       inputDecorationTheme: const InputDecorationTheme(
-        hintStyle: TextStyle(color: Colors.white54),
         border: InputBorder.none,
       ),
     );
@@ -417,8 +420,11 @@ class VocabularySearchDelegate extends SearchDelegate {
   Widget buildSuggestions(BuildContext context) => _buildSearchResults(context);
 
   Widget _buildSearchResults(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     if (query.isEmpty) {
-      return const Center(child: Text('Search vocabulary...', style: TextStyle(color: Colors.white70)));
+      return Center(child: Text('Search vocabulary...', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6))));
     }
 
     final results = allVocabularies.where((v) {
@@ -427,7 +433,7 @@ class VocabularySearchDelegate extends SearchDelegate {
     }).toList();
 
     if (results.isEmpty) {
-      return const Center(child: Text('No results found.', style: TextStyle(color: Colors.white70)));
+      return Center(child: Text('No results found.', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6))));
     }
 
     final mappedAll = allVocabularies.map((v) => v.toJson()).toList();
@@ -438,10 +444,10 @@ class VocabularySearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         final vocab = results[index];
         return ListTile(
-          title: Text(vocab.word, style: const TextStyle(color: Colors.white)),
+          title: Text(vocab.word, style: TextStyle(color: colorScheme.onSurface)),
           subtitle: Text(
             vocab.definition.isNotEmpty ? vocab.definition : vocab.pos,
-            style: const TextStyle(color: Colors.white54),
+            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.54)),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

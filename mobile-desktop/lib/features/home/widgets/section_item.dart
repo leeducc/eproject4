@@ -16,8 +16,8 @@ class SectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('[SectionItem] build: $title');
     final theme = Theme.of(context);
+    debugPrint('[SectionItem] build: $title, brightness: ${theme.brightness}, color: $color');
     
     return GestureDetector(
       onTap: onTap,

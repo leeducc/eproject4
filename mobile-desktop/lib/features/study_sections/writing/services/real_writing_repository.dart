@@ -18,18 +18,25 @@ class RealWritingRepository implements WritingRepository {
       
       
       final filtered = topics.where((topic) {
-        if (topic.difficultyBand == null) return false;
-        
-        
-        
+        if (topic.difficultyBand == null) {
+          debugPrint('[RealWritingRepository] Topic ID ${topic.id} has NULL difficultyBand');
+          return false;
+        }
         
         final backendBand = topic.difficultyBand!.toUpperCase();
-        if (backendBand == 'BAND_0_4' && band == IeltsBand.band0_4) return true;
-        if (backendBand == 'BAND_5_6' && band == IeltsBand.band5_6) return true;
-        if (backendBand == 'BAND_7_8' && band == IeltsBand.band7_8) return true;
-        if (backendBand == 'BAND_9' && band == IeltsBand.band9) return true;
+        bool match = false;
+        if (backendBand == 'BAND_0_4' && band == IeltsBand.band0_4) match = true;
+        if (backendBand == 'BAND_5_6' && band == IeltsBand.band5_6) match = true;
+        if (backendBand == 'BAND_7_8' && band == IeltsBand.band7_8) match = true;
+        if (backendBand == 'BAND_9' && band == IeltsBand.band9) match = true;
         
-        return false;
+        if (!match) {
+          debugPrint('[RealWritingRepository] Topic ID ${topic.id} filtered out. Backend: "$backendBand", Selected: "$band"');
+        } else {
+          debugPrint('[RealWritingRepository] Topic ID ${topic.id} MATCHED. Backend: "$backendBand", Selected: "$band"');
+        }
+        
+        return match;
       }).map((topic) {
         return WritingPrompt(
           id: topic.id.toString(),

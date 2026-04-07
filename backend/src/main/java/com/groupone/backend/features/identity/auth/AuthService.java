@@ -78,9 +78,12 @@ public class AuthService {
 
         user = userRepository.save(user);
 
-        
+        // Create and save user profile with additional info
         UserProfile profile = UserProfile.builder()
                 .user(user)
+                .fullName(request.getFullName())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
                 .build();
         userProfileRepository.save(profile);
     }

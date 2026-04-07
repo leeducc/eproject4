@@ -18,6 +18,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
 
   bool _isAgreed = false;
   bool _isLoading = false;
@@ -33,6 +37,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _codeController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -101,6 +109,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.translate('passwords_dont_match'))),
+      );
+      return;
+    }
+
     if (!_isAgreed) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.translate('agree_to_terms_error'))),
@@ -113,6 +128,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _emailController.text.trim(),
       _codeController.text.trim(),
       _passwordController.text,
+      _nameController.text.trim(),
+      _phoneController.text.trim(),
+      _addressController.text.trim(),
     );
     setState(() => _isLoading = false);
 
@@ -136,7 +154,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     debugPrint('[RegisterScreen] build triggered');
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -177,6 +194,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 48),
+                CustomTextField(
+                  hintText: l10n.translate('full_name_hint'),
+                  controller: _nameController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_full_name');
+                    return null;
+                  },
+                ),
+                CustomTextField(
+                  hintText: l10n.translate('phone_number_hint'),
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_phone_number');
+                    if (!RegExp(r'^[0-9]{10,11}$').hasMatch(value)) return l10n.translate('invalid_phone_number');
+                    return null;
+                  },
+                ),
+                CustomTextField(
+                  hintText: l10n.translate('address_hint'),
+                  controller: _addressController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return l10n.translate('enter_address');
+                    return null;
+                  },
+                ),
                 CustomTextField(
                   hintText: l10n.translate('email_hint'),
                   controller: _emailController,
@@ -230,6 +273,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$').hasMatch(value)) {
                       return 'Mật khẩu phải bao gồm chữ hoa, chữ thường và số';
                     }
+                    return null;
+                  },
+                ),
+                CustomTextField(
+                  hintText: l10n.translate('confirm_password_placeholder'),
+                  isPassword: true,
+                  controller: _confirmPasswordController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return l10n.translate('please_re_enter_password');
+                    if (value != _passwordController.text) return l10n.translate('passwords_dont_match');
                     return null;
                   },
                 ),

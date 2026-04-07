@@ -114,12 +114,19 @@ class AuthApi {
     }
   }
 
-  static Future<bool> register(String email, String code, String password) async {
+  static Future<bool> register(String email, String code, String password, String fullName, String phoneNumber, String address) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'code': code, 'password': password}),
+        body: jsonEncode({
+          'email': email,
+          'code': code,
+          'password': password,
+          'fullName': fullName,
+          'phoneNumber': phoneNumber,
+          'address': address,
+        }),
       );
       if (response.statusCode != 200) {
         print('Register failed: ${response.statusCode} - ${response.body}');

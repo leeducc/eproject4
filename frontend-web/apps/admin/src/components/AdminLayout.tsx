@@ -8,6 +8,7 @@ import { useChatNotificationStore } from "../features/chat/notificationStore";
 
 interface AdminLayoutProps {
     children: React.ReactNode;
+    title?: string;
 }
 
 interface UserProfile {
@@ -17,7 +18,10 @@ interface UserProfile {
     avatarUrl?: string;
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children, title }: AdminLayoutProps) {
+    if (title) {
+        console.log(`[AdminLayout] Rendering page: ${title}`);
+    }
     const navigate = useNavigate();
     const adminToken = localStorage.getItem("admin_token");
     useAutoLogout(adminToken);

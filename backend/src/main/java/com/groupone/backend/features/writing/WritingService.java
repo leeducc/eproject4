@@ -28,8 +28,14 @@ public class WritingService {
     private final OllamaService ollamaService;
 
     public List<TopicResponse> getAllTopics() {
-        log.info("Fetching all writing tasks from Quiz Bank");
-        return questionRepository.findBySkillAndType(SkillType.WRITING, QuestionType.ESSAY).stream()
+        log.info("[WritingService] Fetching all writing tasks (SKILL: {}, TYPE: {})", SkillType.WRITING, QuestionType.ESSAY);
+        List<Question> questions = questionRepository.findBySkillAndType(SkillType.WRITING, QuestionType.ESSAY);
+        log.info("[WritingService] Total raw questions found: {}", questions.size());
+        
+        questions.forEach(q -> log.info("[WritingService] Question ID: {}, Band: {}, Active: {}", 
+            q.getId(), q.getDifficultyBand(), q.getIsActive()));
+
+        return questions.stream()
                 .map(TopicResponse::fromEntity)
                 .collect(Collectors.toList());
     }

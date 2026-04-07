@@ -95,14 +95,13 @@ public class TeacherSlotService {
         List<User> teachers = userRepository.findByRoleAndSearch(UserRole.TEACHER, null);
 
         return teachers.stream().map(teacher -> {
-            List<TeacherSlot> slots = slotRepository.findAllByTeacherIdAndStatusOrderByStartTime(
-                teacher.getId(), SlotStatus.AVAILABLE);
+            List<TeacherSlot> slots = slotRepository.findAllByTeacherIdOrderByStartTime(teacher.getId());
             
             Double avgRating = reviewRepository.getAverageRatingByTeacherId(teacher.getId());
             if (avgRating == null) avgRating = 0.0;
 
             String bio = teacher.getProfile() != null ? teacher.getProfile().getBio() : "";
-            String avatar = teacher.getProfile() != null ? teacher.getProfile().getAvatar() : "";
+            String avatar = teacher.getProfile() != null ? teacher.getProfile().getAvatarUrl() : "";
             String fullName = teacher.getProfile() != null ? teacher.getProfile().getFullName() : teacher.getEmail();
 
             return TeacherScheduleResponse.builder()

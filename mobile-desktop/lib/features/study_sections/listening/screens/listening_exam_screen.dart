@@ -14,6 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_desktop/core/providers/font_size_provider.dart';
 import 'package:mobile_desktop/core/providers/theme_provider.dart';
 import '../../services/moderation_service.dart';
+import 'package:mobile_desktop/core/models/wrong_answer.dart';
+import 'package:mobile_desktop/core/providers/wrong_answer_provider.dart';
 
 
 class ListeningExamScreen extends StatefulWidget {
@@ -70,8 +72,25 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
   }
 
   void nextQuestion(String answerId) {
-    if (questions[currentIndex].isCorrectChoice(answerId)) {
+    final question = questions[currentIndex];
+    bool isCorrect = question.isCorrectChoice(answerId);
+    
+    if (isCorrect) {
       score++;
+    } else {
+      // Record wrong answer
+      debugPrint('[ListeningExamScreen] recording wrong answer for question: ${question.id}');
+      context.read<WrongAnswerProvider>().addWrongAnswer(WrongAnswer(
+        questionId: question.id,
+        skill: 'LISTENING',
+        questionTitle: question.instruction, // Question instructions usually contain the main text
+        instruction: widget.title, // Use title of the section for context
+        userAnswer: answerId,
+        correctAnswers: question.correctIds,
+        explanation: question.explanation,
+        originalJson: question.data, // Storing question data for reconstruction
+        timestamp: DateTime.now(),
+      ));
     }
 
     if (currentIndex < questions.length - 1) {

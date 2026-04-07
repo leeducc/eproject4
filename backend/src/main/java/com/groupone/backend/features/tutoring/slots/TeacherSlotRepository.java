@@ -9,6 +9,7 @@ import java.util.List;
 public interface TeacherSlotRepository extends JpaRepository<TeacherSlot, Long> {
     List<TeacherSlot> findAllByTeacherId(Long teacherId);
     List<TeacherSlot> findAllByTeacherIdAndStartTimeAfter(Long teacherId, LocalDateTime after);
+    List<TeacherSlot> findAllByTeacherIdOrderByStartTime(Long teacherId);
     List<TeacherSlot> findAllByTeacherIdAndStatusOrderByStartTime(Long teacherId, SlotStatus status);
     List<TeacherSlot> findAllByStatusAndStartTimeBetween(SlotStatus status, LocalDateTime start, LocalDateTime end);
 }

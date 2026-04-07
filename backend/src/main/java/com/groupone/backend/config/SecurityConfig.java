@@ -82,7 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/questions/seed").permitAll()
                         .requestMatchers("/media/**").permitAll()
-                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/api/v1/tests/**").authenticated()
                         .requestMatchers("/api/chat/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/api/v1/moderation/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

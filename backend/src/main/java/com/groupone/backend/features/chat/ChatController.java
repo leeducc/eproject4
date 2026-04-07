@@ -105,9 +105,9 @@ public class ChatController {
         if (principal instanceof User) {
             return ((User) principal).getId();
         }
+        
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .map(User::getId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findByEmail(email).map(User::getId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 }

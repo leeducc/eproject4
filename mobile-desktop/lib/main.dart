@@ -20,7 +20,7 @@ import 'features/study_sections/vocabulary/services/vocabulary_api_service.dart'
 import 'features/study_sections/vocabulary/screens/favorite_manager.dart';
 import 'features/study_sections/vocabulary/providers/vocabulary_test_provider.dart';
 import 'features/ranking/providers/ranking_provider.dart';
-
+import 'core/providers/wrong_answer_provider.dart';
 import 'data/services/notification_service.dart';
 
 Future<void> main() async {
@@ -147,6 +147,9 @@ class EnglishStudyApp extends StatelessWidget {
 
         ChangeNotifierProvider<TutoringProvider>(
           create: (_) => TutoringProvider(),
+        ),
+        ChangeNotifierProvider<WrongAnswerProvider>(
+          create: (_) => WrongAnswerProvider(),
         ),
       ],
       child: Consumer3<LocaleProvider, FontSizeProvider, ThemeProvider>(

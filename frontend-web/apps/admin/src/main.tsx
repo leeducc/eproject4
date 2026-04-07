@@ -2,12 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { ThemeProvider } from '@english-learning/ui'
+import { ThemeProvider, ErrorBoundary } from '@english-learning/ui'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <ThemeProvider defaultTheme="light" storageKey="admin-ui-theme">
-            <App />
-        </ThemeProvider>
+        <ErrorBoundary>
+            <ThemeProvider defaultTheme="light" storageKey="admin-ui-theme">
+                <App />
+            </ThemeProvider>
+        </ErrorBoundary>
     </React.StrictMode>,
 )

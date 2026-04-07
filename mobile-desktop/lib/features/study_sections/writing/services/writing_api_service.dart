@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/topic_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../data/services/auth_api.dart';
 import '../models/essay_submission_response.dart';
 
 class WritingApiService {
@@ -12,8 +13,7 @@ class WritingApiService {
 
   Future<List<Topic>> fetchTopics() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
       
       if (token == null) {
         debugPrint('No auth token found for fetchTopics');
@@ -30,6 +30,7 @@ class WritingApiService {
       );
 
       if (response.statusCode == 200) {
+        debugPrint('[WritingApiService] Raw response: ${response.body}');
         final List<dynamic> jsonList = jsonDecode(response.body);
         debugPrint('Successfully fetched topics, count: ${jsonList.length}');
         return jsonList.map((json) => Topic.fromJson(json)).toList();
@@ -45,8 +46,7 @@ class WritingApiService {
 
   Future<EssaySubmissionResponse> submitEssay(int topicId, String content, String gradingType) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
       
       debugPrint('Submitting essay for topicId: $topicId, gradingType: $gradingType');
 
@@ -78,8 +78,7 @@ class WritingApiService {
 
   Future<List<EssaySubmissionResponse>> fetchMySubmissions() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
       
       final response = await http.get(
         Uri.parse('$baseUrl/my-submissions'),

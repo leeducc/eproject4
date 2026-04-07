@@ -35,18 +35,26 @@ public class SmartTestService {
     private final ObjectMapper objectMapper;
 
     private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        }
+        
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 
     @Transactional(readOnly = true)
     public List<QuestionResponse> generateSmartTest(String skillStr, String difficultyBand) {
+        String normalizedBand = normalizeBand(difficultyBand);
+        debugLog("Generating Smart Test: skill=" + skillStr + ", originalBand=" + difficultyBand + ", normalizedBand=" + normalizedBand);
+        
         User user = getCurrentUser();
         SkillType skill = null;
         try {
             skill = SkillType.valueOf(skillStr.toUpperCase());
         } catch (Exception e) {
-            
+            debugLog("Invalid skill type: " + skillStr);
         }
         
         List<Question> questions = new ArrayList<>();
@@ -57,15 +65,17 @@ public class SmartTestService {
                     user.getId(), skill, PageRequest.of(0, 5));
 
             if (!weakTagIds.isEmpty()) {
+                debugLog("Found weak tags: " + weakTagIds + ". Fetching targeted questions...");
                 List<Question> weakQuestions = questionRepository.findRandomBySkillAndDifficultyAndTags(
-                        skill.name(), difficultyBand, weakTagIds, 10);
+                        skill.name(), normalizedBand, weakTagIds, 10);
                 questions.addAll(weakQuestions);
             }
 
             int remaining = required - questions.size();
             if (remaining > 0) {
+                debugLog("Fetching " + remaining + " random questions for " + normalizedBand);
                 List<Question> randoms = questionRepository.findRandomBySkillAndDifficulty(
-                        skill.name(), difficultyBand, required); 
+                        skill.name(), normalizedBand, required); 
                 
                 Set<Long> existingIds = questions.stream().map(Question::getId).collect(Collectors.toSet());
                 for (Question q : randoms) {
@@ -74,16 +84,29 @@ public class SmartTestService {
                     }
                 }
             }
-        } else {
-            
         }
 
+        debugLog("Generated " + questions.size() + " questions.");
         return questions.stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
+    private String normalizeBand(String band) {
+        if (band == null) return "BAND_5_6";
+        if (band.contains("0") && band.contains("4")) return "BAND_0_4";
+        if (band.contains("5") && band.contains("6")) return "BAND_5_6";
+        if (band.contains("7") && band.contains("8")) return "BAND_7_8";
+        if (band.contains("9")) return "BAND_9";
+        return "BAND_5_6";
+    }
+
+    private void debugLog(String message) {
+        System.out.println("[SmartTestService] " + message);
     }
 
     @Transactional
     public SmartTestSubmitResponse submitSmartTest(SmartTestSubmitRequest request) {
         User user = getCurrentUser();
+        String normalizedBand = normalizeBand(request.getDifficultyBand());
         
         long correctCount = request.getAttempts().stream().filter(a -> Boolean.TRUE.equals(a.getIsCorrect())).count();
         int total = request.getAttempts().size();
@@ -95,7 +118,7 @@ public class SmartTestService {
                 .endTime(LocalDateTime.now())
                 .score(score)
                 .skill(request.getSkill())
-                .difficultyBand(request.getDifficultyBand())
+                .difficultyBand(normalizedBand)
                 .testType("smart_test")
                 .build();
                 

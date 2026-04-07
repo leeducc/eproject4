@@ -21,6 +21,7 @@ public class SmartTestController {
     public ResponseEntity<List<QuestionResponse>> generateSmartTest(
             @RequestParam String skill,
             @RequestParam String level) {
+        System.out.println("[SmartTestController] Received generate request: skill=" + skill + ", level=" + level);
         return ResponseEntity.ok(service.generateSmartTest(skill, level));
     }
 

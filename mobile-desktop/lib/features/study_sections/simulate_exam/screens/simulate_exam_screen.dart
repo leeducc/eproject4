@@ -42,23 +42,31 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    debugPrint('[SimulateExamScreen] build – brightness: ${theme.brightness}');
+
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Mock Exam',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: colorScheme.onSurface, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.history, color: Colors.white),
+            icon: Icon(Icons.history, color: colorScheme.onSurface),
             onPressed: () {
+              debugPrint('[SimulateExamScreen] History tapped');
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExamHistoryScreen()),
@@ -68,12 +76,12 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
           : _exams.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'Hiện chưa có bài thi Mock Exam nào.',
-                    style: TextStyle(color: Colors.white54, fontSize: 16),
+                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.54), fontSize: 16),
                   ),
                 )
               : ListView.builder(
@@ -81,21 +89,24 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
                   itemCount: _exams.length,
                   itemBuilder: (context, index) {
                     final exam = _exams[index];
-                    return _buildExamCard(exam);
+                    return _buildExamCard(exam, theme);
                   },
                 ),
     );
   }
 
-  Widget _buildExamCard(ExamModel exam) {
+  Widget _buildExamCard(ExamModel exam, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     int _ = (exam.questions?.length ?? 0) + (exam.groups?.length ?? 0) * 5; 
     
     return Card(
-      color: const Color(0xFF1E2330),
+      color: theme.cardTheme.color ?? colorScheme.surface,
+      elevation: theme.cardTheme.elevation ?? 0,
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: theme.cardTheme.shape ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
+          debugPrint('[SimulateExamScreen] Exam tapped: ${exam.title}');
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -115,13 +126,13 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
                   Expanded(
                     child: Text(
                       exam.title,
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
+                      color: Colors.blueAccent.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text('MOCK', style: TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
@@ -131,20 +142,20 @@ class _SimulateExamScreenState extends State<SimulateExamScreen> {
               const SizedBox(height: 8),
               Text(
                 exam.description ?? 'Full IELTS Mock Test',
-                style: const TextStyle(color: Colors.white54, fontSize: 14),
+                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.access_time, color: Colors.white30, size: 16),
+                  Icon(Icons.access_time, color: colorScheme.onSurface.withOpacity(0.3), size: 16),
                   const SizedBox(width: 4),
-                  const Text('160 mins', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text('160 mins', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 12)),
                   const SizedBox(width: 16),
-                  const Icon(Icons.format_list_bulleted, color: Colors.white30, size: 16),
+                  Icon(Icons.format_list_bulleted, color: colorScheme.onSurface.withOpacity(0.3), size: 16),
                   const SizedBox(width: 4),
-                  Text('4 Skills', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text('4 Skills', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 12)),
                 ],
               ),
             ],

@@ -1,0 +1,561 @@
+﻿-- eProject4 Database Schema Extraction
+-- Source: eproject4_dump.sql
+-- Generated: 04/07/2026 20:40:27
+
+CREATE TABLE `app_screen_sections` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `difficulty_band` varchar(255) NOT NULL,
+  `display_order` int NOT NULL,
+  `guide_content` longtext,
+  `section_name` varchar(255) NOT NULL,
+  `skill` varchar(255) NOT NULL,
+  `is_premium` bit(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `app_section_tags` (
+  `section_id` bigint NOT NULL,
+  `tag_id` bigint NOT NULL,
+  KEY `FKtf3oprk0umdlus0ftxi3suqnc` (`tag_id`),
+  KEY `FK8un6vyq7jufdpf336f8ga2jlk` (`section_id`),
+  CONSTRAINT `FK8un6vyq7jufdpf336f8ga2jlk` FOREIGN KEY (`section_id`) REFERENCES `app_screen_sections` (`id`),
+  CONSTRAINT `FKtf3oprk0umdlus0ftxi3suqnc` FOREIGN KEY (`tag_id`) REFERENCES `qb_tags` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `chat_messages` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content` text,
+  `created_at` datetime(6) DEFAULT NULL,
+  `is_edited` bit(1) NOT NULL,
+  `media_type` varchar(255) DEFAULT NULL,
+  `media_url` varchar(512) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `receiver_id` bigint NOT NULL,
+  `sender_id` bigint NOT NULL,
+  `is_read` bit(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKand7mh9iu4kt3n1tn2w9i9of0` (`receiver_id`),
+  KEY `FKgiqeap8ays4lf684x7m0r2729` (`sender_id`),
+  CONSTRAINT `FKand7mh9iu4kt3n1tn2w9i9of0` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKgiqeap8ays4lf684x7m0r2729` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `essay_submission` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `ai_feedback` text,
+  `content` text NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `grading_type` enum('AI','HUMAN') NOT NULL,
+  `score` double DEFAULT NULL,
+  `cohesion_coherence` double DEFAULT NULL,
+  `cohesion_coherence_reason` text,
+  `corrections_json` text,
+  `grammatical_range` double DEFAULT NULL,
+  `grammatical_range_reason` text,
+  `lexical_resource` double DEFAULT NULL,
+  `lexical_resource_reason` text,
+  `locked_at` datetime(6) DEFAULT NULL,
+  `status` enum('GRADED','IN_PROGRESS','PENDING') NOT NULL,
+  `task_achievement` double DEFAULT NULL,
+  `task_achievement_reason` text,
+  `teacher_feedback` text,
+  `locked_by` bigint DEFAULT NULL,
+  `student_id` bigint DEFAULT NULL,
+  `topic_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKe263fjpmc6ky2rm7cl5808djn` (`locked_by`),
+  KEY `FKjucnqt8ut5cqx2b52ostra7xu` (`student_id`),
+  KEY `FKb917tm70xgsxjs4dhhjok38sr` (`topic_id`),
+  CONSTRAINT `FKb917tm70xgsxjs4dhhjok38sr` FOREIGN KEY (`topic_id`) REFERENCES `qb_questions` (`id`),
+  CONSTRAINT `FKe263fjpmc6ky2rm7cl5808djn` FOREIGN KEY (`locked_by`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKjucnqt8ut5cqx2b52ostra7xu` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `faqs` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `answer_en` longtext NOT NULL,
+  `answer_vi` longtext NOT NULL,
+  `answer_zh` longtext NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `display_order` int NOT NULL,
+  `is_active` bit(1) NOT NULL,
+  `question_en` varchar(255) NOT NULL,
+  `question_vi` varchar(255) NOT NULL,
+  `question_zh` varchar(255) NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `icoin_transactions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `amount` int NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `description` text,
+  `transaction_type` enum('ADD','DEDUCT','SET') NOT NULL,
+  `user_id` bigint NOT NULL,
+  `balance_after` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKpyl1theq6fm6ivcsbyh3dlje3` (`user_id`),
+  CONSTRAINT `FKpyl1theq6fm6ivcsbyh3dlje3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `media_files` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `file_size` bigint DEFAULT NULL,
+  `mime_type` varchar(255) DEFAULT NULL,
+  `original_name` varchar(255) DEFAULT NULL,
+  `stored_name` varchar(255) DEFAULT NULL,
+  `stored_path` varchar(255) DEFAULT NULL,
+  `uploaded_at` datetime(6) DEFAULT NULL,
+  `uploaded_by_user_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `message_edit_history` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `edited_at` datetime(6) DEFAULT NULL,
+  `old_content` text NOT NULL,
+  `message_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKm2hwhrmtv6l7o3k21pavjcg6a` (`message_id`),
+  CONSTRAINT `FKm2hwhrmtv6l7o3k21pavjcg6a` FOREIGN KEY (`message_id`) REFERENCES `chat_messages` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `moderation_notifications` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `is_read` bit(1) DEFAULT NULL,
+  `message` text NOT NULL,
+  `report_id` bigint DEFAULT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK3ndqtbloyfndo30q2amn75o4o` (`report_id`),
+  KEY `FK5st0gk6b8xxvqb1mlt5jc258u` (`user_id`),
+  CONSTRAINT `FK3ndqtbloyfndo30q2amn75o4o` FOREIGN KEY (`report_id`) REFERENCES `moderation_reports` (`id`),
+  CONSTRAINT `FK5st0gk6b8xxvqb1mlt5jc258u` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `moderation_reports` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `admin_response` text,
+  `created_at` datetime(6) DEFAULT NULL,
+  `item_id` bigint NOT NULL,
+  `item_type` enum('QUESTION','VOCABULARY') NOT NULL,
+  `reason` text NOT NULL,
+  `status` enum('NEW','RESOLVED','SPAM') NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `reporter_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKe0hieuh0nuvqewaepdccil4ha` (`reporter_id`),
+  CONSTRAINT `FKe0hieuh0nuvqewaepdccil4ha` FOREIGN KEY (`reporter_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `pinned_conversations` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `pinned_at` datetime(6) DEFAULT NULL,
+  `pinned_user_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKhxs96nhxnse3pja8rwtab2327` (`pinned_user_id`),
+  KEY `FKaxbxqgqn69nxtyrh892uox1t7` (`user_id`),
+  CONSTRAINT `FKaxbxqgqn69nxtyrh892uox1t7` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKhxs96nhxnse3pja8rwtab2327` FOREIGN KEY (`pinned_user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `policies` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content_en` longtext,
+  `content_vi` longtext,
+  `content_zh` longtext,
+  `title_en` varchar(255) DEFAULT NULL,
+  `title_vi` varchar(255) DEFAULT NULL,
+  `title_zh` varchar(255) DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKksrnbkt9yo0bj50s9fp3hd0qu` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `policy_history` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `changed_at` datetime(6) DEFAULT NULL,
+  `content_en` longtext,
+  `content_vi` longtext,
+  `content_zh` longtext,
+  `title_en` varchar(255) DEFAULT NULL,
+  `title_vi` varchar(255) DEFAULT NULL,
+  `title_zh` varchar(255) DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  `admin_id` bigint NOT NULL,
+  `policy_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKpxu1daprbcvqml8xu25ctxp7a` (`admin_id`),
+  KEY `FKsavuggsdyt97tkoq85oe26936` (`policy_id`),
+  CONSTRAINT `FKpxu1daprbcvqml8xu25ctxp7a` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKsavuggsdyt97tkoq85oe26936` FOREIGN KEY (`policy_id`) REFERENCES `policies` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_exam_groups` (
+  `exam_id` bigint NOT NULL,
+  `group_id` bigint NOT NULL,
+  KEY `FKsuh3u64buhmcjevdgd1c5u0ib` (`group_id`),
+  KEY `FKpdlm3w11g1l64m26xut67x1o8` (`exam_id`),
+  CONSTRAINT `FKpdlm3w11g1l64m26xut67x1o8` FOREIGN KEY (`exam_id`) REFERENCES `qb_exams` (`id`),
+  CONSTRAINT `FKsuh3u64buhmcjevdgd1c5u0ib` FOREIGN KEY (`group_id`) REFERENCES `qb_question_groups` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_exam_questions` (
+  `exam_id` bigint NOT NULL,
+  `question_id` bigint NOT NULL,
+  KEY `FK20yoau5yq3avky5fea94ng2ye` (`question_id`),
+  KEY `FK8863g6mu9uhewr59laf9x1lxc` (`exam_id`),
+  CONSTRAINT `FK20yoau5yq3avky5fea94ng2ye` FOREIGN KEY (`question_id`) REFERENCES `qb_questions` (`id`),
+  CONSTRAINT `FK8863g6mu9uhewr59laf9x1lxc` FOREIGN KEY (`exam_id`) REFERENCES `qb_exams` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_exam_submissions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `completed_at` datetime(6) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `listening_score` double DEFAULT NULL,
+  `reading_score` double DEFAULT NULL,
+  `status` varchar(255) NOT NULL,
+  `exam_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `writing_submission_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKifjuynw9k8iy4k6mfj3xo50bk` (`writing_submission_id`),
+  KEY `FK2yqifnt1o83olnv1fv2xo11ph` (`exam_id`),
+  KEY `FK4cha5r9lrcp84ogg6qqs0ix4d` (`user_id`),
+  CONSTRAINT `FK2yqifnt1o83olnv1fv2xo11ph` FOREIGN KEY (`exam_id`) REFERENCES `qb_exams` (`id`),
+  CONSTRAINT `FK4cha5r9lrcp84ogg6qqs0ix4d` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK4vi6vysi8pbdxyvvlhtert26r` FOREIGN KEY (`writing_submission_id`) REFERENCES `essay_submission` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_exam_tags` (
+  `exam_id` bigint NOT NULL,
+  `tag_id` bigint NOT NULL,
+  KEY `FKsrpvhhm28lf6qm0hry8k72jmr` (`tag_id`),
+  KEY `FK5qtqoqx1m9jtovc56s5ongjkh` (`exam_id`),
+  CONSTRAINT `FK5qtqoqx1m9jtovc56s5ongjkh` FOREIGN KEY (`exam_id`) REFERENCES `qb_exams` (`id`),
+  CONSTRAINT `FKsrpvhhm28lf6qm0hry8k72jmr` FOREIGN KEY (`tag_id`) REFERENCES `qb_tags` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_exams` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `description` text,
+  `title` varchar(255) NOT NULL,
+  `exam_type` varchar(255) NOT NULL,
+  `difficulty_band` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_group_tags` (
+  `group_id` bigint NOT NULL,
+  `tag_id` bigint NOT NULL,
+  KEY `FK65rftrbice5ta95pp43crrc7x` (`tag_id`),
+  KEY `FKl3o6q8y20d94ilfwrmvqkxe0d` (`group_id`),
+  CONSTRAINT `FK65rftrbice5ta95pp43crrc7x` FOREIGN KEY (`tag_id`) REFERENCES `qb_tags` (`id`),
+  CONSTRAINT `FKl3o6q8y20d94ilfwrmvqkxe0d` FOREIGN KEY (`group_id`) REFERENCES `qb_question_groups` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_question_groups` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `skill` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text,
+  `media_url` varchar(255) DEFAULT NULL,
+  `media_type` varchar(50) DEFAULT NULL,
+  `difficulty_band` varchar(255) NOT NULL,
+  `author_id` bigint DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_question_history` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `editor_id` bigint NOT NULL,
+  `question_id` bigint NOT NULL,
+  `snapshot` text,
+  `changes` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_question_tags` (
+  `question_id` bigint NOT NULL,
+  `tag_id` bigint NOT NULL,
+  KEY `FKlf3rl9ak2kppg3efwix60i6r8` (`tag_id`),
+  KEY `FKh83tr4uu876cnn2bwjbvfgrpa` (`question_id`),
+  CONSTRAINT `FKh83tr4uu876cnn2bwjbvfgrpa` FOREIGN KEY (`question_id`) REFERENCES `qb_questions` (`id`),
+  CONSTRAINT `FKlf3rl9ak2kppg3efwix60i6r8` FOREIGN KEY (`tag_id`) REFERENCES `qb_tags` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_questions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `data` text,
+  `difficulty_band` varchar(255) NOT NULL,
+  `explanation` text,
+  `instruction` text,
+  `skill` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `is_premium_content` bit(1) NOT NULL,
+  `media_type` varchar(50) DEFAULT NULL,
+  `media_url` varchar(255) DEFAULT NULL,
+  `author_id` bigint DEFAULT NULL,
+  `group_id` bigint DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_questions_pagination` (`skill`,`type`,`difficulty_band`,`id`),
+  KEY `fk_question_group` (`group_id`),
+  FULLTEXT KEY `idx_question_search` (`data`,`instruction`,`explanation`),
+  CONSTRAINT `fk_question_group` FOREIGN KEY (`group_id`) REFERENCES `qb_question_groups` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=275 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `qb_tags` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `color` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `namespace` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `system_notifications` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `admin_id` bigint DEFAULT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `teacher_slots` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `end_time` datetime(6) NOT NULL,
+  `start_time` datetime(6) NOT NULL,
+  `status` enum('AVAILABLE','BOOKED','CANCELLED','COMPLETED','ONGOING') NOT NULL,
+  `student_id` bigint DEFAULT NULL,
+  `teacher_id` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `tutoring_reviews` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `rating` int NOT NULL,
+  `student_review_public` text,
+  `tags` varchar(255) DEFAULT NULL,
+  `teacher_feedback_private` text,
+  `session_id` bigint NOT NULL,
+  `student_id` bigint NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKakt3hxy8dw1u70mm150k1camj` (`session_id`),
+  KEY `FK100ffqdxn26y6bb3eeytmh506` (`student_id`),
+  KEY `FKh6xh74vd2dj9073l94w9q23w` (`teacher_id`),
+  CONSTRAINT `FK100ffqdxn26y6bb3eeytmh506` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKfu448fx5so95xioa7ib8d8ipf` FOREIGN KEY (`session_id`) REFERENCES `tutoring_sessions` (`id`),
+  CONSTRAINT `FKh6xh74vd2dj9073l94w9q23w` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `tutoring_sessions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `coin_amount` int NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `end_time` datetime(6) DEFAULT NULL,
+  `start_time` datetime(6) DEFAULT NULL,
+  `status` enum('CANCELLED','COMPLETED','ONGOING','PENDING') NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `student_id` bigint NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKcpx0b2m3hwvsm6mmg29ii99xr` (`student_id`),
+  KEY `FKe9axuph5p7u6j0ghs22s4j3jn` (`teacher_id`),
+  CONSTRAINT `FKcpx0b2m3hwvsm6mmg29ii99xr` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKe9axuph5p7u6j0ghs22s4j3jn` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_notifications` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `is_read` bit(1) NOT NULL,
+  `notification_id` bigint NOT NULL,
+  `read_at` datetime(6) NOT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKtgwraou9gk2rh54qei8iuyfku` (`user_id`,`notification_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_profiles` (
+  `user_id` bigint NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `bio` text,
+  `full_name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `FKjcad5nfve11khsnpwj1mv8frj` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_question_attempts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `attempt_date` datetime(6) NOT NULL,
+  `is_correct` bit(1) NOT NULL,
+  `user_answer` text,
+  `question_id` bigint NOT NULL,
+  `session_id` bigint DEFAULT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_question_perf` (`user_id`,`question_id`),
+  KEY `FKhon9joful3dc8ll6agdpq3f09` (`question_id`),
+  KEY `FKukjdea3fw1gs6khmgnwdfvql` (`session_id`),
+  CONSTRAINT `FKhon9joful3dc8ll6agdpq3f09` FOREIGN KEY (`question_id`) REFERENCES `qb_questions` (`id`),
+  CONSTRAINT `FKm1ajavvc1tkgvrpf52mgk8aiv` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKukjdea3fw1gs6khmgnwdfvql` FOREIGN KEY (`session_id`) REFERENCES `user_test_sessions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_section_stats` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `total_correct_answers` int NOT NULL,
+  `total_questions_attempted` int NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `section_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKhd20kx2i15jbxmviuakmtuprq` (`user_id`,`section_id`),
+  KEY `FKd7s8i77eoapqbe7mryvop08pf` (`section_id`),
+  CONSTRAINT `FK6e7cv5ybxsrufr6mhf9p974c9` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKd7s8i77eoapqbe7mryvop08pf` FOREIGN KEY (`section_id`) REFERENCES `app_screen_sections` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_stats` (
+  `user_id` bigint NOT NULL,
+  `total_correct_answers` bigint NOT NULL,
+  `total_time_seconds` bigint NOT NULL,
+  `total_vocab_correct` bigint NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `FKj277c5rcqlsvwkk3hj39e2b74` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_test_sessions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `difficulty_band` varchar(50) DEFAULT NULL,
+  `end_time` datetime(6) DEFAULT NULL,
+  `score` double DEFAULT NULL,
+  `skill` varchar(50) DEFAULT NULL,
+  `start_time` datetime(6) NOT NULL,
+  `test_type` varchar(255) NOT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKovq8j14l3h3v0q8m5bb393ftg` (`user_id`),
+  CONSTRAINT `FKovq8j14l3h3v0q8m5bb393ftg` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_word_progress` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `correct_streak` int NOT NULL,
+  `last_reviewed_at` datetime(6) DEFAULT NULL,
+  `next_review_date` datetime(6) DEFAULT NULL,
+  `proficiency_level` int NOT NULL,
+  `user_id` bigint NOT NULL,
+  `vocabulary_id` bigint NOT NULL,
+  `is_viewed` bit(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_uwp_user_vocab` (`user_id`,`vocabulary_id`),
+  KEY `idx_uwp_next_review` (`next_review_date`),
+  KEY `FK9g1fedadn98r3nqn9ved5fgrm` (`vocabulary_id`),
+  CONSTRAINT `FK9g1fedadn98r3nqn9ved5fgrm` FOREIGN KEY (`vocabulary_id`) REFERENCES `vocabulary` (`id`),
+  CONSTRAINT `FKciba19f12lld0spe86k0kgs9i` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `users` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `is_email_confirmed` bit(1) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('ADMIN','CUSTOMER','TEACHER') NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `icoin_balance` int NOT NULL,
+  `is_pro` bit(1) NOT NULL,
+  `pro_expiry_date` datetime(6) DEFAULT NULL,
+  `status` enum('ACTIVE','INACTIVE','SUSPENDED') NOT NULL,
+  `is_online` bit(1) NOT NULL,
+  `last_active_at` datetime(6) DEFAULT NULL,
+  `held_icoin_balance` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK6dotkott2kjsp8vw4d0m25fb7` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `vocabulary` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `definition` text,
+  `definition_url` varchar(500) DEFAULT NULL,
+  `examples_json` text,
+  `level` varchar(255) DEFAULT NULL,
+  `level_group` varchar(255) DEFAULT NULL,
+  `pos` varchar(255) DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  `voice_url` varchar(500) DEFAULT NULL,
+  `word` varchar(255) NOT NULL,
+  `synonyms_json` text,
+  `is_premium` bit(1) DEFAULT NULL,
+  `phonetic` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_vocabulary_word` (`word`),
+  KEY `idx_vocabulary_type_level` (`type`,`level_group`),
+  FULLTEXT KEY `idx_vocab_search` (`word`,`definition`)
+) ENGINE=InnoDB AUTO_INCREMENT=13399 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `vocabulary_favorites` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `user_id` bigint NOT NULL,
+  `vocabulary_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK4eh52rw0u0tjau73usq6gnmrn` (`user_id`,`vocabulary_id`),
+  KEY `FKbhhmf4p03t4wf665lpwec9r0g` (`vocabulary_id`),
+  CONSTRAINT `FKbhhmf4p03t4wf665lpwec9r0g` FOREIGN KEY (`vocabulary_id`) REFERENCES `vocabulary` (`id`),
+  CONSTRAINT `FKga2qdxeteyb0qg1mq9o6y4q29` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `vocabulary_history` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `changes` text,
+  `created_at` datetime(6) DEFAULT NULL,
+  `editor_id` bigint NOT NULL,
+  `snapshot` text,
+  `vocabulary_id` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `vocabulary_practice_ai_generated_content` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `json_content` longtext NOT NULL,
+  `quiz_type` varchar(255) NOT NULL,
+  `word` varchar(255) NOT NULL,
+  `version` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_vocab_practice_ai_word_type` (`word`,`quiz_type`)
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `vocabulary_practice_history` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `changes` text,
+  `created_at` datetime(6) DEFAULT NULL,
+  `editor_id` bigint NOT NULL,
+  `practice_id` bigint NOT NULL,
+  `snapshot` text,
+  `version` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+

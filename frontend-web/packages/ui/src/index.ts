@@ -5,4 +5,7 @@ export * from "./components/DashboardLayout";
 export * from "./components/ui/toast";
 export * from "./components/ui/confirm-dialog";
 export * from "./components/ThemeProvider";
+export * from "./components/ThemeToggle";
 export * from "./components/ProfileView";
+export * from "./components/ErrorUI";
+export { ErrorBoundary } from "./components/ErrorBoundary";

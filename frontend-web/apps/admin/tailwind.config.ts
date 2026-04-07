@@ -1,1 +1,1 @@
-export * from "@english-learning/config-tailwind";
+export { default } from "@english-learning/config-tailwind";

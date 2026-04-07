@@ -3,14 +3,14 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../data/services/auth_api.dart';
 
 class VocabularyTestApiService {
   static final String baseUrl = '${dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api'}/v1/vocabulary/test';
 
   Future<int> fetchDueCount() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
 
       final response = await http.get(
         Uri.parse('$baseUrl/due-count'),
@@ -32,8 +32,7 @@ class VocabularyTestApiService {
 
   Future<Map<String, dynamic>?> generateTest() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
 
       final response = await http.get(
         Uri.parse('$baseUrl/generate'),
@@ -55,8 +54,7 @@ class VocabularyTestApiService {
 
   Future<void> submitResults(List<Map<String, dynamic>> answers) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
 
       await http.post(
         Uri.parse('$baseUrl/submit'),
@@ -75,8 +73,7 @@ class VocabularyTestApiService {
 
   Future<void> logView(int id) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthApi.getToken();
 
       await http.post(
         Uri.parse('$baseUrl/log-view/$id'),

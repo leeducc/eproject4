@@ -23,8 +23,13 @@ public class ModerationController {
     private final UserRepository userRepository;
 
     private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 
     @PostMapping("/report")
