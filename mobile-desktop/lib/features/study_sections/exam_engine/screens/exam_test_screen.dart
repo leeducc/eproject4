@@ -90,16 +90,16 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2330),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(children: [
-          Icon(Icons.exit_to_app, color: Colors.redAccent, size: 20),
-          SizedBox(width: 8),
-          Text('Give Up?', style: TextStyle(color: Colors.white, fontSize: 17)),
+        title: Row(children: [
+          const Icon(Icons.exit_to_app, color: Colors.redAccent, size: 20),
+          const SizedBox(width: 8),
+          Text('Give Up?', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 17)),
         ]),
-        content: const Text(
+        content: Text(
           'Are you sure you want to exit?\nYour progress will NOT be saved.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
@@ -126,16 +126,16 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2330),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(children: [
           const Icon(Icons.arrow_forward_ios, color: Colors.greenAccent, size: 16),
           const SizedBox(width: 8),
-          Text('Move to $nextName?', style: const TextStyle(color: Colors.white, fontSize: 17)),
+          Text('Move to $nextName?', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 17)),
         ]),
         content: Text(
           'You will move to the $nextName section and CANNOT return to this section.\n\nAny unanswered questions will stay empty.',
-          style: const TextStyle(color: Colors.white70, height: 1.5),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), height: 1.5),
         ),
         actions: [
           TextButton(
@@ -176,9 +176,9 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
         final state = provider.state;
 
         if (state == null) {
-          return const Scaffold(
-            backgroundColor: Color(0xFF161A23),
-            body: Center(child: CircularProgressIndicator(color: Colors.blueAccent)),
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            body: const Center(child: CircularProgressIndicator(color: Colors.blueAccent)),
           );
         }
 
@@ -191,13 +191,13 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
         final bool hasNextSection = state.currentSection != ExamSection.WRITING;
 
         return Scaffold(
-          backgroundColor: const Color(0xFF161A23),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: const Color(0xFF1A1E2E),
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             elevation: 0,
             leadingWidth: 40,
             leading: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white70, size: 22),
+              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), size: 22),
               onPressed: _confirmGiveUp,
               tooltip: 'Give Up',
             ),
@@ -206,7 +206,7 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
               children: [
                 Text(
                   state.exam.title,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14, fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Row(
@@ -276,13 +276,13 @@ class _ExamTestBodyState extends State<_ExamTestBody> {
             ],
           ),
           body: provider.isSubmitting
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(color: Colors.blueAccent),
-                      SizedBox(height: 16),
-                      Text('Submitting Exam...', style: TextStyle(color: Colors.white70)),
+                      const CircularProgressIndicator(color: Colors.blueAccent),
+                      const SizedBox(height: 16),
+                      Text('Submitting Exam...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                     ],
                   ),
                 )

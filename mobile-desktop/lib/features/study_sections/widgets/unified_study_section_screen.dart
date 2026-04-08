@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_html/flutter_html.dart';
 import '../reading/screens/reading_exam_screen.dart';
 import '../listening/screens/listening_exam_screen.dart';
+import '../../ranking/providers/ranking_provider.dart';
 
 class UnifiedStudySectionScreen extends StatefulWidget {
   final String skill; 
@@ -24,8 +25,6 @@ class UnifiedStudySectionScreen extends StatefulWidget {
 }
 
 class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
-  int totalAnswers = 0;
-  int correctAnswers = 0;
   int totalTime = 0;
   late Future<List<AppSectionModel>> _sectionsFuture;
 
@@ -37,11 +36,25 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
       ? [const Color(0xFFFDBB2D), const Color(0xFFE65100)] 
       : [const Color(0xFF5A9BD5), const Color(0xFF4A90E2)];
 
+  late RankingProvider _rankingProvider;
+
   @override
   void initState() {
     super.initState();
     debugPrint('[UnifiedStudySectionScreen] initState for ${widget.skill}');
     loadStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _rankingProvider = context.read<RankingProvider>();
+        _rankingProvider.pushLearningScreen();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _rankingProvider.popLearningScreen();
+    super.dispose();
   }
 
   @override
@@ -60,8 +73,6 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      totalAnswers = prefs.getInt("totalAnswers") ?? 0;
-      correctAnswers = prefs.getInt("correctAnswers") ?? 0;
       totalTime = prefs.getInt("totalTime") ?? 0;
     });
   }
@@ -88,18 +99,20 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
   Widget build(BuildContext context) {
     debugPrint('[UnifiedStudySectionScreen] building UI');
     final theme = Theme.of(context);
-    double mastery = totalAnswers == 0 ? 0 : (correctAnswers / totalAnswers);
 
     return FutureBuilder<List<AppSectionModel>>(
       future: _sectionsFuture,
       builder: (context, snapshot) {
         final sections = snapshot.data;
+        int totalQuestions = sections?.fold(0, (sum, sec) => sum! + (sec.questionCount ?? 0)) ?? 0;
+        int totalAppCorrect = sections?.fold(0, (sum, sec) => sum! + ((sec.mastery ?? 0) / 100 * (sec.questionCount ?? 0)).round()) ?? 0;
+        double overallMastery = totalQuestions == 0 ? 0 : (totalAppCorrect / totalQuestions);
         
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           body: Column(
             children: [
-              _buildHeader(context, mastery),
+              _buildHeader(context, overallMastery, totalQuestions, totalAppCorrect),
               Expanded(
                 child: _buildMainContent(snapshot, theme),
               ),
@@ -111,7 +124,7 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, double mastery) {
+  Widget _buildHeader(BuildContext context, double mastery, int totalQuestions, int totalCorrect) {
     debugPrint('[UnifiedStudySectionScreen] building smooth header');
     return Container(
       padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 40),
@@ -158,8 +171,8 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
             ],
           ),
           const SizedBox(height: 28),
-          _statRow("Số câu đã học", "$totalAnswers"),
-          _statRow("Câu trả lời đúng", "$correctAnswers"),
+          _statRow("Tổng số câu hỏi", "$totalQuestions"),
+          _statRow("Đã trả lời đúng", "$totalCorrect"),
           _statRow("Thời gian học", formatTime(totalTime)),
           const SizedBox(height: 24),
           Row(
@@ -250,8 +263,8 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
   Widget _buildSectionCard(AppSectionModel section, ThemeData theme) {
     debugPrint('[UnifiedStudySectionScreen] building card for ${section.sectionName}');
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => widget.skill == 'READING'
@@ -259,6 +272,13 @@ class _UnifiedStudySectionScreenState extends State<UnifiedStudySectionScreen> {
                 : ListeningExamScreen(title: section.sectionName, groupId: section.id, section: section),
           ),
         );
+        loadStats();
+        if (mounted) {
+          final selectedLevel = context.read<IeltsLevelProvider>().selectedLevel;
+          setState(() {
+            _sectionsFuture = AppConfigApiService().getSections(widget.skill.toUpperCase(), selectedLevel.range);
+          });
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),

@@ -55,8 +55,13 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     _heartbeatTimer = Timer.periodic(
       const Duration(seconds: _heartbeatSeconds),
       (_) {
-        debugPrint('[MainLayout] heartbeat — recording ${_heartbeatSeconds}s');
-        context.read<RankingProvider>().recordTime(_heartbeatSeconds);
+        final rankingProvider = context.read<RankingProvider>();
+        if (rankingProvider.isLearningActive) {
+          debugPrint('[MainLayout] heartbeat — learning active, recording ${_heartbeatSeconds}s');
+          rankingProvider.recordTime(_heartbeatSeconds);
+        } else {
+          debugPrint('[MainLayout] heartbeat — learning inactive, skipping recording');
+        }
       },
     );
   }

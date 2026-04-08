@@ -6,6 +6,7 @@ import 'package:mobile_desktop/core_quiz/widgets/dynamic_question_builder.dart';
 import 'package:mobile_desktop/features/ranking/providers/ranking_provider.dart';
 import 'package:mobile_desktop/core/models/app_section_model.dart';
 import '../../services/question_bank_api_service.dart';
+import '../../services/app_config_api_service.dart';
 import '../../widgets/unified_result_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,7 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
 
   bool isLoading = true;
   List<QuizQuestion> questions = [];
+  List<Map<String, dynamic>> userAttempts = [];
 
   @override
   void initState() {
@@ -54,9 +56,15 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
         widget.section.tags ?? [],
         skill: 'READING',
       );
+      
+      final solvedIds = await AppConfigApiService().getSolvedQuestionIds();
+
       if (!mounted) return;
       setState(() {
-        questions = fetched;
+        questions = fetched.map((q) {
+          final isSolved = solvedIds.contains(q.id);
+          return QuizQuestion.from(q, isSolved: isSolved);
+        }).toList();
         isLoading = false;
       });
     } catch (e) {
@@ -69,8 +77,17 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
     }
   }
 
-  void nextQuestion(String answerId) {
-    if (questions[currentIndex].isCorrectChoice(answerId)) {
+  Future<void> nextQuestion(String answerId) async {
+    final question = questions[currentIndex];
+    bool isCorrect = question.isCorrectChoice(answerId);
+
+    userAttempts.add({
+      'questionId': question.id,
+      'userAnswer': answerId,
+      'isCorrect': isCorrect,
+    });
+
+    if (isCorrect && !question.isAlreadySolved) {
       score++;
     }
 
@@ -83,10 +100,21 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
       int totalTime =
           (DateTime.now().millisecondsSinceEpoch - startTime) ~/ 1000;
 
-      debugPrint('[ReadingExamScreen] session ended — score=$score');
+      debugPrint('[ReadingExamScreen] session ended — score=$score, total=${questions.length}');
       context.read<RankingProvider>().recordAnswers(score);
-      _reportStats(score, questions.length);
 
+      // Await stats report BEFORE navigating away so the widget is still mounted
+      // during the HTTP call. Navigating first causes `if (!mounted) return` to
+      // silently abort the POST, leaving progress stuck at 0%.
+      await _reportStats(score, questions.length, userAttempts);
+
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt("totalAnswers", (prefs.getInt("totalAnswers") ?? 0) + questions.length);
+      prefs.setInt("correctAnswers", (prefs.getInt("correctAnswers") ?? 0) + score);
+      prefs.setInt("totalTime", (prefs.getInt("totalTime") ?? 0) + totalTime);
+      debugPrint('[ReadingExamScreen] SharedPreferences updated');
+
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -101,25 +129,30 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
     }
   }
 
-  Future<void> _reportStats(int correct, int total) async {
+  Future<void> _reportStats(int correct, int total, List<Map<String, dynamic>> attempts) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (!mounted) return;
       final token = prefs.getString('access_token');
+      debugPrint('[ReadingExamScreen] reporting stats: section=${widget.section.id}, correct=$correct, attempts=${attempts.length}');
       final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
-      
-      await http.post(
-        Uri.parse('$baseUrl/v1/section-stats/${widget.section.id}/record'),
+      final url = '$baseUrl/v1/section-stats/${widget.section.id}/record';
+      debugPrint('[ReadingExamScreen] _reportStats → POST $url');
+      debugPrint('[ReadingExamScreen]   payload=${jsonEncode({'count': correct, 'attempts': attempts})}');
+
+      final response = await http.post(
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           'count': correct, 
+          'attempts': attempts,
         }),
       );
+      debugPrint('[ReadingExamScreen] _reportStats ← HTTP ${response.statusCode}: ${response.body}');
     } catch (e) {
-      debugPrint('Error reporting stats: $e');
+      debugPrint('[ReadingExamScreen] _reportStats error: $e');
     }
   }
 
@@ -360,27 +393,31 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
                     if (selectedId != null)
                       SizedBox(
                         width: double.infinity,
-                        height: 55,
                         child: ElevatedButton(
                           onPressed: () => nextQuestion(selectedId!),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF9800),
                             foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                             elevation: 0,
                           ),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 currentIndex < questions.length - 1 ? "Tiếp tục" : "Hoàn thành",
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              if (selectedId != null && selectedId!.startsWith("__MATCHING"))
+                              if (selectedId != null && selectedId!.startsWith("__MATCHING")) ...[
+                                const SizedBox(height: 4),
                                 const Text(
                                   "Tất cả đã nối. Kiểm tra và nộp bài.",
-                                  style: TextStyle(fontSize: 10, color: Colors.white70),
+                                  style: TextStyle(fontSize: 11, color: Colors.white70),
+                                  textAlign: TextAlign.center,
                                 ),
+                              ]
                             ],
                           ),
                         ),

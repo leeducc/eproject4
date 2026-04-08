@@ -76,7 +76,7 @@ class _WritingSectionViewState extends State<WritingSectionView> {
     final writingQuestions = state.exam.questions?.where((q) => q.skill == SkillType.writing).toList() ?? [];
 
     if (writingQuestions.isEmpty) {
-       return const Center(child: Text('No writing tasks available.', style: TextStyle(color: Colors.white70)));
+       return Center(child: Text('No writing tasks available.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))));
     }
 
     
@@ -91,9 +91,9 @@ class _WritingSectionViewState extends State<WritingSectionView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Writing Section', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          Text('Writing Section', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 24, fontWeight: FontWeight.bold)),
            const SizedBox(height: 8),
-           const Text('Write your essays in the provided text boxes. When finished, select your grading preference and submit the entire exam.', style: TextStyle(color: Colors.white54)),
+           Text('Write your essays in the provided text boxes. When finished, select your grading preference and submit the entire exam.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54))),
            const SizedBox(height: 32),
 
            ...writingQuestions.asMap().entries.map((entry) {
@@ -104,32 +104,32 @@ class _WritingSectionViewState extends State<WritingSectionView> {
                 margin: const EdgeInsets.only(bottom: 32),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2330),
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white12),
+                  border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Task $idx', style: const TextStyle(color: Colors.blueAccent, fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    Text(q.instruction, style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5)),
+                    Text(q.instruction, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 16, height: 1.5)),
                     if (q.data['template'] != null) ...[
                        const SizedBox(height: 8),
-                       Text(q.data['template'].toString(), style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                       Text(q.data['template'].toString(), style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 14)),
                     ],
                     const SizedBox(height: 24),
                     TextField(
                       controller: _controllers[q.id],
                       maxLines: 15,
-                      style: const TextStyle(color: Colors.white, height: 1.6),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface, height: 1.6),
                       decoration: InputDecoration(
                         hintText: 'Start writing your essay here...',
-                        hintStyle: const TextStyle(color: Colors.white30),
+                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
                         filled: true,
-                        fillColor: const Color(0xFF161A23),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white12)),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white12)),
+                        fillColor: Theme.of(context).scaffoldBackgroundColor,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.blueAccent)),
                       ),
                     ),
@@ -140,7 +140,7 @@ class _WritingSectionViewState extends State<WritingSectionView> {
                         int wordCount = value.text.trim().isEmpty ? 0 : value.text.trim().split(RegExp(r'\s+')).length;
                         return Align(
                           alignment: Alignment.centerRight,
-                          child: Text('Word count: $wordCount', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                          child: Text('Word count: $wordCount', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54), fontSize: 12)),
                         );
                       },
                     ),
@@ -149,10 +149,10 @@ class _WritingSectionViewState extends State<WritingSectionView> {
               );
            }).toList(),
 
-           const Divider(color: Colors.white12, thickness: 2),
+           Divider(color: Theme.of(context).dividerColor.withOpacity(0.1), thickness: 2),
            const SizedBox(height: 32),
 
-           const Text('Grading Preference', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+           Text('Grading Preference', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold)),
            const SizedBox(height: 16),
            SegmentedButton<String>(
              segments: const <ButtonSegment<String>>[
@@ -176,8 +176,8 @@ class _WritingSectionViewState extends State<WritingSectionView> {
              style: SegmentedButton.styleFrom(
                selectedBackgroundColor: _writingGradingType == 'AI' ? Colors.purpleAccent.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
                selectedForegroundColor: _writingGradingType == 'AI' ? Colors.purpleAccent : Colors.blueAccent,
-               backgroundColor: const Color(0xFF1E2330),
-               foregroundColor: Colors.white54,
+               backgroundColor: Theme.of(context).cardColor,
+               foregroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
              ),
            ),
 

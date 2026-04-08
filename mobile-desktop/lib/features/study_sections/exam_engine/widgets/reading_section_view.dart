@@ -51,7 +51,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
         }
 
         if (flatQuestions.isEmpty) {
-          return const Center(child: Text('No reading questions.', style: TextStyle(color: Colors.white70)));
+          return Center(child: Text('No reading questions.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))));
         }
 
         final targetIndex = state.currentQuestionIndex.clamp(0, flatQuestions.length - 1);
@@ -73,7 +73,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
             Container(
               margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.07),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.07),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
@@ -84,8 +84,8 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white54,
+                labelColor: Theme.of(context).colorScheme.onSurface,
+                unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 tabs: [
                   Tab(
@@ -135,7 +135,7 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
                         if (current.group != null) ...[
                           Text(
                             current.group!.title,
-                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
                         ],
@@ -143,21 +143,21 @@ class _ReadingSectionViewState extends State<ReadingSectionView>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E2330),
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.white12),
+                              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                             ),
                             child: SelectableText(
                               passageText,
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 fontSize: 14,
                                 height: 1.7,
                               ),
                             ),
                           )
                         else
-                          const Text('No passage for this question.', style: TextStyle(color: Colors.white38)),
+                          Text('No passage for this question.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38))),
                         const SizedBox(height: 80),
                       ],
                     ),

@@ -38,4 +38,33 @@ class AppConfigApiService {
       rethrow;
     }
   }
+
+  Future<List<int>> getSolvedQuestionIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    
+    final uri = Uri.parse('$_baseUrl/v1/section-stats/solved-questions');
+    debugPrint('[AppConfigApiService] Fetching solved questions: $uri');
+    
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> body = jsonDecode(response.body);
+        return body.map((id) => id as int).toList();
+      } else {
+        debugPrint('[AppConfigApiService] Error solved questions: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('[AppConfigApiService] Solved questions exception: $e');
+      return [];
+    }
+  }
 }

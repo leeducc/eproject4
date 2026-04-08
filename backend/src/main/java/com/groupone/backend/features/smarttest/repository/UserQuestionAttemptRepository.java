@@ -20,4 +20,12 @@ public interface UserQuestionAttemptRepository extends JpaRepository<UserQuestio
     List<Long> findWeakTagIdsByUserAndSkill(@Param("userId") Long userId, 
                                             @Param("skill") SkillType skill, 
                                             Pageable pageable);
+
+    @Query("SELECT DISTINCT uqa.question.id FROM UserQuestionAttempt uqa " +
+           "WHERE uqa.user.id = :userId AND uqa.isCorrect = true")
+    List<Long> findCorrectQuestionIdsByUser(@Param("userId") Long userId);
+
+    boolean existsByUserIdAndQuestionIdAndIsCorrect(Long userId, Long questionId, boolean isCorrect);
+
+    boolean existsByUserIdAndSectionIdAndQuestionIdAndIsCorrect(Long userId, Long sectionId, Long questionId, boolean isCorrect);
 }

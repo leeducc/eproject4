@@ -3,6 +3,8 @@ import '../../core/utils/url_helper.dart';
 import 'quiz_option.dart';
 
 class QuizQuestion extends Question {
+  bool isAlreadySolved = false;
+
   QuizQuestion({
     required super.id,
     required super.skill,
@@ -13,9 +15,10 @@ class QuizQuestion extends Question {
     required super.mediaUrls,
     required super.mediaTypes,
     required super.data,
+    this.isAlreadySolved = false,
   });
 
-  factory QuizQuestion.from(Question q) {
+  factory QuizQuestion.from(Question q, {bool isSolved = false}) {
     return QuizQuestion(
       id: q.id,
       skill: q.skill,
@@ -26,6 +29,7 @@ class QuizQuestion extends Question {
       mediaUrls: q.mediaUrls,
       mediaTypes: q.mediaTypes,
       data: q.data,
+      isAlreadySolved: isSolved,
     );
   }
 

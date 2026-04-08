@@ -6,6 +6,7 @@ import 'package:mobile_desktop/core_quiz/widgets/dynamic_question_builder.dart';
 import 'package:mobile_desktop/features/ranking/providers/ranking_provider.dart';
 import 'package:mobile_desktop/core/models/app_section_model.dart';
 import '../../services/question_bank_api_service.dart';
+import '../../services/app_config_api_service.dart';
 import '../../widgets/unified_result_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -42,6 +43,7 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
 
   bool isLoading = true;
   List<QuizQuestion> questions = [];
+  List<Map<String, dynamic>> userAttempts = [];
 
   @override
   void initState() {
@@ -56,9 +58,15 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
         widget.section.tags ?? [],
         skill: 'LISTENING',
       );
+      
+      final solvedIds = await AppConfigApiService().getSolvedQuestionIds();
+      
       if (!mounted) return;
       setState(() {
-        questions = fetched;
+        questions = fetched.map((q) {
+          final isSolved = solvedIds.contains(q.id);
+          return QuizQuestion.from(q, isSolved: isSolved);
+        }).toList();
         isLoading = false;
       });
     } catch (e) {
@@ -71,24 +79,31 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
     }
   }
 
-  void nextQuestion(String answerId) {
+  Future<void> nextQuestion(String answerId) async {
     final question = questions[currentIndex];
     bool isCorrect = question.isCorrectChoice(answerId);
     
-    if (isCorrect) {
+    userAttempts.add({
+      'questionId': question.id,
+      'userAnswer': answerId,
+      'isCorrect': isCorrect,
+    });
+
+    // Only increment score if newly mastered
+    if (isCorrect && !question.isAlreadySolved) {
       score++;
-    } else {
+    } else if (!isCorrect) {
       // Record wrong answer
       debugPrint('[ListeningExamScreen] recording wrong answer for question: ${question.id}');
       context.read<WrongAnswerProvider>().addWrongAnswer(WrongAnswer(
         questionId: question.id,
         skill: 'LISTENING',
-        questionTitle: question.instruction, // Question instructions usually contain the main text
-        instruction: widget.title, // Use title of the section for context
+        questionTitle: question.instruction, 
+        instruction: widget.title, 
         userAnswer: answerId,
         correctAnswers: question.correctIds,
         explanation: question.explanation,
-        originalJson: question.data, // Storing question data for reconstruction
+        originalJson: question.data, 
         timestamp: DateTime.now(),
       ));
     }
@@ -102,10 +117,21 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
       int totalTime =
           (DateTime.now().millisecondsSinceEpoch - startTime) ~/ 1000;
 
-      debugPrint('[ListeningExamScreen] session ended — score=$score');
+      debugPrint('[ListeningExamScreen] session ended — score=$score, total=${questions.length}');
       context.read<RankingProvider>().recordAnswers(score);
-      _reportStats(score, questions.length);
 
+      // Await stats report BEFORE navigating away so the widget is still mounted
+      // during the HTTP call. Navigating first causes `if (!mounted) return` to
+      // silently abort the POST, leaving progress stuck at 0%.
+      await _reportStats(score, questions.length, userAttempts);
+
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt("totalAnswers", (prefs.getInt("totalAnswers") ?? 0) + questions.length);
+      prefs.setInt("correctAnswers", (prefs.getInt("correctAnswers") ?? 0) + score);
+      prefs.setInt("totalTime", (prefs.getInt("totalTime") ?? 0) + totalTime);
+      debugPrint('[ListeningExamScreen] SharedPreferences updated');
+
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -120,25 +146,30 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
     }
   }
 
-  Future<void> _reportStats(int correct, int total) async {
+  Future<void> _reportStats(int correct, int total, List<Map<String, dynamic>> attempts) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (!mounted) return;
       final token = prefs.getString('access_token');
       final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
-      
-      await http.post(
-        Uri.parse('$baseUrl/v1/section-stats/${widget.section.id}/record'),
+      final url = '$baseUrl/v1/section-stats/${widget.section.id}/record';
+      debugPrint('[ListeningExamScreen] _reportStats → POST $url');
+      debugPrint('[ListeningExamScreen]   correct=$correct, total=$total, attempts=${attempts.length}');
+      debugPrint('[ListeningExamScreen]   payload=${jsonEncode({'count': correct, 'attempts': attempts})}');
+
+      final response = await http.post(
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           'count': correct,
+          'attempts': attempts,
         }),
       );
+      debugPrint('[ListeningExamScreen] _reportStats ← HTTP ${response.statusCode}: ${response.body}');
     } catch (e) {
-      debugPrint('Error reporting stats: $e');
+      debugPrint('[ListeningExamScreen] _reportStats error: $e');
     }
   }
 
@@ -378,27 +409,31 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
                     if (selectedId != null)
                       SizedBox(
                         width: double.infinity,
-                        height: 55,
                         child: ElevatedButton(
                           onPressed: () => nextQuestion(selectedId!),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF42A5F5),
                             foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                             elevation: 0,
                           ),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 currentIndex < questions.length - 1 ? "Tiếp tục" : "Hoàn thành",
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              if (selectedId != null && selectedId!.startsWith("__MATCHING"))
+                              if (selectedId != null && selectedId!.startsWith("__MATCHING")) ...[
+                                const SizedBox(height: 4),
                                 const Text(
                                   "Tất cả đã nối. Kiểm tra và nộp bài.",
-                                  style: TextStyle(fontSize: 10, color: Colors.white70),
+                                  style: TextStyle(fontSize: 11, color: Colors.white70),
+                                  textAlign: TextAlign.center,
                                 ),
+                              ]
                             ],
                           ),
                         ),

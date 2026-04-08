@@ -119,6 +119,7 @@ class _MatchingWidgetState extends State<MatchingWidget> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final leftItems = widget.question.leftItems;
     final rightItems = widget.question.rightItems;
 
@@ -137,8 +138,14 @@ class _MatchingWidgetState extends State<MatchingWidget> with SingleTickerProvid
             if (!widget.isAnswered && _matchOrder.isNotEmpty)
               TextButton.icon(
                 onPressed: _clearAll,
-                icon: Icon(Icons.refresh, size: 18, color: Theme.of(context).primaryColor.withOpacity(0.7)),
-                label: Text("Xóa tất cả", style: TextStyle(color: Theme.of(context).primaryColor.withOpacity(0.7), fontSize: 13)),
+                style: TextButton.styleFrom(
+                  backgroundColor: theme.colorScheme.error.withOpacity(0.1),
+                  foregroundColor: theme.colorScheme.error,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text("Làm lại", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               ),
           ],
         ),
@@ -202,38 +209,48 @@ class _MatchingWidgetState extends State<MatchingWidget> with SingleTickerProvid
     required VoidCallback onTap,
     bool isRightSide = false,
   }) {
-    Color borderColor = Theme.of(context).dividerColor;
+    Color borderColor = Theme.of(context).dividerColor.withOpacity(0.2);
     Color bgColor = Theme.of(context).cardColor;
     Color textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     
     if (isSelected) {
       borderColor = const Color(0xFF42A5F5);
-      bgColor = const Color(0xFF42A5F5).withOpacity(0.15);
+      bgColor = const Color(0xFF42A5F5).withOpacity(0.1);
       textColor = const Color(0xFF42A5F5);
     } else if (isMatched) {
-      borderColor = const Color(0xFF4CAF50).withOpacity(0.6);
-      bgColor = const Color(0xFF4CAF50).withOpacity(0.1);
+      borderColor = const Color(0xFF4CAF50).withOpacity(0.5);
+      bgColor = const Color(0xFF4CAF50).withOpacity(0.08);
       textColor = const Color(0xFF4CAF50);
     }
 
     Widget content = Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: isSelected ? 2.5 : 1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: isSelected ? 2 : 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Text(
-            text,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 14,
-              fontWeight: isSelected || isMatched ? FontWeight.bold : FontWeight.normal,
+          Center(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontWeight: isSelected || isMatched ? FontWeight.bold : FontWeight.w500,
+              ),
             ),
           ),
           if (isMatched && matchNumber != null)

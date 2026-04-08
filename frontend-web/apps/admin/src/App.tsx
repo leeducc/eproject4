@@ -13,6 +13,7 @@ import { VocabularyDetailView } from "./pages/vocabulary/VocabularyDetailView";
 import { VocabularyCreateView } from "./pages/vocabulary/VocabularyCreateView";
 import { CustomerList as UserManagementPage } from "./pages/customers/CustomerList";
 import { CustomerDetailPage } from "./pages/customers/CustomerDetailPage";
+import { FeedbackRequests } from "./pages/customers/FeedbackRequests";
 import { TeacherList } from "./pages/teachers/TeacherList";
 import { TeacherDetailPage } from "./pages/teachers/TeacherDetailPage";
 import TransactionPage from "./pages/ICoinManagement";
@@ -78,6 +79,7 @@ export const App: React.FC = () => {
 
             {}
             <Route path="/admin/customers/list" element={<UserManagementPage />} />
+            <Route path="/admin/customers/feedback" element={<FeedbackRequests />} />
             <Route path="/admin/customers/:id" element={<CustomerDetailPage />} />
             <Route path="/admin/users" element={<UserManagementPage />} />
 

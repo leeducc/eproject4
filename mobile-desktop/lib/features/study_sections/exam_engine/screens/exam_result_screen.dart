@@ -9,7 +9,7 @@ class ExamResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1320),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
@@ -35,7 +35,7 @@ class ExamResultScreen extends StatelessWidget {
                         const Text('Exam Complete!',
                             style: TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1)),
                         Text(result.examTitle,
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis),
                       ],
                     ),
@@ -52,8 +52,8 @@ class ExamResultScreen extends StatelessWidget {
               ],
 
               
-              const Text('Section Scores',
-                  style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+              Text('Section Scores',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
               const SizedBox(height: 14),
 
               _ScoreCard(
@@ -162,15 +162,15 @@ class _OverallBandCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Overall Band Score',
-                    style: TextStyle(color: Colors.white70, fontSize: 13)),
+                Text('Overall Band Score',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 13)),
                 const SizedBox(height: 6),
                 Text(_bandLabel,
                     style: TextStyle(
                         color: _bandColor, fontSize: 15, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                const Text('(Average of graded sections)',
-                    style: TextStyle(color: Colors.white38, fontSize: 11)),
+                Text('(Average of graded sections)',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 11)),
               ],
             ),
           ),
@@ -230,9 +230,9 @@ class _ScoreCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1E2E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       child: Row(
         children: [
@@ -252,14 +252,14 @@ class _ScoreCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(label,
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface, fontSize: 15, fontWeight: FontWeight.bold)),
                     const Spacer(),
                     Text(score.toStringAsFixed(1),
                         style: TextStyle(
                             color: color, fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(width: 4),
-                    const Text('/9', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                    Text('/9', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 12)),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -267,7 +267,7 @@ class _ScoreCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: Colors.white12,
+                    backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                     minHeight: 6,
                   ),
@@ -275,7 +275,7 @@ class _ScoreCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(description, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                    Text(description, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 11)),
                     const Spacer(),
                     Text(_levelLabel,
                         style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -298,7 +298,7 @@ class _WritingPendingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1E2E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.orangeAccent.withOpacity(0.4)),
       ),
@@ -317,10 +317,10 @@ class _WritingPendingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Text('Writing', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
-                    Spacer(),
+                    Text('Writing', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15, fontWeight: FontWeight.bold)),
+                    const Spacer(),
                     Icon(Icons.hourglass_top_rounded, color: Colors.orangeAccent, size: 18),
                     SizedBox(width: 4),
                     Text('Pending', style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold)),
@@ -333,10 +333,10 @@ class _WritingPendingCard extends StatelessWidget {
                     color: Colors.orangeAccent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
+                  child: Text(
                     '✏️ Your essay has been submitted to a teacher for grading. '
                     'You will be notified when the result is ready.',
-                    style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.5),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 12, height: 1.5),
                   ),
                 ),
               ],
@@ -361,15 +361,15 @@ class _BandGuideSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('IELTS Band Guide',
-            style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+        Text('IELTS Band Guide',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1E2E),
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
           child: Column(
             children: [
@@ -407,7 +407,7 @@ class _BandRow extends StatelessWidget {
           const SizedBox(width: 10),
           SizedBox(
             width: 75,
-            child: Text(band, style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Courier')),
+            child: Text(band, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 12, fontFamily: 'Courier')),
           ),
           Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500)),
         ],

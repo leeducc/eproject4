@@ -54,12 +54,12 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23), 
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
       appBar: AppBar(
-        title: const Text('Exam Preparation', style: TextStyle(color: Colors.white)),
+        title: Text('Exam Preparation', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -69,14 +69,14 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
             children: [
               Text(
                 widget.exam.title,
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 8),
               if (widget.exam.categories != null)
                  Wrap(
                     spacing: 8,
                     children: widget.exam.categories!.map((c) => Chip(
-                      label: Text(c, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                      label: Text(c, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12)),
                       backgroundColor: Colors.blueAccent.withOpacity(0.2),
                       side: BorderSide.none,
                     )).toList(),
@@ -93,14 +93,14 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
               
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2330),
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white12),
+                  border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: SwitchListTile(
-                  title: const Text('Quick Test Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Reduces timers to minimum for fast testing.', style: TextStyle(color: Colors.white70)),
+                  title: Text('Quick Test Mode', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold)),
+                  subtitle: Text('Reduces timers to minimum for fast testing.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                   value: _isQuickMode,
                   activeColor: Colors.blueAccent,
                   onChanged: (val) {
@@ -136,7 +136,7 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2330),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -154,13 +154,13 @@ class _ExamLauncherScreenState extends State<ExamLauncherScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 14)),
+                Text(subtitle, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54), fontSize: 14)),
               ],
             ),
           ),
-          Text(time, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(time, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 16, fontWeight: FontWeight.w600)),
         ],
       ),
     );

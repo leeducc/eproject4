@@ -75,7 +75,40 @@ class DynamicQuestionBuilder extends StatelessWidget {
             ),
           ),
         _buildQuestionBody(),
+        if (isAnswered && selectedId != null)
+          _buildFeedbackBanner(context),
       ],
+    );
+  }
+
+  Widget _buildFeedbackBanner(BuildContext context) {
+    bool isCorrect = question.isCorrectChoice(selectedId!);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isCorrect ? Colors.green.withOpacity(0.15) : Colors.red.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isCorrect ? Colors.green.withOpacity(0.5) : Colors.red.withOpacity(0.5), width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded, 
+               color: isCorrect ? Colors.green : Colors.red,
+               size: 24),
+          const SizedBox(width: 10),
+          Text(
+            isCorrect ? "Chính xác!" : "Chưa chính xác", 
+            style: TextStyle(
+              color: isCorrect ? Colors.green : Colors.red, 
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -101,6 +134,7 @@ class DynamicQuestionBuilder extends StatelessWidget {
           correctIds: question.correctIds,
           selectedId: selectedId,
           isAnswered: isAnswered,
+          isMastered: question.isAlreadySolved,
           onSelect: onAnswer,
         );
     }

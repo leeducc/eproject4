@@ -7,8 +7,8 @@ import 'settings_screen.dart';
 import 'upgrade_pro_screen.dart';
 import 'edit_profile_screen.dart';
 import '../../chat/screens/chat_with_admin_screen.dart';
-
-
+import 'package:provider/provider.dart';
+import '../../../core/providers/ielts_level_provider.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -227,6 +227,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildStatsSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ieltsProvider = Provider.of<IeltsLevelProvider>(context);
+    final currentRange = ieltsProvider.selectedLevel.range;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
@@ -238,7 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
               Row(
                 children: [
-                  Text('IELTS 6.0',
+                  Text('IELTS $currentRange',
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-﻿-- eProject4 Database Schema Extraction
+-- eProject4 Database Schema Extraction
 -- Source: eproject4_dump.sql
 -- Generated: 04/07/2026 20:40:27
 
@@ -407,12 +407,15 @@ CREATE TABLE `user_question_attempts` (
   `is_correct` bit(1) NOT NULL,
   `user_answer` text,
   `question_id` bigint NOT NULL,
+  `section_id` bigint DEFAULT NULL,
   `session_id` bigint DEFAULT NULL,
   `user_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_user_question_perf` (`user_id`,`question_id`),
   KEY `FKhon9joful3dc8ll6agdpq3f09` (`question_id`),
   KEY `FKukjdea3fw1gs6khmgnwdfvql` (`session_id`),
+  KEY `FK_uqa_section` (`section_id`),
+  CONSTRAINT `FK_uqa_section` FOREIGN KEY (`section_id`) REFERENCES `app_screen_sections` (`id`),
   CONSTRAINT `FKhon9joful3dc8ll6agdpq3f09` FOREIGN KEY (`question_id`) REFERENCES `qb_questions` (`id`),
   CONSTRAINT `FKm1ajavvc1tkgvrpf52mgk8aiv` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `FKukjdea3fw1gs6khmgnwdfvql` FOREIGN KEY (`session_id`) REFERENCES `user_test_sessions` (`id`)

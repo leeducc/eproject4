@@ -44,9 +44,9 @@ class _BreakScreenState extends State<BreakScreen> {
   }
 
   String _formatTime(int totalSeconds) {
-    int _ = totalSeconds ~/ 60;
-    int _ = totalSeconds % 60;
-    return "\${m.toString().padLeft(2, '0')}:\${s.toString().padLeft(2, '0')}";
+    int m = totalSeconds ~/ 60;
+    int s = totalSeconds % 60;
+    return "${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
   }
 
   @override
@@ -58,7 +58,7 @@ class _BreakScreenState extends State<BreakScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF161A23),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -67,14 +67,14 @@ class _BreakScreenState extends State<BreakScreen> {
             children: [
                const Icon(Icons.coffee, size: 80, color: Colors.orangeAccent),
                const SizedBox(height: 32),
-               const Text(
+               Text(
                  'Break Time', 
-                 style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)
+                 style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 32, fontWeight: FontWeight.bold)
                ),
                const SizedBox(height: 16),
-               const Text(
+               Text(
                  'Please take a few moments to rest before the next exam section begins.', 
-                 style: TextStyle(color: Colors.white70, fontSize: 16),
+                 style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 16),
                  textAlign: TextAlign.center,
                ),
                const SizedBox(height: 48),
@@ -83,7 +83,7 @@ class _BreakScreenState extends State<BreakScreen> {
                Container(
                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                  decoration: BoxDecoration(
-                   color: const Color(0xFF1E2330),
+                   color: Theme.of(context).cardColor,
                    borderRadius: BorderRadius.circular(24),
                    border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
                    boxShadow: [
@@ -92,8 +92,8 @@ class _BreakScreenState extends State<BreakScreen> {
                  ),
                  child: Text(
                     _formatTime(_breakSeconds),
-                    style: const TextStyle(
-                      color: Colors.white, 
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface, 
                       fontSize: 48, 
                       fontWeight: FontWeight.bold,
                       letterSpacing: 4,

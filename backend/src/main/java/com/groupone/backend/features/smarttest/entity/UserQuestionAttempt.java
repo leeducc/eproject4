@@ -33,6 +33,11 @@ public class UserQuestionAttempt {
     private UserTestSession session;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id")
+    @ToString.Exclude
+    private com.groupone.backend.features.appconfig.entity.AppScreenSection section;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
     @ToString.Exclude
     private Question question;

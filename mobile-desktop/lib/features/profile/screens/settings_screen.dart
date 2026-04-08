@@ -6,9 +6,12 @@ import '../../../core/providers/locale_provider.dart';
 import '../../../core/providers/font_size_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../faq/screens/faq_list_screen.dart';
+import '../../auth/screens/login_screen.dart';
+import '../../../data/services/auth_api.dart';
 import 'about_us_screen.dart';
 import 'delete_account_screen.dart';
 import 'wallet_screen.dart';
+import '../../feedback/screens/feedback_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,7 +21,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _soundEffects = true;
 
   @override
   Widget build(BuildContext context) {
@@ -45,77 +47,96 @@ class _SettingsScreenState extends State<SettingsScreen> {
         iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
         children: [
-          _buildSettingsItem(
-            l10n.translate('language_settings'), 
-            trailingText: currentLanguageName,
-            onTap: () => _showLanguageDialog(context),
-          ),
-          _buildSettingsItem(l10n.translate('learning_reminders')),
-          _buildSettingsSwitch(l10n.translate('sound_effects'), _soundEffects, (value) {
-            setState(() {
-              _soundEffects = value;
-            });
-          }),
-          _buildSettingsSwitch(l10n.translate('night_mode'), themeProvider.themeMode == ThemeMode.dark, (value) {
-            debugPrint('[SettingsScreen] Night Mode toggled: $value');
-            themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-          }),
-          _buildSettingsItem(
-            l10n.translate('font_size'),
-            trailingText: currentFontSizeName,
-            onTap: () => _showFontSizeDialog(context),
-          ),
-          _buildDivider(),
-          _buildSettingsItem(
-            l10n.translate('faq'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const FAQListScreen()),
+          // Basic Functionality
+          _buildSection([
+            _buildSettingsItem(
+              l10n.translate('language_settings'), 
+              trailingText: currentLanguageName,
+              onTap: () => _showLanguageDialog(context),
             ),
-          ),
-          _buildSettingsItem(
-            'Ví xu của tôi',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WalletScreen()),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(l10n.translate('learning_reminders')),
+            _buildDivider(indent: 16),
+            _buildSettingsSwitch(l10n.translate('night_mode'), themeProvider.themeMode == ThemeMode.dark, (value) {
+              debugPrint('[SettingsScreen] Night Mode toggled: $value');
+              themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+            }),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(
+              l10n.translate('font_size'),
+              trailingText: currentFontSizeName,
+              onTap: () => _showFontSizeDialog(context),
             ),
-          ),
-          _buildDivider(),
-          _buildSettingsItem(l10n.translate('recharge_supertest_card')),
-          _buildDivider(),
-          _buildSettingsItem(l10n.translate('clear_cache')),
-          _buildDivider(),
+          ]),
+          
+          const SizedBox(height: 24), // Spacing between sections
 
-          _buildSettingsItem(
-            l10n.translate('about_us'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AboutUsScreen()),
+          // Account & Support
+          _buildSection([
+            _buildSettingsItem(
+              l10n.translate('faq'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FAQListScreen()),
+              ),
             ),
-          ),
-          _buildDivider(),
-          _buildSettingsItem(l10n.translate('feedback')),
-          _buildDivider(),
-          _buildSettingsItem(
-            l10n.translate('appearance'),
-            trailingText: currentThemeName,
-            onTap: () => _showAppearanceDialog(context),
-          ),
-          _buildDivider(),
-          _buildSettingsItem(
-            l10n.translate('delete_account'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DeleteAccountScreen()),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(
+              'Ví xu của tôi',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletScreen()),
+              ),
             ),
-          ),
-          _buildDivider(),
-          const SizedBox(height: 20),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(l10n.translate('clear_cache')),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(
+              l10n.translate('about_us'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutUsScreen()),
+              ),
+            ),
+            _buildDivider(indent: 16),
+            _buildSettingsItem(
+              l10n.translate('feedback'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FeedbackScreen()),
+              ),
+            ),
+          ]),
+          
+          const SizedBox(height: 24), // Spacing between sections
+
+          // Danger Zone
+          _buildSection([
+            _buildSettingsItem(
+              l10n.translate('delete_account'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DeleteAccountScreen()),
+              ),
+            ),
+          ]),
+          
+          const SizedBox(height: 32),
+          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextButton(
-              onPressed: () {},
+              onPressed: () async {
+                debugPrint('[SettingsScreen] Logging out...');
+                await AuthApi.logout();
+                if (!mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
               child: Text(l10n.translate('logout'), style: const TextStyle(color: Colors.redAccent, fontSize: 16)),
             ),
           ),
@@ -180,8 +201,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(color: Theme.of(context).dividerTheme.color, height: 1, thickness: 1);
+  Widget _buildSection(List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildDivider({double indent = 0}) {
+    return Divider(color: Theme.of(context).dividerTheme.color?.withOpacity(0.5) ?? Colors.grey.withOpacity(0.2), height: 1, thickness: 1, indent: indent);
   }
 
   void _showLanguageDialog(BuildContext context) {
@@ -241,7 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1F2531),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -283,57 +324,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         provider.setFontSizeLevel(level);
         Navigator.pop(context);
         debugPrint('[SettingsScreen] Font size changed to $level');
-      },
-    );
-  }
-
-  void _showAppearanceDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.translate('appearance'),
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              _buildThemeOption(context, l10n.translate('theme_light'), ThemeMode.light, themeProvider),
-              _buildThemeOption(context, l10n.translate('theme_dark'), ThemeMode.dark, themeProvider),
-              _buildThemeOption(context, l10n.translate('theme_system'), ThemeMode.system, themeProvider),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.translate('cancel'), style: const TextStyle(color: Colors.redAccent)),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildThemeOption(BuildContext context, String name, ThemeMode mode, ThemeProvider provider) {
-    bool isSelected = provider.themeMode == mode;
-    final theme = Theme.of(context);
-    
-    return ListTile(
-      title: Text(name, style: TextStyle(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
-      trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
-      onTap: () {
-        provider.setThemeMode(mode);
-        Navigator.pop(context);
-        debugPrint('[SettingsScreen] Theme changed to $mode');
       },
     );
   }

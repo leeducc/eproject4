@@ -113,6 +113,7 @@ public class AppScreenSectionService {
         int questionCount = 0;
         if (section.getTags() != null && !section.getTags().isEmpty()) {
             FilterRequest request = new FilterRequest();
+            request.setSkill(section.getSkill());
             request.setLogic("AND");
             FilterGroup group = new FilterGroup();
             group.setLogic("OR");
@@ -123,12 +124,13 @@ public class AppScreenSectionService {
             questionCount = questionFilterService.filterQuestions(request).size();
         }
 
+        final int totalQuestions = questionCount;
         double mastery = 0.0;
         if (userId != null) {
             mastery = userSectionStatsRepository.findByUserIdAndSectionId(userId, section.getId())
                     .map(stats -> {
-                        if (stats.getTotalQuestionsAttempted() == 0) return 0.0;
-                        return (double) stats.getTotalCorrectAnswers() / stats.getTotalQuestionsAttempted() * 100;
+                        if (totalQuestions == 0) return 0.0;
+                        return (double) stats.getTotalCorrectAnswers() / totalQuestions * 100;
                     })
                     .orElse(0.0);
         }

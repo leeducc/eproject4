@@ -90,7 +90,7 @@ class _ListeningSectionViewState extends State<ListeningSectionView> {
         }
 
         if (flatQuestions.isEmpty) {
-          return const Center(child: Text('No listening questions.', style: TextStyle(color: Colors.white70)));
+          return Center(child: Text('No listening questions.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))));
         }
 
         
@@ -207,31 +207,31 @@ class _AudioPlayerBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isLocked ? Colors.white.withOpacity(0.05) : Colors.purple.withOpacity(0.15),
+        color: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.05) : Colors.purple.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isLocked ? Colors.white12 : Colors.purpleAccent.withOpacity(0.4)),
+        border: Border.all(color: isLocked ? Theme.of(context).dividerColor.withOpacity(0.1) : Colors.purpleAccent.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.headphones, size: 14, color: isLocked ? Colors.white38 : Colors.purpleAccent),
+              Icon(Icons.headphones, size: 14, color: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.38) : Colors.purpleAccent),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   group.title,
-                  style: TextStyle(color: isLocked ? Colors.white38 : Colors.white70, fontSize: 12),
+                  style: TextStyle(color: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.38) : Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (isLocked)
-                const Padding(
-                  padding: EdgeInsets.only(left: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.lock, size: 12, color: Colors.white38),
-                    SizedBox(width: 4),
-                    Text('Played', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                    Icon(Icons.lock, size: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38)),
+                    const SizedBox(width: 4),
+                    Text('Played', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 11)),
                   ]),
                 ),
             ],
@@ -244,12 +244,12 @@ class _AudioPlayerBar extends StatelessWidget {
                 child: Container(
                   width: 40, height: 40,
                   decoration: BoxDecoration(
-                    color: isLocked ? Colors.white12 : Colors.purpleAccent,
+                    color: isLocked ? Theme.of(context).dividerColor.withOpacity(0.1) : Colors.purpleAccent,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: isLocked ? Colors.white24 : Colors.white,
+                    color: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.24) : Colors.white,
                     size: 22,
                   ),
                 ),
@@ -263,11 +263,11 @@ class _AudioPlayerBar extends StatelessWidget {
                         trackHeight: 3,
                         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
                         overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                        activeTrackColor: isLocked ? Colors.white24 : Colors.purpleAccent,
-                        inactiveTrackColor: Colors.white12,
-                        thumbColor: isLocked ? Colors.white24 : Colors.purpleAccent,
-                        disabledThumbColor: Colors.white24,
-                        disabledActiveTrackColor: Colors.white24,
+                        activeTrackColor: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.24) : Colors.purpleAccent,
+                        inactiveTrackColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                        thumbColor: isLocked ? Theme.of(context).colorScheme.onSurface.withOpacity(0.24) : Colors.purpleAccent,
+                        disabledThumbColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
+                        disabledActiveTrackColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
                       ),
                       child: Slider(
                         min: 0,
@@ -280,8 +280,8 @@ class _AudioPlayerBar extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(formatTime(position), style: const TextStyle(color: Colors.white38, fontSize: 10)),
-                        Text(formatTime(duration), style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                        Text(formatTime(position), style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 10)),
+                        Text(formatTime(duration), style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), fontSize: 10)),
                       ],
                     ),
                   ],
@@ -322,9 +322,9 @@ class _SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12), overflow: TextOverflow.ellipsis),
+                Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontSize: 12), overflow: TextOverflow.ellipsis),
                 Text('Question ${current + 1} of $total',
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -335,18 +335,18 @@ class _SectionHeader extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: isFlagged ? Colors.orangeAccent.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                color: isFlagged ? Colors.orangeAccent.withOpacity(0.2) : Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: isFlagged ? Colors.orangeAccent : Colors.white12),
+                border: Border.all(color: isFlagged ? Colors.orangeAccent : Theme.of(context).dividerColor.withOpacity(0.1)),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(isFlagged ? Icons.flag : Icons.flag_outlined,
-                    size: 14, color: isFlagged ? Colors.orangeAccent : Colors.white38),
+                    size: 14, color: isFlagged ? Colors.orangeAccent : Theme.of(context).colorScheme.onSurface.withOpacity(0.38)),
                 const SizedBox(width: 4),
                 Text(isFlagged ? 'Flagged' : 'Flag',
                     style: TextStyle(
                         fontSize: 12,
-                        color: isFlagged ? Colors.orangeAccent : Colors.white38)),
+                        color: isFlagged ? Colors.orangeAccent : Theme.of(context).colorScheme.onSurface.withOpacity(0.38))),
               ]),
             ),
           ),
@@ -391,9 +391,9 @@ class _PageNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E2330),
-        border: Border(top: BorderSide(color: Colors.white12)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
       ),
       child: Row(
         children: [
@@ -403,10 +403,10 @@ class _PageNavBar extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new, size: 14),
               label: const Text('Previous'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white12,
-                disabledBackgroundColor: Colors.white.withOpacity(0.04),
-                foregroundColor: Colors.white,
-                disabledForegroundColor: Colors.white24,
+                backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
+                disabledBackgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                disabledForegroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -422,9 +422,9 @@ class _PageNavBar extends StatelessWidget {
               iconAlignment: IconAlignment.end,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,
-                disabledBackgroundColor: Colors.white.withOpacity(0.04),
+                disabledBackgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
                 foregroundColor: Colors.white,
-                disabledForegroundColor: Colors.white24,
+                disabledForegroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

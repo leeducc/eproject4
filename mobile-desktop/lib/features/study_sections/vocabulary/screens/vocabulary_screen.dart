@@ -7,6 +7,7 @@ import 'vocabulary_detail_screen.dart';
 import 'favorite_vocabulary_screen.dart';
 import 'favorite_manager.dart';
 import 'daily_test_screen.dart';
+import '../../../ranking/providers/ranking_provider.dart';
 
 class VocabularyScreen extends StatefulWidget {
   const VocabularyScreen({Key? key}) : super(key: key);
@@ -20,6 +21,8 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
   
   late TabController _tabController;
 
+  late RankingProvider _rankingProvider;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +30,10 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
     
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _rankingProvider = context.read<RankingProvider>();
+      _rankingProvider.pushLearningScreen();
+      
       final levelProvider = Provider.of<IeltsLevelProvider>(context, listen: false);
       final index = kIeltsLevels.indexWhere((l) => l.band == levelProvider.selectedLevel.band);
       if (index != -1) {
@@ -49,6 +56,7 @@ class _VocabularyScreenState extends State<VocabularyScreen> with SingleTickerPr
 
   @override
   void dispose() {
+    _rankingProvider.popLearningScreen();
     _tabController.dispose();
     super.dispose();
   }

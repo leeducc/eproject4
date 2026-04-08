@@ -114,6 +114,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                 { title: "Messages", href: "/admin/customers/messages" },
                 { title: "Reports", href: "/admin/moderation" },
                 { title: "Requests", href: "/admin/customers/requests" },
+                { title: "Feedback Requests", href: "/admin/customers/feedback" },
                 { title: "iCoin Transactions", href: "/admin/customers/icoin" },
             ],
         },

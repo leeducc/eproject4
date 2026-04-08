@@ -10,14 +10,25 @@ class RankingProvider extends ChangeNotifier {
   LeaderboardType _currentType = LeaderboardType.ANSWERS;
   bool _isLoading = false;
   String? _error;
+  int _activeLearningScreens = 0;
 
   List<LeaderboardEntry> get entries => List.unmodifiable(_entries);
   MyRankInfo? get myRankInfo => _myRankInfo;
   LeaderboardType get currentType => _currentType;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isLearningActive => _activeLearningScreens > 0;
 
-  
+  void pushLearningScreen() {
+    _activeLearningScreens++;
+    debugPrint('[RankingProvider] pushLearningScreen: $_activeLearningScreens active');
+  }
+
+  void popLearningScreen() {
+    _activeLearningScreens--;
+    if (_activeLearningScreens < 0) _activeLearningScreens = 0;
+    debugPrint('[RankingProvider] popLearningScreen: $_activeLearningScreens active');
+  }
 
   Future<void> loadLeaderboard(LeaderboardType type) async {
     debugPrint('[RankingProvider] loadLeaderboard type=$type');
