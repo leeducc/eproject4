@@ -78,6 +78,10 @@ public class FeedbackService {
         Feedback feedback = feedbackRepository.findById(feedbackId)
                 .orElseThrow(() -> new RuntimeException("Feedback not found"));
 
+        if (feedback.getStatus() == FeedbackStatus.RESOLVED) {
+            throw new RuntimeException("This feedback has already been resolved and cannot be replied to again.");
+        }
+
         FeedbackMessage message = FeedbackMessage.builder()
                 .feedback(feedback)
                 .senderId(adminId)
@@ -100,6 +104,28 @@ public class FeedbackService {
         }
 
         return toDto(feedback);
+    }
+
+    public Page<FeedbackDto> getUserFeedbacks(Long userId, Pageable pageable) {
+        log.info("Fetching feedbacks for user {}", userId);
+        return feedbackRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(this::toDto);
+    }
+
+    public FeedbackDetailDto getUserFeedbackDetails(Long id, Long userId) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found"));
+        
+        if (!feedback.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You do not have permission to view this feedback");
+        }
+        
+        List<FeedbackMessage> messages = messageRepository.findByFeedbackIdOrderByCreatedAtAsc(id);
+        
+        return FeedbackDetailDto.builder()
+                .feedback(toDto(feedback))
+                .messages(messages.stream().map(this::toMessageDto).collect(Collectors.toList()))
+                .build();
     }
 
     private FeedbackDto toDto(Feedback feedback) {

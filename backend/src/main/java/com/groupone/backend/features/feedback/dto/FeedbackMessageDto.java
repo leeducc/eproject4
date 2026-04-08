@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class FeedbackMessageDto {
     private Long id;
     private Long senderId;
+    @com.fasterxml.jackson.annotation.JsonProperty("isAdmin")
     private boolean isAdmin;
     private String textContent;
     private LocalDateTime createdAt;

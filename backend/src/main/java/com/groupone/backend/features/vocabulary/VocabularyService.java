@@ -205,6 +205,12 @@ public class VocabularyService {
         return mapToItem(saved);
     }
 
+    public VocabularyItem getVocabularyById(Long id) {
+        VocabularyEntity entity = vocabularyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vocabulary not found"));
+        return mapToItem(entity);
+    }
+
     public void deleteVocabulary(Long id) {
         vocabularyRepository.deleteById(id);
     }

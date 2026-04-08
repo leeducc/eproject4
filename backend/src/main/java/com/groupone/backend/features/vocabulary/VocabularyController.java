@@ -42,6 +42,12 @@ public class VocabularyController {
         return ResponseEntity.ok(vocabularyService.createVocabulary(item));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<VocabularyItem> getVocabularyById(@PathVariable Long id) {
+        log.info("Request: GET vocabulary id={}", id);
+        return ResponseEntity.ok(vocabularyService.getVocabularyById(id));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<VocabularyItem> updateWord(@PathVariable Long id, @RequestBody VocabularyItem item) {
         log.info("Request: PUT update vocabulary id={}", id);

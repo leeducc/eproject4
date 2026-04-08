@@ -72,3 +72,23 @@ export const getModerationNotifications = async (): Promise<ReportNotification[]
 export const markNotificationRead = async (id: number): Promise<void> => {
     await apiClient.post(`/v1/moderation/notifications/${id}/read`);
 };
+
+export const getQuestionDetail = async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/v1/questions/${id}`);
+    return response.data;
+};
+
+export const getQuestionHistory = async (id: number): Promise<any[]> => {
+    const response = await apiClient.get(`/v1/questions/${id}/history`);
+    return response.data;
+};
+
+export const getVocabularyDetail = async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/v1/vocabulary/${id}`);
+    return response.data;
+};
+
+export const getVocabularyHistory = async (id: number): Promise<any[]> => {
+    const response = await apiClient.get(`/v1/vocabulary/${id}/history`);
+    return response.data;
+};

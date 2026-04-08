@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../../core/models/app_section_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../data/services/auth_api.dart';
 
 class AppConfigApiService {
   String get _baseUrl => dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
 
   Future<List<AppSectionModel>> getSections(String skill, String difficultyBand) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
+    final token = await AuthApi.getToken();
     
     final uri = Uri.parse('$_baseUrl/v1/app-sections?skill=$skill&difficultyBand=${Uri.encodeComponent(difficultyBand)}');
     debugPrint('[AppConfigApiService] Fetching sections: $uri');
@@ -40,8 +39,7 @@ class AppConfigApiService {
   }
 
   Future<List<int>> getSolvedQuestionIds() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
+    final token = await AuthApi.getToken();
     
     final uri = Uri.parse('$_baseUrl/v1/section-stats/solved-questions');
     debugPrint('[AppConfigApiService] Fetching solved questions: $uri');

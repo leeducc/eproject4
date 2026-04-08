@@ -15,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_desktop/core/providers/font_size_provider.dart';
 import 'package:mobile_desktop/core/providers/theme_provider.dart';
 import '../../services/moderation_service.dart';
+import 'package:mobile_desktop/features/study_sections/services/favorite_question_service.dart';
+import '../../../../data/services/auth_api.dart';
 
 
 class ReadingExamScreen extends StatefulWidget {
@@ -34,20 +36,28 @@ class ReadingExamScreen extends StatefulWidget {
 }
 
 class _ReadingExamScreenState extends State<ReadingExamScreen> {
-  int currentIndex = 0;
-  String? selectedId;
-  int score = 0;
   late int startTime;
+  late PageController pageController;
+  int currentIndex = 0;
 
   bool isLoading = true;
   List<QuizQuestion> questions = [];
+  Map<int, String?> userAnswers = {}; // Persist state across swipes
   List<Map<String, dynamic>> userAttempts = [];
 
   @override
   void initState() {
     super.initState();
+    currentIndex = 0;
+    pageController = PageController(initialPage: currentIndex);
     startTime = DateTime.now().millisecondsSinceEpoch;
     _loadQuestions();
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadQuestions() async {
@@ -77,62 +87,61 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
     }
   }
 
-  Future<void> nextQuestion(String answerId) async {
-    final question = questions[currentIndex];
-    bool isCorrect = question.isCorrectChoice(answerId);
+  Future<void> submitExam() async {
+    int finalScore = 0;
+    List<Map<String, dynamic>> finalAttempts = [];
 
-    userAttempts.add({
-      'questionId': question.id,
-      'userAnswer': answerId,
-      'isCorrect': isCorrect,
-    });
-
-    if (isCorrect && !question.isAlreadySolved) {
-      score++;
+    for (int i = 0; i < questions.length; i++) {
+      final q = questions[i];
+      final answerId = userAnswers[i];
+      if (answerId != null) {
+        bool isCorrect = q.isCorrectChoice(answerId);
+        finalAttempts.add({
+          'questionId': q.id,
+          'userAnswer': answerId,
+          'isCorrect': isCorrect,
+        });
+        if (isCorrect && !q.isAlreadySolved) {
+          finalScore++;
+        }
+      } else {
+        // Unanswered
+        finalAttempts.add({
+          'questionId': q.id,
+          'userAnswer': null,
+          'isCorrect': false,
+        });
+      }
     }
 
-    if (currentIndex < questions.length - 1) {
-      setState(() {
-        currentIndex++;
-        selectedId = null;
-      });
-    } else {
-      int totalTime =
-          (DateTime.now().millisecondsSinceEpoch - startTime) ~/ 1000;
+    int totalTime = (DateTime.now().millisecondsSinceEpoch - startTime) ~/ 1000;
+    debugPrint('[ReadingExamScreen] submitting exam — score=$finalScore, total=${questions.length}');
+    context.read<RankingProvider>().recordAnswers(finalScore);
 
-      debugPrint('[ReadingExamScreen] session ended — score=$score, total=${questions.length}');
-      context.read<RankingProvider>().recordAnswers(score);
+    await _reportStats(finalScore, questions.length, finalAttempts);
 
-      // Await stats report BEFORE navigating away so the widget is still mounted
-      // during the HTTP call. Navigating first causes `if (!mounted) return` to
-      // silently abort the POST, leaving progress stuck at 0%.
-      await _reportStats(score, questions.length, userAttempts);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt("totalAnswers", (prefs.getInt("totalAnswers") ?? 0) + questions.length);
+    prefs.setInt("correctAnswers", (prefs.getInt("correctAnswers") ?? 0) + finalScore);
+    prefs.setInt("totalTime", (prefs.getInt("totalTime") ?? 0) + totalTime);
 
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setInt("totalAnswers", (prefs.getInt("totalAnswers") ?? 0) + questions.length);
-      prefs.setInt("correctAnswers", (prefs.getInt("correctAnswers") ?? 0) + score);
-      prefs.setInt("totalTime", (prefs.getInt("totalTime") ?? 0) + totalTime);
-      debugPrint('[ReadingExamScreen] SharedPreferences updated');
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => UnifiedResultScreen(
-            score: score,
-            total: questions.length,
-            time: totalTime,
-            skill: 'READING',
-          ),
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UnifiedResultScreen(
+          score: finalScore,
+          total: questions.length,
+          time: totalTime,
+          skill: 'READING',
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _reportStats(int correct, int total, List<Map<String, dynamic>> attempts) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('access_token');
+      final token = await AuthApi.getToken();
       debugPrint('[ReadingExamScreen] reporting stats: section=${widget.section.id}, correct=$correct, attempts=${attempts.length}');
       final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
       final url = '$baseUrl/v1/section-stats/${widget.section.id}/record';
@@ -208,7 +217,7 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).cardColor,
+      backgroundColor: Theme.of(context).bottomSheetTheme.backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -220,13 +229,28 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _settingsItem(Icons.bookmark_border, "Lưu", () {
+                  _settingsItem(context, Icons.bookmark_border, "Lưu câu hỏi", () async {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Đã lưu câu hỏi!")),
-                    );
+                    final q = questions[currentIndex];
+                    try {
+                      final bool isNowFavorite = await FavoriteQuestionService().toggleFavorite(q.id);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(isNowFavorite ? 'Đã lưu câu hỏi vào danh sách yêu thích!' : 'Đã xóa câu hỏi khỏi danh sách yêu thích!'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lỗi: Không thể lưu câu hỏi. $e')),
+                        );
+                      }
+                    }
                   }),
-                  _settingsItem(Icons.flag_outlined, "Báo cáo đề sai", () {
+                  _settingsItem(context, Icons.flag_outlined, "Báo cáo đề sai", () {
                     Navigator.pop(context);
                     _showReportDialog();
                   }),
@@ -323,22 +347,25 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
     );
   }
 
-  Widget _settingsItem(IconData icon, String label, VoidCallback onTap) {
+  Widget _settingsItem(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon, color: Colors.white70),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: TextStyle(color: theme.colorScheme.onSurface)),
       onTap: onTap,
     );
   }
 
   Widget _themeOption(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final accentColor = const Color(0xFFFF9800);
     return InkWell(
       onTap: onTap,
       child: Column(
         children: [
-          Icon(icon, color: isSelected ? const Color(0xFFFF9800) : Colors.white70),
+          Icon(icon, color: isSelected ? accentColor : theme.colorScheme.onSurface.withOpacity(0.6)),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: isSelected ? const Color(0xFFFF9800) : Colors.white70, fontSize: 12)),
+          Text(label, style: TextStyle(color: isSelected ? accentColor : theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 12)),
         ],
       ),
     );
@@ -374,59 +401,78 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
           children: [
             _buildCustomHeader(),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    DynamicQuestionBuilder(
-                      question: question,
-                      selectedId: selectedId,
-                      isAnswered: selectedId != null,
-                      onAnswer: (id) {
-                        debugPrint('[ReadingExamScreen] Selected: $id, Correct: ${question.correctIds}');
-                        setState(() {
-                          selectedId = id;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 40),
-                    if (selectedId != null)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => nextQuestion(selectedId!),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF9800),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                            elevation: 0,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                currentIndex < questions.length - 1 ? "Tiếp tục" : "Hoàn thành",
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              if (selectedId != null && selectedId!.startsWith("__MATCHING")) ...[
-                                const SizedBox(height: 4),
-                                const Text(
-                                  "Tất cả đã nối. Kiểm tra và nộp bài.",
-                                  style: TextStyle(fontSize: 11, color: Colors.white70),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ]
-                            ],
-                          ),
+              child: PageView.builder(
+                controller: pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                },
+                itemCount: questions.length,
+                itemBuilder: (context, index) {
+                  final q = questions[index];
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        DynamicQuestionBuilder(
+                          question: q,
+                          selectedId: userAnswers[index],
+                          isAnswered: userAnswers[index] != null,
+                          onAnswer: (id) {
+                            debugPrint('[ReadingExamScreen] Page $index Selected: $id');
+                            setState(() {
+                              userAnswers[index] = id;
+                            });
+                          },
                         ),
-                      )
-                  ],
-                ),
+                        const SizedBox(height: 80), // Space for bottom button
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
+        ),
+      ),
+      bottomSheet: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            )
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              if (currentIndex < questions.length - 1) {
+                pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              } else {
+                submitExam();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 0,
+            ),
+            child: Text(
+              currentIndex < questions.length - 1 ? "Tiếp tục" : "Hoàn thành",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import '../../../data/services/profile_api.dart';
 import 'settings_screen.dart';
 import 'upgrade_pro_screen.dart';
 import 'edit_profile_screen.dart';
+import 'favorite_questions_screen.dart';
 import '../../chat/screens/chat_with_admin_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/ielts_level_provider.dart';
@@ -316,7 +317,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildMenuItem(context, Icons.article, Colors.lightBlue, l10n.translate('my_essays')),
 
         _buildDivider(context),
-        _buildMenuItem(context, Icons.star, Colors.orangeAccent, l10n.translate('saved_items')),
+        _buildMenuItem(context, Icons.favorite, Colors.redAccent, 'Favorite Questions', onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FavoriteQuestionsScreen()),
+          );
+        }),
         _buildMenuItem(context, Icons.edit, Colors.blue, l10n.translate('my_notes')),
         _buildDivider(context),
         _buildMenuItem(context, Icons.download, Colors.cyan, l10n.translate('offline_exams')),

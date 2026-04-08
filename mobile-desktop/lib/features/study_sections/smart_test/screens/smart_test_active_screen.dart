@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../../core/models/quiz_bank_models.dart';
 import 'package:mobile_desktop/core_quiz/models/quiz_question.dart';
 import 'package:mobile_desktop/core_quiz/widgets/dynamic_question_builder.dart';
-import 'package:mobile_desktop/core_quiz/widgets/audio_player_widget.dart';
 import '../services/smart_test_api_service.dart';
 import 'package:mobile_desktop/features/study_sections/services/moderation_service.dart';
 import '../models/smart_test_models.dart';
 import 'smart_test_summary_screen.dart';
 import 'package:mobile_desktop/core/models/wrong_answer.dart';
 import 'package:mobile_desktop/core/providers/wrong_answer_provider.dart';
+import 'package:mobile_desktop/core/providers/theme_provider.dart';
+import 'package:mobile_desktop/core/providers/font_size_provider.dart';
+import 'package:mobile_desktop/features/study_sections/services/favorite_question_service.dart';
 import 'package:provider/provider.dart';
-import 'package:just_audio/just_audio.dart';
 
 class SmartTestActiveScreen extends StatefulWidget {
   final String skill;
@@ -24,13 +25,6 @@ class SmartTestActiveScreen extends StatefulWidget {
 }
 
 class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
-  // Theme Constants matching the User's Image
-  static const Color kAppBg = Color(0xFF121A21);
-  static const Color kCardBg = Color(0xFF1D2733);
-  static const Color kAccentBlue = Color(0xFF42A5F5);
-  static const Color kTextWhite = Colors.white;
-  static const Color kTextGray = Colors.white54;
-
   bool isLoading = true;
   List<Question> questions = [];
   Map<int, String> userAnswers = {};
@@ -132,41 +126,83 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
   }
 
   void _showSettingsMenu() {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: kCardBg,
+      backgroundColor: theme.cardColor,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-             ListTile(
-               leading: const Icon(Icons.flag_outlined, color: kTextWhite),
-               title: const Text('Báo cáo đề sai', style: TextStyle(color: kTextWhite)),
+            ListTile(
+              leading: Icon(Icons.bookmark_border_rounded, color: theme.colorScheme.onSurface),
+              title: Text('Lưu câu hỏi', style: TextStyle(color: theme.colorScheme.onSurface)),
+              onTap: () async {
+                Navigator.pop(context);
+                final q = questions[_currentPageIndex];
+                try {
+                  final bool isNowFavorite = await FavoriteQuestionService().toggleFavorite(q.id);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isNowFavorite ? 'Đã lưu câu hỏi vào danh sách yêu thích!' : 'Đã xóa câu hỏi khỏi danh sách yêu thích!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Lỗi: Không thể lưu câu hỏi. $e')),
+                    );
+                  }
+                }
+              },
+            ),
+            ListTile(
+               leading: Icon(Icons.flag_outlined, color: theme.colorScheme.onSurface),
+               title: Text('Báo cáo đề sai', style: TextStyle(color: theme.colorScheme.onSurface)),
                onTap: () {
                  Navigator.pop(context);
                  _showReportDialog(questions[_currentPageIndex]);
                },
              ),
-             const Divider(color: Colors.white10),
+             Divider(color: theme.dividerColor, height: 32),
              Row(
                mainAxisAlignment: MainAxisAlignment.spaceAround,
                children: [
-                 _buildFontOption("Aa", 14),
-                 _buildFontOption("Aa", 18),
-                 _buildFontOption("Aa", 22),
+                 _buildFontOption("Aa", 14, FontSizeLevel.small, context.read<FontSizeProvider>().level == FontSizeLevel.small),
+                 _buildFontOption("Aa", 18, FontSizeLevel.medium, context.read<FontSizeProvider>().level == FontSizeLevel.medium),
+                 _buildFontOption("Aa", 22, FontSizeLevel.large, context.read<FontSizeProvider>().level == FontSizeLevel.large),
                ],
              ),
              const SizedBox(height: 24),
              Row(
                children: [
                  Expanded(
-                   child: _buildModeOption(Icons.wb_sunny_outlined, "Ban ngày", false),
+                   child: _buildModeOption(
+                     Icons.wb_sunny_outlined, 
+                     "Ban ngày", 
+                     theme.brightness == Brightness.light,
+                     onTap: () {
+                       context.read<ThemeProvider>().setThemeMode(ThemeMode.light);
+                       Navigator.pop(context);
+                     },
+                   ),
                  ),
                  const SizedBox(width: 16),
                  Expanded(
-                   child: _buildModeOption(Icons.nightlight_round, "Chế độ ban đêm", true),
+                   child: _buildModeOption(
+                     Icons.nightlight_round, 
+                     "Chế độ ban đêm", 
+                     theme.brightness == Brightness.dark,
+                     onTap: () {
+                       context.read<ThemeProvider>().setThemeMode(ThemeMode.dark);
+                       Navigator.pop(context);
+                     },
+                   ),
                  ),
                ],
              )
@@ -176,51 +212,66 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
     );
   }
 
-  Widget _buildFontOption(String label, double size) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-         borderRadius: BorderRadius.circular(10),
-         border: Border.all(color: Colors.white10),
+  Widget _buildFontOption(String label, double size, FontSizeLevel level, bool isSelected) {
+    final theme = Theme.of(context);
+    final accentColor = theme.colorScheme.primary;
+    return GestureDetector(
+      onTap: () {
+        context.read<FontSizeProvider>().setFontSizeLevel(level);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+           color: isSelected ? accentColor.withValues(alpha: 0.1) : Colors.transparent,
+           borderRadius: BorderRadius.circular(10),
+           border: Border.all(color: isSelected ? accentColor : theme.dividerColor),
+        ),
+        child: Text(label, style: TextStyle(color: isSelected ? accentColor : theme.colorScheme.onSurface, fontSize: size)),
       ),
-      child: Text(label, style: TextStyle(color: kTextWhite, fontSize: size)),
     );
   }
 
-  Widget _buildModeOption(IconData icon, String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: isSelected ? kAccentBlue.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isSelected ? kAccentBlue : Colors.white10),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: isSelected ? kAccentBlue : kTextWhite),
-          const SizedBox(height: 8),
-          Text(label, style: TextStyle(color: isSelected ? kAccentBlue : kTextWhite, fontSize: 12)),
-        ],
+  Widget _buildModeOption(IconData icon, String label, bool isSelected, {VoidCallback? onTap}) {
+    final theme = Theme.of(context);
+    final accentColor = theme.colorScheme.primary;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor.withValues(alpha: 0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? accentColor : theme.dividerColor),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? accentColor : theme.colorScheme.onSurface),
+            const SizedBox(height: 8),
+            Text(label, style: TextStyle(color: isSelected ? accentColor : theme.colorScheme.onSurface, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }
 
   void _showReportDialog(Question q) {
+      final theme = Theme.of(context);
       final TextEditingController reasonController = TextEditingController();
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: kCardBg,
-          title: const Text('Report Question', style: TextStyle(color: kTextWhite)),
+          backgroundColor: theme.cardColor,
+          title: Text('Report Question', style: TextStyle(color: theme.colorScheme.onSurface)),
           content: TextField(
             controller: reasonController,
             maxLines: 3,
-            style: const TextStyle(color: kTextWhite),
-            decoration: const InputDecoration(
+            style: TextStyle(color: theme.colorScheme.onSurface),
+            decoration: InputDecoration(
               hintText: "Describe the issue...", 
-              hintStyle: TextStyle(color: Colors.white30),
-              border: OutlineInputBorder(),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+              hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.3)),
+              border: const OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
             ),
           ),
           actions: [
@@ -232,9 +283,13 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
                 try {
                   await ModerationService().submitReport("QUESTION", q.id, reason);
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report Submitted!')));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report Submitted!')));
+                  }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+                  }
                 }
               },
               child: const Text('Submit'),
@@ -245,12 +300,13 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
   }
 
   Future<bool> _onWillPop() async {
+    final theme = Theme.of(context);
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: kCardBg,
-        title: const Text('Are you sure?', style: TextStyle(color: kTextWhite)),
-        content: const Text('Your test is running. Do you want to exit without saving?', style: TextStyle(color: kTextGray)),
+        backgroundColor: theme.cardColor,
+        title: Text('Are you sure?', style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text('Your test is running. Do you want to exit without saving?', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7))),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
           TextButton(onPressed: () {
@@ -277,6 +333,9 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -287,57 +346,66 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: kAppBg,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: kTextWhite),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text("Hết giờ:", style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 8),
               Text(_formattedTime, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(width: 12),
               if (questions.isNotEmpty)
-                Text("${_currentPageIndex + 1}/${questions.length}", style: const TextStyle(color: kTextGray, fontSize: 16)),
+                Text("${_currentPageIndex + 1}/${questions.length}", style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 16)),
             ],
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.more_horiz, color: kTextWhite),
+              icon: Icon(Icons.more_horiz, color: theme.colorScheme.onSurface),
               onPressed: _showSettingsMenu,
             )
           ],
         ),
         body: isLoading 
-            ? const Center(child: CircularProgressIndicator(color: kAccentBlue))
+            ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
             : questions.isEmpty 
-               ? const Center(child: Text("No questions generated.", style: TextStyle(color: kTextWhite)))
+               ? Center(child: Text("No questions generated.", style: TextStyle(color: theme.colorScheme.onSurface)))
                : PageView.builder(
                    controller: _pageController,
-                   onPageChanged: (idx) => setState(() => _currentPageIndex = idx),
+                   onPageChanged: (idx) {
+                     debugPrint('[SmartTestActiveScreen] Page changed to $idx');
+                     setState(() => _currentPageIndex = idx);
+                   },
                    itemCount: questions.length,
                    itemBuilder: (context, index) {
                       final q = questions[index];
+                      final hasAnswer = userAnswers.containsKey(q.id);
                       return SmartQuestionCard(
                         question: q,
                         index: index,
                         total: questions.length,
                         selectedAnswerId: userAnswers[q.id],
+                        isAnswered: hasAnswer,
                         onAnswer: (val) {
+                          if (val == null || val.isEmpty) return;
+                          debugPrint('[SmartTestActiveScreen] Storing answer for question ${q.id}: $val');
                           setState(() {
-                            userAnswers[q.id] = val!;
+                            userAnswers[q.id] = val;
                           });
                         },
                         isLast: index == questions.length - 1,
                         onSubmit: _submitTest,
                       );
-                   },
-                 ),
-      ),
-    );
+                    },
+                  ),
+        ),
+      );
   }
 }
 
@@ -346,6 +414,7 @@ class SmartQuestionCard extends StatelessWidget {
   final int index;
   final int total;
   final String? selectedAnswerId;
+  final bool isAnswered;
   final Function(String?) onAnswer;
   final bool isLast;
   final VoidCallback onSubmit;
@@ -356,6 +425,7 @@ class SmartQuestionCard extends StatelessWidget {
     required this.index,
     required this.total,
     this.selectedAnswerId,
+    required this.isAnswered,
     required this.onAnswer,
     required this.isLast,
     required this.onSubmit,
@@ -363,66 +433,51 @@ class SmartQuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[SmartQuestionCard] Building card for question id=${question.id}, type=${question.type}, isAnswered=$isAnswered');
     final quizQ = QuizQuestion.from(question);
+    final theme = Theme.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (quizQ.hasAudio)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: SmartAudioPlayer(audioUrl: quizQ.mediaUrl!),
-            ),
-          
-          if (question.instruction.isNotEmpty)
-             Padding(
-               padding: const EdgeInsets.only(bottom: 30),
-               child: Text(
-                 question.instruction,
-                 style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
-                 textAlign: TextAlign.center,
-               ),
-             ),
-
-          ...quizQ.options.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final option = entry.value;
-            final isSelected = selectedAnswerId == option.id;
-            final prefix = String.fromCharCode(65 + idx);
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: InkWell(
-                onTap: () => onAnswer(option.id),
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: _SmartTestActiveScreenState.kCardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? _SmartTestActiveScreenState.kAccentBlue : Colors.white10,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(prefix, style: TextStyle(
-                        color: isSelected ? _SmartTestActiveScreenState.kAccentBlue : _SmartTestActiveScreenState.kTextGray,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      )),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(option.label, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                      ),
-                    ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  "Câu ${index + 1}",
+                  style: TextStyle(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
                 ),
               ),
-            );
-          }).toList(),
+              IconButton(
+                icon: Icon(Icons.more_horiz, color: theme.colorScheme.onSurface.withOpacity(0.8)),
+                onPressed: () => _showQuestionActionMenu(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Use DynamicQuestionBuilder to handle ALL question types
+          // (multipleChoice, fillBlank, matching) correctly
+          DynamicQuestionBuilder(
+            question: quizQ,
+            selectedId: selectedAnswerId,
+            isAnswered: isAnswered,
+            onAnswer: (val) {
+              debugPrint('[SmartQuestionCard] Answer selected: question=${question.id}, val=$val');
+              onAnswer(val);
+            },
+          ),
 
           if (isLast)
             Padding(
@@ -430,8 +485,8 @@ class SmartQuestionCard extends StatelessWidget {
                child: ElevatedButton(
                  style: ElevatedButton.styleFrom(
                    minimumSize: const Size(double.infinity, 55),
-                   backgroundColor: _SmartTestActiveScreenState.kAccentBlue,
-                   foregroundColor: Colors.white,
+                   backgroundColor: Theme.of(context).colorScheme.primary,
+                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                    elevation: 4,
                  ),
@@ -443,109 +498,64 @@ class SmartQuestionCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class SmartAudioPlayer extends StatefulWidget {
-  final String audioUrl;
-  const SmartAudioPlayer({super.key, required this.audioUrl});
-
-  @override
-  State<SmartAudioPlayer> createState() => _SmartAudioPlayerState();
-}
-
-class _SmartAudioPlayerState extends State<SmartAudioPlayer> {
-  final AudioPlayer _player = AudioPlayer();
-
-  @override
-  void initState() {
-    super.initState();
-    _player.setUrl(widget.audioUrl);
-  }
-
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
-  }
-
-  String _format(Duration d) {
-    return "${d.inMinutes.remainder(60).toString().padLeft(2, '0')}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        StreamBuilder<Duration?>(
-          stream: _player.durationStream,
-          builder: (context, snapshot) {
-            final duration = snapshot.data ?? Duration.zero;
-            return StreamBuilder<Duration>(
-              stream: _player.positionStream,
-              builder: (context, snapshot) {
-                var pos = snapshot.data ?? Duration.zero;
-                if (pos > duration) pos = duration;
-                return Column(
-                  children: [
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: _SmartTestActiveScreenState.kAccentBlue,
-                        inactiveTrackColor: Colors.white10,
-                        thumbColor: _SmartTestActiveScreenState.kAccentBlue,
-                        trackHeight: 3.0,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+  void _showQuestionActionMenu(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.bookmark_border_rounded, color: theme.colorScheme.onSurface),
+              title: Text('Lưu câu hỏi', style: TextStyle(color: theme.colorScheme.onSurface)),
+              onTap: () async {
+                Navigator.pop(context);
+                try {
+                  final bool isNowFavorite = await FavoriteQuestionService().toggleFavorite(question.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isNowFavorite ? 'Đã lưu câu hỏi vào danh sách yêu thích!' : 'Đã xóa câu hỏi khỏi danh sách yêu thích!'),
+                        behavior: SnackBarBehavior.floating,
                       ),
-                      child: Slider(
-                        value: pos.inMilliseconds.toDouble(),
-                        max: duration.inMilliseconds.toDouble() > 0 ? duration.inMilliseconds.toDouble() : 1.0,
-                        onChanged: (v) => _player.seek(Duration(milliseconds: v.toInt())),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(_format(pos), style: const TextStyle(color: _SmartTestActiveScreenState.kTextGray, fontSize: 12)),
-                          Text(_format(duration), style: const TextStyle(color: _SmartTestActiveScreenState.kTextGray, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Lỗi: Không thể lưu câu hỏi. $e')),
+                    );
+                  }
+                }
               },
-            );
-          },
+            ),
+            ListTile(
+              leading: Icon(Icons.flag_outlined, color: theme.colorScheme.onSurface),
+              title: Text('Báo cáo đề sai', style: TextStyle(color: theme.colorScheme.onSurface)),
+              onTap: () {
+                Navigator.pop(context);
+                // We'll call the report dialog from the stateful parent
+                // by finding the state in the context or passing a callback
+                _triggerReport(context);
+              },
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        StreamBuilder<PlayerState>(
-          stream: _player.playerStateStream,
-          builder: (context, snapshot) {
-            final state = snapshot.data;
-            final playing = state?.playing ?? false;
-            return Center(
-              child: GestureDetector(
-                onTap: () {
-                   if (playing) {
-                     _player.pause();
-                   } else {
-                     if (state?.processingState == ProcessingState.completed) {
-                       _player.seek(Duration.zero);
-                     }
-                     _player.play();
-                   }
-                },
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: const BoxDecoration(color: _SmartTestActiveScreenState.kAccentBlue, shape: BoxShape.circle),
-                  child: Icon(playing ? Icons.pause : Icons.volume_up, color: Colors.white, size: 35),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
+      ),
     );
   }
-}
+
+  void _triggerReport(BuildContext context) {
+    // Find the state of SmartTestActiveScreen to call its internal _showReportDialog
+    final state = context.findAncestorStateOfType<_SmartTestActiveScreenState>();
+    if (state != null) {
+      state._showReportDialog(question);
+    }
+  }
+}
+

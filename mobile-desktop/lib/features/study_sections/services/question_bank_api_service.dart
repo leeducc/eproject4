@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../data/services/auth_api.dart';
 import '../../../core/models/quiz_bank_models.dart';
 import '../../../core_quiz/models/quiz_question.dart';
 
@@ -10,8 +10,7 @@ class QuestionBankApiService {
   String get _baseUrl => dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
 
   Future<List<QuizQuestion>> fetchByTags(List<dynamic> tags, {required String skill}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
+    final token = await AuthApi.getToken();
     
     final uri = Uri.parse('$_baseUrl/v1/questions/filter');
     

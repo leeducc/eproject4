@@ -1,5 +1,7 @@
 package com.groupone.backend.features.identity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.groupone.backend.shared.enums.UserRole;
 import com.groupone.backend.shared.enums.UserStatus;
 import jakarta.persistence.*;
@@ -21,6 +23,7 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
 
     @Id
@@ -31,6 +34,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
@@ -80,11 +84,13 @@ public class User implements UserDetails {
     private UserProfile profile;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
+    @JsonIgnore
     public String getPassword() {
         return passwordHash;
     }

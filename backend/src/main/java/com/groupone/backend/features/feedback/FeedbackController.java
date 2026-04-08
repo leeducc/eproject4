@@ -33,6 +33,22 @@ public class FeedbackController {
         return ResponseEntity.ok(savedFeedback);
     }
 
+    @GetMapping("/api/user/feedback")
+    public ResponseEntity<Page<FeedbackDto>> getUserFeedbacks(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(feedbackService.getUserFeedbacks(user.getId(), pageable));
+    }
+
+    @GetMapping("/api/user/feedback/{id}")
+    public ResponseEntity<FeedbackDetailDto> getUserFeedbackDetails(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(feedbackService.getUserFeedbackDetails(id, user.getId()));
+    }
+
     // Admin endpoints
     @GetMapping("/api/admin/feedback")
     public ResponseEntity<Page<FeedbackDto>> getAllFeedbacks(
