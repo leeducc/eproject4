@@ -34,9 +34,23 @@ class MultipleChoiceWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (isMastered)
-                const Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child: Icon(Icons.check_circle, color: Colors.green, size: 28),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Tooltip(
+                    message: "Bạn đã trả lời chính xác câu hỏi này trước đó",
+                    child: GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Bạn đã trả lời chính xác câu hỏi này trước đó."),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.check_circle, color: Colors.green, size: 28),
+                    ),
+                  ),
                 ),
               Expanded(
                 child: Text(

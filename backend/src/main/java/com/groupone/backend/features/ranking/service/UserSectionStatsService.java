@@ -50,6 +50,7 @@ public class UserSectionStatsService {
         int totalAttempted = 0;
 
         if (request.getAttempts() != null && !request.getAttempts().isEmpty()) {
+            log.info("  Processing {} attempts...", request.getAttempts().size());
             for (com.groupone.backend.features.ranking.dto.QuestionAttemptDTO attempt : request.getAttempts()) {
                 totalAttempted++;
                 
@@ -58,7 +59,8 @@ public class UserSectionStatsService {
                         
                 if (question != null) {
                     boolean wasCorrectInSection = userQuestionAttemptRepository.existsByUserIdAndSectionIdAndQuestionIdAndIsCorrect(userId, sectionId, question.getId(), true);
-                    log.debug("  Processing qid={}, isCorrect={}, wasCorrectInSection={}", question.getId(), attempt.isCorrect(), wasCorrectInSection);
+                    log.info("    [Attempt] QID: {}, SentCorrect: {}, AlreadyCorrectInSection: {}", 
+                             question.getId(), attempt.isCorrect(), wasCorrectInSection);
                     
                     com.groupone.backend.features.smarttest.entity.UserQuestionAttempt uqa = com.groupone.backend.features.smarttest.entity.UserQuestionAttempt.builder()
                             .user(user)
@@ -71,9 +73,10 @@ public class UserSectionStatsService {
                     
                     if (attempt.isCorrect() && !wasCorrectInSection) {
                         newCorrect++;
+                        log.info("      -> Mastery Progress: +1 (New correct answer for this section)");
                     }
                 } else {
-                    log.warn("  Question NOT FOUND: id={}", attempt.getQuestionId());
+                    log.warn("    [Attempt] Question NOT FOUND: id={}", attempt.getQuestionId());
                 }
             }
         } else {

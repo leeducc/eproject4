@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/models/quiz_bank_models.dart';
 import 'package:mobile_desktop/core_quiz/models/quiz_question.dart';
@@ -103,7 +104,10 @@ class _SmartTestActiveScreenState extends State<SmartTestActiveScreen> {
       }).toList();
       
       final req = SmartTestSubmitRequest(skill: widget.skill, difficultyBand: widget.level, attempts: attempts);
+      debugPrint('[SmartTestActiveScreen] Submitting test payload: ${jsonEncode(req.toJson())}');
+      
       final res = await SmartTestApiService().submitSmartTest(req);
+      debugPrint('[SmartTestActiveScreen] Test submitted successfully. SessionId: ${res.sessionId}');
       
       if (!mounted) return;
       Navigator.pop(context); // pop loading dialog

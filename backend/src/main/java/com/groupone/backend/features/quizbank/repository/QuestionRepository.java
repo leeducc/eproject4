@@ -23,10 +23,32 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, JpaSp
             @org.springframework.data.repository.query.Param("tagIds") List<Long> tagIds,
             @org.springframework.data.repository.query.Param("limit") int limit);
 
+    @org.springframework.data.jpa.repository.Query(value = "SELECT * FROM qb_questions q JOIN qb_question_tags qt ON q.id = qt.question_id " +
+            "WHERE q.skill = :skill AND q.difficulty_band = :difficulty " +
+            "AND qt.tag_id IN :tagIds " +
+            "AND (:excludeIds IS NULL OR q.id NOT IN :excludeIds) " +
+            "ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Question> findRandomBySkillAndDifficultyAndTagsExcluding(
+            @org.springframework.data.repository.query.Param("skill") String skill,
+            @org.springframework.data.repository.query.Param("difficulty") String difficulty,
+            @org.springframework.data.repository.query.Param("tagIds") List<Long> tagIds,
+            @org.springframework.data.repository.query.Param("excludeIds") List<Long> excludeIds,
+            @org.springframework.data.repository.query.Param("limit") int limit);
+
     @org.springframework.data.jpa.repository.Query(value = "SELECT * FROM qb_questions WHERE skill = :skill AND difficulty_band = :difficulty ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Question> findRandomBySkillAndDifficulty(
             @org.springframework.data.repository.query.Param("skill") String skill,
             @org.springframework.data.repository.query.Param("difficulty") String difficulty,
+            @org.springframework.data.repository.query.Param("limit") int limit);
+
+    @org.springframework.data.jpa.repository.Query(value = "SELECT * FROM qb_questions " +
+            "WHERE skill = :skill AND difficulty_band = :difficulty " +
+            "AND (:excludeIds IS NULL OR id NOT IN :excludeIds) " +
+            "ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Question> findRandomBySkillAndDifficultyExcluding(
+            @org.springframework.data.repository.query.Param("skill") String skill,
+            @org.springframework.data.repository.query.Param("difficulty") String difficulty,
+            @org.springframework.data.repository.query.Param("excludeIds") List<Long> excludeIds,
             @org.springframework.data.repository.query.Param("limit") int limit);
 
 

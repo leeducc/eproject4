@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class FillBlankWidget extends StatefulWidget {
   final String questionText;
   final bool isAnswered;
+  final bool isMastered;
   final void Function(String? answer) onSubmit;
 
   const FillBlankWidget({
     super.key,
     required this.questionText,
     required this.isAnswered,
+    this.isMastered = false,
     required this.onSubmit,
   });
 
@@ -33,10 +35,36 @@ class _FillBlankWidgetState extends State<FillBlankWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          child: Text(
-            widget.questionText,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.4),
-            textAlign: TextAlign.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.isMastered)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Tooltip(
+                    message: "Bạn đã trả lời chính xác câu hỏi này trước đó",
+                    child: GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Bạn đã trả lời chính xác câu hỏi này trước đó."),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Text(
+                  widget.questionText,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.4),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),

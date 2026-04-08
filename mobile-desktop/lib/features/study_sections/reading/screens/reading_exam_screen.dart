@@ -142,11 +142,16 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
   Future<void> _reportStats(int correct, int total, List<Map<String, dynamic>> attempts) async {
     try {
       final token = await AuthApi.getToken();
-      debugPrint('[ReadingExamScreen] reporting stats: section=${widget.section.id}, correct=$correct, attempts=${attempts.length}');
       final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
       final url = '$baseUrl/v1/section-stats/${widget.section.id}/record';
+      
+      final Map<String, dynamic> payload = {
+        'count': correct,
+        'attempts': attempts,
+      };
+
       debugPrint('[ReadingExamScreen] _reportStats → POST $url');
-      debugPrint('[ReadingExamScreen]   payload=${jsonEncode({'count': correct, 'attempts': attempts})}');
+      debugPrint('[ReadingExamScreen]   Payload: ${jsonEncode(payload)}');
 
       final response = await http.post(
         Uri.parse(url),
@@ -154,14 +159,16 @@ class _ReadingExamScreenState extends State<ReadingExamScreen> {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'count': correct, 
-          'attempts': attempts,
-        }),
+        body: jsonEncode(payload),
       );
-      debugPrint('[ReadingExamScreen] _reportStats ← HTTP ${response.statusCode}: ${response.body}');
+      debugPrint('[ReadingExamScreen] _reportStats ← Status: ${response.statusCode}');
+      debugPrint('[ReadingExamScreen]   Body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        debugPrint('[ReadingExamScreen] Error: Server returned ${response.statusCode}');
+      }
     } catch (e) {
-      debugPrint('[ReadingExamScreen] _reportStats error: $e');
+      debugPrint('[ReadingExamScreen] _reportStats critical error: $e');
     }
   }
 

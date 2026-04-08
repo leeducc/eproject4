@@ -118,12 +118,14 @@ class DynamicQuestionBuilder extends StatelessWidget {
         return MatchingWidget(
           question: question,
           isAnswered: isAnswered,
+          isMastered: question.isAlreadySolved,
           onAnswer: onAnswer,
         );
       case QuestionType.fillBlank:
         return FillBlankWidget(
           questionText: question.instruction,
           isAnswered: isAnswered,
+          isMastered: question.isAlreadySolved,
           onSubmit: onAnswer,
         );
       case QuestionType.multipleChoice:

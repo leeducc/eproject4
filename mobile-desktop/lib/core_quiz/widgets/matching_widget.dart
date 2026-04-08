@@ -4,12 +4,14 @@ import '../models/quiz_question.dart';
 class MatchingWidget extends StatefulWidget {
   final QuizQuestion question;
   final bool isAnswered;
+  final bool isMastered;
   final void Function(String? answerId) onAnswer;
 
   const MatchingWidget({
     super.key,
     required this.question,
     required this.isAnswered,
+    this.isMastered = false,
     required this.onAnswer,
   });
 
@@ -129,6 +131,25 @@ class _MatchingWidgetState extends State<MatchingWidget> with SingleTickerProvid
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (widget.isMastered)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Tooltip(
+                  message: "Bạn đã trả lời chính xác câu hỏi này trước đó",
+                  child: GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Bạn đã trả lời chính xác câu hỏi này trước đó."),
+                          behavior: SnackBarBehavior.floating,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                  ),
+                ),
+              ),
             Expanded(
               child: Text(
                 widget.question.instruction,

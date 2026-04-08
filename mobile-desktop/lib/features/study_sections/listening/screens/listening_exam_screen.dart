@@ -159,9 +159,14 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
       final token = await AuthApi.getToken();
       final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8123/api';
       final url = '$baseUrl/v1/section-stats/${widget.section.id}/record';
+      
+      final Map<String, dynamic> payload = {
+        'count': correct,
+        'attempts': attempts,
+      };
+
       debugPrint('[ListeningExamScreen] _reportStats → POST $url');
-      debugPrint('[ListeningExamScreen]   correct=$correct, total=$total, attempts=${attempts.length}');
-      debugPrint('[ListeningExamScreen]   payload=${jsonEncode({'count': correct, 'attempts': attempts})}');
+      debugPrint('[ListeningExamScreen]   Payload: ${jsonEncode(payload)}');
 
       final response = await http.post(
         Uri.parse(url),
@@ -169,14 +174,16 @@ class _ListeningExamScreenState extends State<ListeningExamScreen> {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'count': correct,
-          'attempts': attempts,
-        }),
+        body: jsonEncode(payload),
       );
-      debugPrint('[ListeningExamScreen] _reportStats ← HTTP ${response.statusCode}: ${response.body}');
+      debugPrint('[ListeningExamScreen] _reportStats ← Status: ${response.statusCode}');
+      debugPrint('[ListeningExamScreen]   Body: ${response.body}');
+      
+      if (response.statusCode != 200) {
+        debugPrint('[ListeningExamScreen] Error: Server returned ${response.statusCode}');
+      }
     } catch (e) {
-      debugPrint('[ListeningExamScreen] _reportStats error: $e');
+      debugPrint('[ListeningExamScreen] _reportStats critical error: $e');
     }
   }
 

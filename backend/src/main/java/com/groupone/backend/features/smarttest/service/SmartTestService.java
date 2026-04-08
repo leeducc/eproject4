@@ -61,21 +61,31 @@ public class SmartTestService {
         int required = 15;
 
         if (skill != null) {
+            // 1. Get IDs of questions the user already answered correctly to EXCLUDE them
+            List<Long> solvedIds = userQuestionAttemptRepository.findCorrectQuestionIdsByUser(user.getId());
+            if (solvedIds == null) solvedIds = new ArrayList<>();
+            // If empty, pass null to the repository to trigger the (:excludeIds IS NULL) check in the native query
+            List<Long> excludeIds = solvedIds.isEmpty() ? null : solvedIds;
+
+            debugLog("Solved questions discovered: " + solvedIds.size() + ". Excluding them from generation pool.");
+
+            // 2. Target weak areas (Weakness Correction)
             List<Long> weakTagIds = userQuestionAttemptRepository.findWeakTagIdsByUserAndSkill(
                     user.getId(), skill, PageRequest.of(0, 5));
 
             if (!weakTagIds.isEmpty()) {
                 debugLog("Found weak tags: " + weakTagIds + ". Fetching targeted questions...");
-                List<Question> weakQuestions = questionRepository.findRandomBySkillAndDifficultyAndTags(
-                        skill.name(), normalizedBand, weakTagIds, 10);
+                List<Question> weakQuestions = questionRepository.findRandomBySkillAndDifficultyAndTagsExcluding(
+                        skill.name(), normalizedBand, weakTagIds, excludeIds, 10);
                 questions.addAll(weakQuestions);
             }
 
+            // 3. Fill the gap (Variety)
             int remaining = required - questions.size();
             if (remaining > 0) {
-                debugLog("Fetching " + remaining + " random questions for " + normalizedBand);
-                List<Question> randoms = questionRepository.findRandomBySkillAndDifficulty(
-                        skill.name(), normalizedBand, required); 
+                debugLog("Fetching " + remaining + " remaining random questions for " + normalizedBand + " (excluding solved).");
+                List<Question> randoms = questionRepository.findRandomBySkillAndDifficultyExcluding(
+                        skill.name(), normalizedBand, excludeIds, required); 
                 
                 Set<Long> existingIds = questions.stream().map(Question::getId).collect(Collectors.toSet());
                 for (Question q : randoms) {
